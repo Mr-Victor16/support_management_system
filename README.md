@@ -24,5 +24,9 @@ Przy tworzeniu projektu użyto: Java Spring, Spring Security, Thymeleaf, Bootstr
   - Login: admin
   - Hasło: admin
 
-## Konfiguracja aplikacji
+## Konfiguracja
 Aby móc uruchomić aplikację, należy w pliku **application.properties** wprowadzić dane logowania do wysyłania wiadomości e-mail przez system (spring.mail.host, spring.mail.port, spring.mail.username, spring.mail.password).
+
+## Przykład wyglądu
+![screenshot](https://user-images.githubusercontent.com/101965882/163582629-19fea2dc-12cf-461e-ad45-1176d25af3d1.png)
+Podgląd zgłoszenia z poziomu administratora.
