@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <title>Wsparcie techniczne - priorytet</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:insert="~{fragments/fragments :: menu('operator')}"></div>
+<div class="container">
+    <h2 class="text-center">Priorytety</h2>
+    <table class="table" th:if="${#arrays.length(priority)}">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">Akcja</th><th scope="col">Nazwa</th><th scope="col">Maksymalny czas na reakcje</th><th scope="col">Liczba zgłoszeń</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="k,iter : ${priority}">
+                <td>
+                    <div sec:authorize="hasRole('ADMIN')"><a th:href="@{'/priority/edit/'+${k.priorityID}}">Edytuj</a></br></div>
+                    <div sec:authorize="hasRole('ADMIN')" th:if="${#arrays.length(priority) > 1 and use[iter.index]==0}" ><a th:href="@{'/priority/delete/'+${k.priorityID}}">Usuń</a></br></div>
+                </td>
+                <td th:text="${k.priorityName}"></td>
+                <td th:text="${k.maxTime + ' dni'}"></td>
+                <td th:text="${use[iter.index]}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${#lists.isEmpty(priority)}" class="text-center text-warning"><h3>Brak elementów na liście</h3></div>
+</div>
+<div th:insert="~{fragments/fragments :: footer}"></div>
+</body>
+</html>

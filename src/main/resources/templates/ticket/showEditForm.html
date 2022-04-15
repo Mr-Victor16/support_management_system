@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <title>Zgłoszenie - edytuj</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:insert="~{fragments/fragments :: menu('ticket')}"></div>
+    <div class="container">
+        <h2 class="fs-3">Edytuj zgłoszenie</h2>
+        <form method="POST" th:object="${ticket}" th:action="@{'/tickets/edit/' + ${ticket.ticketID}}" class="mb-3" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{ticketID}" th:value="*{ticketID}">
+            Tytuł: <input type="text" th:field="*{ticketTitle}" th:value="*{ticketTitle}" class="form-control"><br>
+            <p th:if="${#fields.hasErrors('ticketTitle')}" th:each="err : ${#fields.errors('ticketTitle')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+
+            Opis: <input type="text" th:field="*{ticketDescription}" th:value="*{ticketDescription}" class="form-control"><br>
+            <p th:if="${#fields.hasErrors('ticketDescription')}" th:each="err : ${#fields.errors('ticketDescription')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+
+            <div>
+                <table th:if="*{#arrays.length(images)}">
+                    <tr><th>Akcja</th><th>Zrzut ekranu</th></tr>
+                    <tr th:each="img: *{images}">
+                        <td>
+                            <a th:href="@{'/tickets/' + ${ticket.ticketID} + '/delete-image/' + ${img.imageID}}">Usuń</a>
+                        </td>
+                        <td>
+                            <img style="max-height: 500px; max-width: 500px" alt="image_file" th:src="'data:mime_type;base64,' + ${img.getB64Content()}">
+                        </td>
+                    </tr>
+                </table>
+
+                <span th:if="*{#lists.isEmpty(images)}">Brak zrzutów ekranu<br></span>
+                <input type="file" name="multipartFile" accept=".gif,.png,.jpeg,.jpg" multiple><br><br>
+            </div>
+
+            <input type="hidden" th:field="*{user.id}" th:value="*{user.id}">
+
+            <div sec:authorize="hasRole('OPERATOR')">
+                Data: <input type="date" th:field="*{ticketDate}" th:value="*{ticketDate}" class="form-control"><br>
+                <p th:if="${#fields.hasErrors('ticketDate')}" th:each="err : ${#fields.errors('ticketDate')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-10">
+                    Kategorie:
+                    <div th:each="kat:${categoryList}" class="custom-control custom-checkbox">
+                        <input type="checkbox" th:field="*{categories}" th:value="${kat.categoryID}" class="custom-control-input" th:id="${kat}" >
+                        <label class="custom-control-label" th:for="${kat}" th:text="${kat.categoryName}"></label>
+                    </div>
+                    <small style="color: red" th:if="${#fields.hasErrors('categories')}" th:each="err : ${#fields.errors('categories')}" th:text="${err}"/>
+                </div>
+            </div><br>
+
+            <div>
+                Priorytet: <select th:field="*{priority}" class="form-select">
+                <option th:each="prov : ${priorityList}"
+                        th:value="${prov.priorityID}"
+                        th:text="${prov.priorityName + ' - ' + prov.maxTime + ' dni'}"></option>
+                </select>
+            </div><br>
+
+            <div sec:authorize="hasRole('OPERATOR')">
+                Status: <select th:field="*{status}" class="form-select">
+                    <option th:each="prov : ${statusList}"
+                            th:value="${prov.statusID}"
+                            th:text="${prov.statusName}"></option>
+                </select>
+            </div><br>
+
+            Wersja oprogramowania:
+            <input type="text" th:field="*{version}" th:value="*{version}" placeholder="XXXX.XX.XX" class="form-control"><br>
+            <p th:if="${#fields.hasErrors('version')}" th:each="err : ${#fields.errors('version')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+
+            Oprogramowanie: <select th:field="*{version.software}" class="form-select">
+            <option th:each="prov : ${softwareList}"
+                    th:value="${prov.softwareID}"
+                    th:text="${prov.softwareName}"></option>
+             </select><br>
+
+            <input type="submit" value="Prześlij zmiany" class="btn btn-primary">
+        </form>
+    </div>
+    <div th:insert="~{fragments/fragments :: footer}"></div>
+</body>
+</html>

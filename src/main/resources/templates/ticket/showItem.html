@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <title>Zgłoszenie</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:insert="~{fragments/fragments :: menu('ticket')}"></div>
+<div class="container" th:object="${ticket}">
+    <div>
+        <h2 th:text="*{'Zgłoszenie nr. '  + ticketID}"></h2>
+        <ul class="list-group">
+            <li class="list-group-item">Tytuł: <span th:text="*{ticketTitle}"></span></li>
+            <li class="list-group-item">Użytkownik: <span th:text="*{user.username + ' (' + user.name + ' ' + user.surname + ')'}"></span></li>
+            <li class="list-group-item">Data: <span th:text="*{ticketDate}"></span></li>
+            <li class="list-group-item">Status: <span th:text="*{status.statusName}"></span></li>
+
+            <li class="list-group-item">Kategorie:
+                <span th:if="*{#arrays.length(categories)}" th:each="kat: *{categories}" th:text="${kat.categoryName} + ' '"></span>
+                <span th:if="*{#lists.isEmpty(categories)}">Brak kategorii</span>
+            </li>
+
+            <li class="list-group-item">Priorytet: <span th:text="*{priority.priorityName}"></span></li>
+            <li class="list-group-item">Opis: <span th:text="*{ticketDescription}"></span></li>
+            <li class="list-group-item">Oprogramowanie i wersja: <span th:text="*{version.toString() + ' (' + version.software.softwareName + ')'}"></span></li>
+
+            <li class="list-group-item">Zrzuty ekranu:
+                <img th:if="*{#arrays.length(images)}" th:each="img: *{images}" style="max-height: 500px; max-width: 500px" alt="image_file" th:src="'data:mime_type;base64,' + ${img.getB64Content()}">
+                <span th:if="*{#lists.isEmpty(images)}">Brak zrzutów ekranu</span>
+            </li><br>
+
+            <h2>Odpowiedzi</h2>
+            <div th:each="reply,iter : *{ticketReplies}" th:if="*{#arrays.length(ticketReplies)}">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        #<span th:text="${iter.index+1 + ' '}"></span>
+                        <span th:text="${reply.user.name + ' ' + reply.user.surname + ' - ' + reply.replyDate}"></span>
+                        <div sec:authorize="hasRole('OPERATOR')"><a th:href="@{'/tickets/'+${ticket.ticketID}+'/delete-reply/'+${reply.replyID}}">Usuń odpowiedź</a></br></div>
+                    </li>
+                    <li class="list-group-item"><span th:text="${reply.replyContent}"></span></li>
+                </ul>
+                <span th:if="*{#lists.isEmpty(ticketReplies)}">Brak odpowiedzi do wyświetlenia</span>
+                <br>
+            </div>
+        </ul><br>
+    </div>
+
+    <div class="container" th:if="*{status.closeTicket != true}">
+        <h2 class="fs-3">Dodaj odpowiedź</h2>
+        <form method="post" th:object="${ticketReply}" th:action="@{'/ticket/reply/' + ${ticket.ticketID}}">
+            Treść: <input type="text" th:field="*{replyContent}" th:value="*{replyContent}" class="form-control"><br>
+            <p th:if="${#fields.hasErrors('replyContent')}" th:each="err : ${#fields.errors('replyContent')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+            <input type="submit" value="Wyślij" class="btn btn-primary">
+        </form>
+    </div><br>
+
+    <div class="container" sec:authorize="hasRole('OPERATOR')">
+        <h2 class="fs-3">Zmień status</h2>
+        <form method="post" th:object="${status}" th:action="@{'/tickets/status/' + ${ticket.ticketID}}">
+            <select th:field="${ticket.status}" class="form-select">
+                <option th:each="prov : ${statusList}"
+                        th:value="${prov.statusID}"
+                        th:text="${prov.statusName}"></option>
+            </select><br>
+            <input type="submit" value="Zmień status" class="btn btn-primary">
+        </form>
+    </div>
+
+    <br><a th:href="@{/}">Powrót</a>
+</div>
+<div th:insert="~{fragments/fragments :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div>
+        <H1>Pomyślnie zarejestrowano</H1>
+        <div><span th:text="${username + ' '}"></span>dziękujemy za rejestracje.</div>
+        <div th:if="${enabled == false}">
+            <div>Aktywuj swoje konto:</div>
+            <a th:href="${link}" th:text="${link}"></a>
+        </div>
+        <div th:if="${enabled == true}">
+            <div>Twoje konto jest aktywne.</div>
+        </div>
+    </div>
+</body>
+</html>

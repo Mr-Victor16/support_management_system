@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Rejestracja</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:insert="~{fragments/fragments :: menu('register')}"></div>
+<div class="container">
+    <h2 class="fs-3">Zarejestruj się</h2>
+
+    <form th:action="@{/register}" method="post" th:object="${user}" class="mb-3">
+        <p th:if="${errorEmailOrUsername == true}" th:text="${'Podana nazwa użytkownika lub adres e-mail, znajduje się już w bazie'}" class="alert alert-warning" role="alert"></p>
+        <div>
+            <input type="text" class="form-control" th:field="*{username}" placeholder="Nazwa użytkownika"/>
+            <p th:if="${#fields.hasErrors('username')}" th:each="err : ${#fields.errors('username')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+        </div><br>
+        <div>
+            <input type="email" class="form-control" th:field="*{email}" placeholder="E-mail"/>
+            <p th:if="${#fields.hasErrors('email')}" th:each="err : ${#fields.errors('email')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+        </div><br>
+        <div>
+            <input type="text" class="form-control" th:field="*{name}" placeholder="Imię"/>
+            <p th:if="${#fields.hasErrors('name')}" th:each="err : ${#fields.errors('name')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+        </div><br>
+        <div>
+            <input type="text" class="form-control" th:field="*{surname}" placeholder="Nazwisko"/>
+            <p th:if="${#fields.hasErrors('surname')}" th:each="err : ${#fields.errors('surname')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+        </div><br>
+        <div>
+            <input type="password" class="form-control" th:field="*{password}" placeholder="Hasło"/>
+            <p th:if="${#fields.hasErrors('password')}" th:each="err : ${#fields.errors('password')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+        </div><br>
+        <div>
+            <input type="password" class="form-control" th:field="*{passwordConfirm}" placeholder="Powtórz hasło"/>
+            <p th:if="${#fields.hasErrors('passwordConfirm')}" th:each="err : ${#fields.errors('passwordConfirm')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
+        </div><br>
+        <input type="submit" value="Zarejestruj" class="btn btn-primary"/>
+    </form>
+</div>
+<div th:insert="~{fragments/fragments :: footer}"></div>
+</body>
+</html>

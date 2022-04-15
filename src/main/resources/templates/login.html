@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Logowanie</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div th:insert="~{fragments/fragments :: menu('login')}"></div>
+<div class="container">
+    <h2 class="fs-3">Zaloguj się</h2>
+    <div th:if="${param.error}" class="alert alert-warning">
+        Błędna nazwa użytkownika lub/i hasło.
+    </div>
+    <div th:if="${param.logout}" class="alert alert-warning">
+        Zostałeś wylogowany.
+    </div>
+    <form th:action="@{/login}" method="post" class="mb-3">
+        <div>
+            <input type="text" class="form-control" name="username" placeholder="Nazwa użytkownika"/>
+        </div>
+        <div>
+            <input type="password" class="form-control" name="password" placeholder="Hasło"/>
+        </div>
+        <input type="submit" value="Zaloguj" class="btn btn-primary"/>
+    </form>
+</div>
+<div th:insert="~{fragments/fragments :: footer}"></div>
+</body>
+</html>
