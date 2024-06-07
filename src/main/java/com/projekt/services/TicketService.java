@@ -4,7 +4,7 @@ import com.projekt.models.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;

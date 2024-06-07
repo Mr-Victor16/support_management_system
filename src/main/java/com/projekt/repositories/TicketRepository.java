@@ -48,6 +48,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 
     ArrayList<Ticket> findDistinctByCategoriesIn(Set<Category> categories);
 
-    @Query("SELECT t FROM Ticket t WHERE t.ticketReplies.size BETWEEN ?1 and ?2")
+    @Query("SELECT t FROM Ticket t WHERE SIZE(t.ticketReplies) BETWEEN ?1 and ?2")
     ArrayList<Ticket> searchByReplyNumber(int number1, int number2);
 }

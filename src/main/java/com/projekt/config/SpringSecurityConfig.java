@@ -1,47 +1,53 @@
 package com.projekt.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 
+@Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
-public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableMethodSecurity(securedEnabled = true)
+public class SpringSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests()
-                .antMatchers("/h2-console/**").permitAll()
-                .antMatchers("/knowledge-base/**", "/software-list/**", "/webjars/**", "/", "/register", "/knowledge-search", "/software-search", "/activate/**").permitAll()
-                .antMatchers("/knowledge/**", "/software/**", "/category/**", "/priority/**", "/status/**", "/user/**", "/user-search").hasRole("ADMIN")
-                .antMatchers("/category-list/", "/priority-list/", "/status-list/", "/tickets/**", "/ticket-search").hasRole("OPERATOR")
-                .antMatchers("/my-tickets","/ticket/**","/profile/**").hasRole("USER")
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/knowledge-base/**", "/software-list/**", "/webjars/**", "/", "/register", "/knowledge-search", "/software-search", "/activate/**").permitAll()
+                        .requestMatchers("/knowledge/**", "/software/**", "/category/**", "/priority/**", "/status/**", "/user/**", "/user-search").hasRole("ADMIN")
+                        .requestMatchers("/category-list/", "/priority-list/", "/status-list/", "/tickets/**", "/ticket-search").hasRole("OPERATOR")
+                        .requestMatchers("/my-tickets","/ticket/**","/profile/**").hasRole("USER")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .permitAll()
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedPage("/error403")
+                )
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**")
+                )
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions
+                                .sameOrigin()
+                        )
+                );
 
-                .anyRequest().authenticated();
-
-        http
-                .formLogin()
-                .loginPage("/login")
-                .permitAll();
-
-        http.logout().permitAll();
-
-        http.exceptionHandling().accessDeniedPage("/error403");
-
-        http.csrf()
-                .ignoringAntMatchers("/h2-console/**");
-        http.headers()
-                .frameOptions()
-                .sameOrigin();
-
+        return http.build();
     }
 }

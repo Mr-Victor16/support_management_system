@@ -3,7 +3,7 @@ package com.projekt.services;
 import com.projekt.models.TicketReply;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.util.List;
 
 @Service

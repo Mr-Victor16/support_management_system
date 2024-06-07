@@ -4,7 +4,7 @@ import com.projekt.models.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.util.ArrayList;
 
 @Service
