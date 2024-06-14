@@ -2,7 +2,6 @@ package com.projekt.services;
 
 import com.projekt.models.Status;
 import com.projekt.repositories.StatusRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,11 +9,13 @@ import java.util.List;
 
 @Service("statusDetailsService")
 public class StatusServiceImpl implements StatusService{
-    @Autowired
-    private StatusRepository statusRepository;
+    private final StatusRepository statusRepository;
+    private final TicketService ticketService;
 
-    @Autowired
-    private TicketService ticketService;
+    public StatusServiceImpl(StatusRepository statusRepository, TicketService ticketService) {
+        this.statusRepository = statusRepository;
+        this.ticketService = ticketService;
+    }
 
     @Override
     public ArrayList<Status> loadAll() {
@@ -23,7 +24,7 @@ public class StatusServiceImpl implements StatusService{
 
     @Override
     public Status loadById(Integer id) {
-        if(id == null || statusRepository.existsById(id) == false){
+        if(id == null || !statusRepository.existsById(id)){
             return new Status();
         }
 

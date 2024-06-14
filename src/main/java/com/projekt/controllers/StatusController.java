@@ -2,7 +2,6 @@ package com.projekt.controllers;
 
 import com.projekt.models.Status;
 import com.projekt.services.StatusService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,8 +14,11 @@ import jakarta.validation.Valid;
 
 @Controller
 public class StatusController {
-    @Autowired
-    private StatusService statusService;
+    private final StatusService statusService;
+
+    public StatusController(StatusService statusService) {
+        this.statusService = statusService;
+    }
 
     @GetMapping("/status-list")
     public String showPriorityList(Model model){
@@ -29,7 +31,7 @@ public class StatusController {
     public String showFormStatus(@PathVariable(name = "id", required = false) Integer id, Model model){
         model.addAttribute("status", statusService.loadById(id));
 
-        if(id == null || statusService.exists(id) == false){
+        if(id == null || !statusService.exists(id)){
             return "status/showAddForm";
         }
         return "status/showEditForm";

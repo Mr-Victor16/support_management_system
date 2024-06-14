@@ -2,7 +2,6 @@ package com.projekt.services;
 
 import com.projekt.models.Priority;
 import com.projekt.repositories.PriorityRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,11 +9,13 @@ import java.util.List;
 
 @Service("priorityDetailsService")
 public class PriorityServiceImpl implements PriorityService{
-    @Autowired
-    private PriorityRepository priorityRepository;
+    private final PriorityRepository priorityRepository;
+    private final TicketService ticketService;
 
-    @Autowired
-    private TicketService ticketService;
+    public PriorityServiceImpl(PriorityRepository priorityRepository, TicketService ticketService) {
+        this.priorityRepository = priorityRepository;
+        this.ticketService = ticketService;
+    }
 
     @Override
     public ArrayList<Priority> loadAll() {
@@ -23,7 +24,7 @@ public class PriorityServiceImpl implements PriorityService{
 
     @Override
     public Priority loadById(Integer id) {
-        if(id == null || priorityRepository.existsById(id) == false){
+        if(id == null || !priorityRepository.existsById(id)){
             return new Priority();
         }
 

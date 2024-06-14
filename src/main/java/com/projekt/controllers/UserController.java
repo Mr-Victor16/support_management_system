@@ -6,7 +6,6 @@ import com.projekt.models.Search;
 import com.projekt.models.User;
 import com.projekt.services.RoleService;
 import com.projekt.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -20,11 +19,13 @@ import java.util.ArrayList;
 
 @Controller
 public class UserController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final RoleService roleService;
 
-    @Autowired
-    private RoleService roleService;
+    public UserController(UserService userService, RoleService roleService) {
+        this.userService = userService;
+        this.roleService = roleService;
+    }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model){
@@ -52,7 +53,7 @@ public class UserController {
     public String showUserForm(@PathVariable(name = "id", required = false) Integer id, Model model){
         model.addAttribute("user", userService.loadById(id));
 
-        if(id == null || userService.exists(id) == false){
+        if(id == null || !userService.exists(id)){
             return "user/showAddForm";
         }
         return "user/showEditForm";

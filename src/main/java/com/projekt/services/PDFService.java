@@ -8,7 +8,6 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.projekt.models.Category;
 import com.projekt.models.Ticket;
 import com.projekt.models.TicketReply;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -20,8 +19,11 @@ import java.util.stream.Stream;
 
 @Service
 public class PDFService {
-    @Autowired
-    private TicketService ticketService;
+    private final TicketService ticketService;
+
+    public PDFService(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
 
     public void createPDF(Integer ticketID) throws IOException, DocumentException {
         if(new File("src/main/resources/pdf/"+ticketID+".pdf").exists()){

@@ -2,7 +2,6 @@ package com.projekt.services;
 
 import com.projekt.models.Category;
 import com.projekt.repositories.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,11 +9,13 @@ import java.util.List;
 
 @Service("categoryDetailsService")
 public class CategoryServiceImpl implements CategoryService{
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final TicketService ticketService;
 
-    @Autowired
-    private TicketService ticketService;
+    public CategoryServiceImpl(CategoryRepository categoryRepository, TicketService ticketService) {
+        this.categoryRepository = categoryRepository;
+        this.ticketService = ticketService;
+    }
 
     @Override
     public ArrayList<Category> loadAll() {
@@ -23,7 +24,7 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public Category loadById(Integer id) {
-        if(id == null || categoryRepository.existsById(id) == false){
+        if(id == null || !categoryRepository.existsById(id)){
             return new Category();
         }
 

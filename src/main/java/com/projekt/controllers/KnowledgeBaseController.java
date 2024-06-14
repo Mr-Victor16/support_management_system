@@ -5,7 +5,6 @@ import com.projekt.models.Search;
 import com.projekt.models.Software;
 import com.projekt.services.KnowledgeBaseService;
 import com.projekt.services.SoftwareService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,11 +18,13 @@ import java.util.ArrayList;
 
 @Controller
 public class KnowledgeBaseController {
-    @Autowired
-    private KnowledgeBaseService knowledgeBaseService;
+    private final KnowledgeBaseService knowledgeBaseService;
+    private final SoftwareService softwareService;
 
-    @Autowired
-    private SoftwareService softwareService;
+    public KnowledgeBaseController(KnowledgeBaseService knowledgeBaseService, SoftwareService softwareService) {
+        this.knowledgeBaseService = knowledgeBaseService;
+        this.softwareService = softwareService;
+    }
 
     @GetMapping("/knowledge-base")
     public String showKnowledgeBaseList(Model model){
@@ -47,7 +48,7 @@ public class KnowledgeBaseController {
     public String showFormKnowledgeBase(@PathVariable(name = "id", required = false) Integer id, Model model){
         model.addAttribute("knowledge", knowledgeBaseService.loadById(id));
 
-        if(id == null || knowledgeBaseService.exists(id) == false){
+        if(id == null || !knowledgeBaseService.exists(id)){
             return "knowledge-base/showAddForm";
         }
         return "knowledge-base/showEditForm";

@@ -3,7 +3,6 @@ package com.projekt.controllers;
 import com.projekt.formatters.VersionFormatter;
 import com.projekt.models.*;
 import com.projekt.services.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,32 +17,27 @@ import java.util.ArrayList;
 
 @Controller
 public class SearchController {
-    @Autowired
-    private SoftwareService softwareService;
+    private final SoftwareService softwareService;
+    private final StatusService statusService;
+    private final PriorityService priorityService;
+    private final CategoryService categoryService;
+    private final UserService userService;
+    private final KnowledgeBaseService knowledgeBaseService;
+    private final RoleService roleService;
+    private final TicketService ticketService;
+    private final SearchService searchService;
 
-    @Autowired
-    private StatusService statusService;
-
-    @Autowired
-    private PriorityService priorityService;
-
-    @Autowired
-    private CategoryService categoryService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private KnowledgeBaseService knowledgeBaseService;
-
-    @Autowired
-    private RoleService roleService;
-
-    @Autowired
-    private TicketService ticketService;
-
-    @Autowired
-    private SearchService searchService;
+    public SearchController(SoftwareService softwareService, StatusService statusService, PriorityService priorityService, CategoryService categoryService, UserService userService, KnowledgeBaseService knowledgeBaseService, RoleService roleService, TicketService ticketService, SearchService searchService) {
+        this.softwareService = softwareService;
+        this.statusService = statusService;
+        this.priorityService = priorityService;
+        this.categoryService = categoryService;
+        this.userService = userService;
+        this.knowledgeBaseService = knowledgeBaseService;
+        this.roleService = roleService;
+        this.ticketService = ticketService;
+        this.searchService = searchService;
+    }
 
     @GetMapping("/knowledge-search")
     public String showKnowledgeSearch(Model model){

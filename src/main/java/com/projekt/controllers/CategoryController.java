@@ -2,7 +2,6 @@ package com.projekt.controllers;
 
 import com.projekt.models.Category;
 import com.projekt.services.CategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,8 +14,11 @@ import jakarta.validation.Valid;
 
 @Controller
 public class CategoryController {
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
+
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     @GetMapping("/category-list")
     public String showCategoryList(Model model){
@@ -29,7 +31,7 @@ public class CategoryController {
     public String showFormCategory(@PathVariable(name = "id", required = false) Integer id, Model model){
         model.addAttribute("category", categoryService.loadById(id));
 
-        if(id == null || categoryService.exists(id) == false){
+        if(id == null || !categoryService.exists(id)){
             return "category/showAddForm";
         }
         return "category/showEditForm";

@@ -2,7 +2,6 @@ package com.projekt.controllers;
 
 import com.projekt.models.Priority;
 import com.projekt.services.PriorityService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,8 +14,11 @@ import jakarta.validation.Valid;
 
 @Controller
 public class PriorityController {
-    @Autowired
-    private PriorityService priorityService;
+    private final PriorityService priorityService;
+
+    public PriorityController(PriorityService priorityService) {
+        this.priorityService = priorityService;
+    }
 
     @GetMapping("/priority-list")
     public String showPriorityList(Model model){
@@ -29,7 +31,7 @@ public class PriorityController {
     public String showFormPriority(@PathVariable(name = "id", required = false) Integer id, Model model){
         model.addAttribute("priority", priorityService.loadById(id));
 
-        if(id == null || priorityService.exists(id) == false){
+        if(id == null || !priorityService.exists(id)){
             return "priority/showAddForm";
         }
         return "priority/showEditForm";

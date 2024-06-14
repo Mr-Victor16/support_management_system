@@ -3,7 +3,6 @@ package com.projekt.controllers;
 import com.projekt.models.Search;
 import com.projekt.models.Software;
 import com.projekt.services.SoftwareService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,8 +15,11 @@ import jakarta.validation.Valid;
 
 @Controller
 public class SoftwareController {
-    @Autowired
-    private SoftwareService softwareService;
+    private final SoftwareService softwareService;
+
+    public SoftwareController(SoftwareService softwareService) {
+        this.softwareService = softwareService;
+    }
 
     @GetMapping("/software-list")
     public String showSoftwareList(Model model){
@@ -46,7 +48,7 @@ public class SoftwareController {
     public String showFormSoftware(@PathVariable(name = "id", required = false) Integer id, Model model){
         model.addAttribute("software", softwareService.loadById(id));
 
-        if(id == null || softwareService.exists(id) == false){
+        if(id == null || !softwareService.exists(id)){
             return "software/showAddForm";
         }
         return "software/showEditForm";

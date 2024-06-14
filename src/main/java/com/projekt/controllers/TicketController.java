@@ -5,7 +5,6 @@ import com.projekt.exceptions.TicketNotFoundException;
 import com.projekt.formatters.VersionFormatter;
 import com.projekt.models.*;
 import com.projekt.services.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,32 +29,27 @@ import java.util.List;
 
 @Controller
 public class TicketController {
-    @Autowired
-    private TicketService ticketService;
+    private final TicketService ticketService;
+    private final TicketReplyService ticketReplyService;
+    private final StatusService statusService;
+    private final PriorityService priorityService;
+    private final CategoryService categoryService;
+    private final SoftwareService softwareService;
+    private final ImageService imageService;
+    private final UserService userService;
+    private final PDFService pdfService;
 
-    @Autowired
-    private TicketReplyService ticketReplyService;
-
-    @Autowired
-    private StatusService statusService;
-
-    @Autowired
-    private PriorityService priorityService;
-
-    @Autowired
-    private CategoryService categoryService;
-
-    @Autowired
-    private SoftwareService softwareService;
-
-    @Autowired
-    private ImageService imageService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private PDFService pdfService;
+    public TicketController(TicketService ticketService, TicketReplyService ticketReplyService, StatusService statusService, PriorityService priorityService, CategoryService categoryService, SoftwareService softwareService, ImageService imageService, UserService userService, PDFService pdfService) {
+        this.ticketService = ticketService;
+        this.ticketReplyService = ticketReplyService;
+        this.statusService = statusService;
+        this.priorityService = priorityService;
+        this.categoryService = categoryService;
+        this.softwareService = softwareService;
+        this.imageService = imageService;
+        this.userService = userService;
+        this.pdfService = pdfService;
+    }
 
     @GetMapping("/tickets")
     public String showTicketList(Model model){
@@ -90,7 +84,7 @@ public class TicketController {
     public String showTicketForm(@PathVariable(name = "id", required = false) Integer id, Model model, Principal principal){
         model.addAttribute("ticket", ticketService.loadById(id));
 
-        if(id == null || ticketService.exists(id) == false){
+        if(id == null || !ticketService.exists(id)){
             model.addAttribute("user", userService.findUserByUsername(principal.getName()).getId());
             return "ticket/showAddForm";
         }

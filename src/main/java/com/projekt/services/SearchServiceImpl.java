@@ -3,19 +3,20 @@ package com.projekt.services;
 import com.projekt.models.Knowledge;
 import com.projekt.models.Search;
 import com.projekt.models.Ticket;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-@Service("seachServiceImpl")
+@Service("searchServiceImpl")
 public class SearchServiceImpl implements SearchService{
-    @Autowired
-    private KnowledgeBaseService knowledgeBaseService;
+    private final KnowledgeBaseService knowledgeBaseService;
+    private final TicketService ticketService;
 
-    @Autowired
-    private TicketService ticketService;
+    public SearchServiceImpl(KnowledgeBaseService knowledgeBaseService, TicketService ticketService) {
+        this.knowledgeBaseService = knowledgeBaseService;
+        this.ticketService = ticketService;
+    }
 
     @Override
     public ArrayList<Knowledge> knowledgeSearch(Search search) {

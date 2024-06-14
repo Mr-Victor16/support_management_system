@@ -2,7 +2,6 @@ package com.projekt.services;
 
 import com.projekt.models.TicketReply;
 import com.projekt.repositories.TicketReplyRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
@@ -11,14 +10,15 @@ import java.util.List;
 
 @Service("ticketReplyDetailsService")
 public class TicketReplyServiceImpl implements TicketReplyService{
-    @Autowired
-    private TicketReplyRepository ticketReplyRepository;
+    private final TicketReplyRepository ticketReplyRepository;
+    private final UserService userService;
+    private final TicketService ticketService;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private TicketService ticketService;
+    public TicketReplyServiceImpl(TicketReplyRepository ticketReplyRepository, UserService userService, TicketService ticketService) {
+        this.ticketReplyRepository = ticketReplyRepository;
+        this.userService = userService;
+        this.ticketService = ticketService;
+    }
 
     @Override
     public void save(TicketReply ticketReply, String name, Integer id) throws MessagingException {

@@ -3,7 +3,6 @@ package com.projekt.services;
 import com.projekt.models.Knowledge;
 import com.projekt.models.Software;
 import com.projekt.repositories.KnowledgeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -11,11 +10,13 @@ import java.util.ArrayList;
 
 @Service("knowledgeBaseDetailsService")
 public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
-    @Autowired
-    private KnowledgeRepository knowledgeRepository;
+    private final KnowledgeRepository knowledgeRepository;
+    private final SoftwareService softwareService;
 
-    @Autowired
-    private SoftwareService softwareService;
+    public KnowledgeBaseServiceImpl(KnowledgeRepository knowledgeRepository, SoftwareService softwareService) {
+        this.knowledgeRepository = knowledgeRepository;
+        this.softwareService = softwareService;
+    }
 
     @Override
     public ArrayList<Knowledge> loadAll() {
@@ -24,7 +25,7 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
 
     @Override
     public Knowledge loadById(Integer id) {
-        if(id == null || knowledgeRepository.existsById(id) == false){
+        if(id == null || !knowledgeRepository.existsById(id)){
             return new Knowledge();
         }
 

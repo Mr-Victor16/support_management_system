@@ -1,7 +1,6 @@
 package com.projekt.services;
 
 import com.projekt.models.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -12,14 +11,15 @@ import jakarta.mail.MessagingException;
 
 @Service
 public class MailService {
-    @Autowired
-    private JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
+    private final TemplateEngine templateEngine;
+    private final UserService userService;
 
-    @Autowired
-    private TemplateEngine templateEngine;
-
-    @Autowired
-    private UserService userService;
+    public MailService(JavaMailSender javaMailSender, TemplateEngine templateEngine, UserService userService) {
+        this.javaMailSender = javaMailSender;
+        this.templateEngine = templateEngine;
+        this.userService = userService;
+    }
 
     public void sendRegisterMessage(String to, String username, boolean enabled) throws MessagingException {
         var mimeMessage = javaMailSender.createMimeMessage();

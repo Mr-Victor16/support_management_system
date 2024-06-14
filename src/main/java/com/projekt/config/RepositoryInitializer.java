@@ -3,7 +3,6 @@ package com.projekt.config;
 import com.projekt.models.*;
 import com.projekt.repositories.*;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,38 +18,31 @@ import java.util.*;
 
 @Configuration
 public class RepositoryInitializer {
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final SoftwareRepository softwareRepository;
+    private final KnowledgeRepository knowledgeRepository;
+    private final CategoryRepository categoryRepository;
+    private final PriorityRepository priorityRepository;
+    private final StatusRepository statusRepository;
+    private final ImageRepository imageRepository;
+    private final VersionRepository versionRepository;
+    private final TicketRepository ticketRepository;
+    private final TicketReplyRepository ticketReplyRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private SoftwareRepository softwareRepository;
-
-    @Autowired
-    private KnowledgeRepository knowledgeRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private PriorityRepository priorityRepository;
-
-    @Autowired
-    private StatusRepository statusRepository;
-
-    @Autowired
-    private ImageRepository imageRepository;
-
-    @Autowired
-    private VersionRepository versionRepository;
-
-    @Autowired
-    private TicketRepository ticketRepository;
-
-    @Autowired
-    private TicketReplyRepository ticketReplyRepository;
+    public RepositoryInitializer(UserRepository userRepository, RoleRepository roleRepository, SoftwareRepository softwareRepository, KnowledgeRepository knowledgeRepository, CategoryRepository categoryRepository, PriorityRepository priorityRepository, StatusRepository statusRepository, ImageRepository imageRepository, VersionRepository versionRepository, TicketRepository ticketRepository, TicketReplyRepository ticketReplyRepository) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.softwareRepository = softwareRepository;
+        this.knowledgeRepository = knowledgeRepository;
+        this.categoryRepository = categoryRepository;
+        this.priorityRepository = priorityRepository;
+        this.statusRepository = statusRepository;
+        this.imageRepository = imageRepository;
+        this.versionRepository = versionRepository;
+        this.ticketRepository = ticketRepository;
+        this.ticketReplyRepository = ticketReplyRepository;
+    }
 
     @Bean
     InitializingBean init() {
@@ -63,7 +55,7 @@ public class RepositoryInitializer {
                 PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
                 User user = new User("user", true);
-                user.setRoles(new HashSet<>(Arrays.asList(roleUser)));
+                user.setRoles(new HashSet<>(List.of(roleUser)));
                 user.setEmail("example1@gmail.com");
                 user.setName("Jan");
                 user.setSurname("Kowalski");
@@ -199,7 +191,6 @@ public class RepositoryInitializer {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(bi, format, baos);
 
-        byte[] bytes = baos.toByteArray();
-        return bytes;
+        return baos.toByteArray();
     }
 }

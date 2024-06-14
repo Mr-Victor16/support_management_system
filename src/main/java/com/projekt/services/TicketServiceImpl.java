@@ -2,7 +2,6 @@ package com.projekt.services;
 
 import com.projekt.models.*;
 import com.projekt.repositories.TicketRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,29 +14,25 @@ import java.util.Set;
 
 @Service("ticketDetailsService")
 public class TicketServiceImpl implements TicketService{
-    @Autowired
-    private TicketRepository ticketRepository;
+    private final TicketRepository ticketRepository;
+    private final UserService userService;
+    private final RoleService roleService;
+    private final VersionService versionService;
+    private final ImageService imageService;
+    private final StatusService statusService;
+    private final TicketReplyService ticketReplyService;
+    private final MailService mailService;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private RoleService roleService;
-
-    @Autowired
-    private VersionService versionService;
-
-    @Autowired
-    private ImageService imageService;
-
-    @Autowired
-    private StatusService statusService;
-
-    @Autowired
-    private TicketReplyService ticketReplyService;
-
-    @Autowired
-    private MailService mailService;
+    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, RoleService roleService, VersionService versionService, ImageService imageService, StatusService statusService, TicketReplyService ticketReplyService, MailService mailService) {
+        this.ticketRepository = ticketRepository;
+        this.userService = userService;
+        this.roleService = roleService;
+        this.versionService = versionService;
+        this.imageService = imageService;
+        this.statusService = statusService;
+        this.ticketReplyService = ticketReplyService;
+        this.mailService = mailService;
+    }
 
     @Override
     public ArrayList<Ticket> loadAll() {

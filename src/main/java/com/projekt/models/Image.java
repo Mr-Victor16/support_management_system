@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.util.Base64Utils;
+import java.util.Base64;
 
 import jakarta.persistence.*;
 
@@ -26,6 +26,6 @@ public class Image {
     private byte[] fileContent;
 
     public String getB64Content(){
-        return Base64Utils.encodeToString(this.fileContent);
+        return Base64.getEncoder().encodeToString(this.fileContent);
     }
 }

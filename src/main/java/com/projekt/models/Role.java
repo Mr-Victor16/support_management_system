@@ -29,7 +29,7 @@ public class Role {
         this.type = type;
     }
 
-    public static enum Types{
+    public enum Types{
         ROLE_ADMIN,
         ROLE_OPERATOR,
         ROLE_USER

@@ -2,7 +2,6 @@ package com.projekt.services;
 
 import com.projekt.models.Software;
 import com.projekt.repositories.SoftwareRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,14 +9,15 @@ import java.util.List;
 
 @Service("softwareDetailsService")
 public class SoftwareServiceImpl implements SoftwareService {
-    @Autowired
-    private SoftwareRepository softwareRepository;
+    private final SoftwareRepository softwareRepository;
+    private final TicketService ticketService;
+    private final KnowledgeBaseService knowledgeBaseService;
 
-    @Autowired
-    private TicketService ticketService;
-
-    @Autowired
-    private KnowledgeBaseService knowledgeBaseService;
+    public SoftwareServiceImpl(SoftwareRepository softwareRepository, TicketService ticketService, KnowledgeBaseService knowledgeBaseService) {
+        this.softwareRepository = softwareRepository;
+        this.ticketService = ticketService;
+        this.knowledgeBaseService = knowledgeBaseService;
+    }
 
     @Override
     public ArrayList<Software> loadAll() {
@@ -26,7 +26,7 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public Software loadById(Integer id) {
-        if(id == null || softwareRepository.existsById(Long.valueOf(id)) == false){
+        if(id == null || !softwareRepository.existsById(Long.valueOf(id))){
             return new Software();
         }
 

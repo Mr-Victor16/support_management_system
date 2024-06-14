@@ -2,15 +2,17 @@ package com.projekt.services;
 
 import com.projekt.models.Role;
 import com.projekt.repositories.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
 @Service("roleService")
 public class RoleServiceImpl implements RoleService{
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
+
+    public RoleServiceImpl(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
 
     @Override
     public ArrayList<Role> loadAll() {

@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public boolean activate(Integer userID) {
-        if(userRepository.getById(userID).isEnabled() == false){
+        if(!userRepository.getById(userID).isEnabled()){
             com.projekt.models.User user = userRepository.getById(userID);
             user.setEnabled(true);
             userRepository.save(user);
@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService{
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setEnabled(enabled);
 
-            if(admin == false) {
+            if(!admin) {
                 Set<Role> roleSet = new HashSet<>();
                 roleSet.add(roleService.loadById(1));
                 user.setRoles(roleSet);
@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService{
 
             userRepository.save(setRole(user));
 
-            if(mail == true){
+            if(mail){
                 mailService.sendRegisterMessage(user.getEmail(),user.getUsername(),enabled);
             }
         }else{
@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public com.projekt.models.User loadById(Integer id) {
-        if(id == null || userRepository.existsById(id) == false){
+        if(id == null || !userRepository.existsById(id)){
             return new com.projekt.models.User();
         }
 

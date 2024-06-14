@@ -2,13 +2,15 @@ package com.projekt.services;
 
 import com.projekt.models.Version;
 import com.projekt.repositories.VersionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service("versionService")
 public class VersionServiceImpl implements VersionService{
-    @Autowired
-    private VersionRepository versionRepository;
+    private final VersionRepository versionRepository;
+
+    public VersionServiceImpl(VersionRepository versionRepository) {
+        this.versionRepository = versionRepository;
+    }
 
     @Override
     public Version save(Version version) {
