@@ -2,6 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Priority;
 import com.projekt.repositories.PriorityRepository;
+import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,11 +11,11 @@ import java.util.List;
 @Service("priorityDetailsService")
 public class PriorityServiceImpl implements PriorityService{
     private final PriorityRepository priorityRepository;
-    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
 
-    public PriorityServiceImpl(PriorityRepository priorityRepository, TicketService ticketService) {
+    public PriorityServiceImpl(PriorityRepository priorityRepository, TicketRepository ticketRepository) {
         this.priorityRepository = priorityRepository;
-        this.ticketService = ticketService;
+        this.ticketRepository = ticketRepository;
     }
 
     @Override
@@ -28,7 +29,7 @@ public class PriorityServiceImpl implements PriorityService{
             return new Priority();
         }
 
-        return priorityRepository.getById(id);
+        return priorityRepository.getReferenceById(id);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class PriorityServiceImpl implements PriorityService{
 
     @Override
     public void delete(Integer id) {
-        if(ticketService.countUsePriority(id) == 0 && priorityRepository.existsById(id)){
+        if(ticketRepository.countByPriorityId(id) == 0 && priorityRepository.existsById(id)){
             priorityRepository.deleteById(id);
         }
     }
@@ -54,7 +55,7 @@ public class PriorityServiceImpl implements PriorityService{
         List<Priority> priorities = priorityRepository.findAll();
 
         for (int i=0; i<priorities.size(); i++){
-            list.add(ticketService.countUsePriority(priorities.get(i).getPriorityID()));
+            list.add(ticketRepository.countByPriorityId(priorities.get(i).getId()));
         }
 
         return list;

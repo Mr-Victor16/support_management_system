@@ -9,8 +9,8 @@
 <div th:insert="~{fragments/fragments :: menu('admin')}"></div>
     <div class="container">
         <h2 class="fs-3">Edytuj oprogramowanie</h2>
-        <form method="POST" th:object="${software}" th:action="@{'/software/edit/' + ${software.softwareID}}" class="mb-3">
-            <input type="hidden" th:field="*{softwareID}" th:value="*{softwareID}">
+        <form method="POST" th:object="${software}" th:action="@{'/software/edit/' + ${software.id}}" class="mb-3">
+            <input type="hidden" th:field="*{id}" th:value="*{id}">
             Nazwa: <input type="text" th:field="*{softwareName}" th:value="*{softwareName}" class="form-control"><br>
             <p th:if="${#fields.hasErrors('softwareName')}" th:each="err : ${#fields.errors('softwareName')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
             Opis: <input type="text" th:field="*{softwareDescription}" th:value="*{softwareDescription}" class="form-control"><br>

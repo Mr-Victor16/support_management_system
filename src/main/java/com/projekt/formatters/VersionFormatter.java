@@ -9,7 +9,7 @@ import java.util.Locale;
 public class VersionFormatter implements Formatter<Version> {
     @Override
     public Version parse(String text, Locale locale) throws ParseException {
-        if(text.length() == 0){
+        if(text.isEmpty()){
             return null;
         }
 

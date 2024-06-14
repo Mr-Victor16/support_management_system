@@ -21,11 +21,11 @@
         <tbody>
             <tr th:each="k,iter : ${software}">
                 <td>
-                    <div sec:authorize="hasRole('ADMIN')"><a th:href="@{'/software/edit/'+${k.softwareID}}">Edytuj</a></br></div>
+                    <div sec:authorize="hasRole('ADMIN')"><a th:href="@{'/software/edit/'+${k.id}}">Edytuj</a></br></div>
                     <div sec:authorize="hasRole('ADMIN')" th:if="${#arrays.length(software) > 1 and useInTickets[iter.index]==0 and useInKnowledgeBase[iter.index]==0}">
-                        <a th:href="@{'/software/delete/'+${k.softwareID}}">Usuń</a></br>
+                        <a th:href="@{'/software/delete/'+${k.id}}">Usuń</a></br>
                     </div>
-                    <a th:href="@{'/software-list/'+${k.softwareID}}">Pokaż</a>
+                    <a th:href="@{'/software-list/'+${k.id}}">Pokaż</a>
                 </td>
                 <td th:text="${k.softwareName}"></td>
                 <td sec:authorize="hasRole('OPERATOR')" th:text="${useInTickets[iter.index]}"></td>

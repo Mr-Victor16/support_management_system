@@ -33,8 +33,4 @@ public class TicketReply {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "reply_date", nullable = false)
     private LocalDate replyDate;
-
-    public TicketReply(String replyContent){
-        this.replyContent = replyContent;
-    }
 }

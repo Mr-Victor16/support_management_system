@@ -23,7 +23,7 @@ public class CategoryController {
     @GetMapping("/category-list")
     public String showCategoryList(Model model){
         model.addAttribute("category", categoryService.loadAll());
-        model.addAttribute("use",categoryService.categoriesUse());
+        model.addAttribute("use", categoryService.categoriesUse());
         return "category/showList";
     }
 

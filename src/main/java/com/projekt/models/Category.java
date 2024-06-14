@@ -18,7 +18,7 @@ import jakarta.validation.constraints.Size;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer categoryID;
+    private Integer id;
 
     @Size(min = 2, max = 20) @NotBlank
     @Column(name = "category_name", nullable = false)

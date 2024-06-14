@@ -2,6 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Status;
 import com.projekt.repositories.StatusRepository;
+import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,11 +11,11 @@ import java.util.List;
 @Service("statusDetailsService")
 public class StatusServiceImpl implements StatusService{
     private final StatusRepository statusRepository;
-    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
 
-    public StatusServiceImpl(StatusRepository statusRepository, TicketService ticketService) {
+    public StatusServiceImpl(StatusRepository statusRepository, TicketRepository ticketRepository) {
         this.statusRepository = statusRepository;
-        this.ticketService = ticketService;
+        this.ticketRepository = ticketRepository;
     }
 
     @Override
@@ -28,7 +29,7 @@ public class StatusServiceImpl implements StatusService{
             return new Status();
         }
 
-        return statusRepository.getById(id);
+        return statusRepository.getReferenceById(id);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class StatusServiceImpl implements StatusService{
         List<Status> statuses = statusRepository.findAll();
 
         for (int i=0; i<statuses.size(); i++){
-            list.add(ticketService.countUseStatus(statuses.get(i).getStatusID()));
+            list.add(ticketRepository.countByStatus_StatusID(statuses.get(i).getStatusID()));
         }
 
         return list;
@@ -55,10 +56,9 @@ public class StatusServiceImpl implements StatusService{
 
     @Override
     public void delete(Integer id) {
-        if(ticketService.countUseStatus(id) == 0 && statusRepository.existsById(id)){
+        if(ticketRepository.countByStatus_StatusID(id) == 0 && statusRepository.existsById(id)){
             statusRepository.deleteById(id);
         }
     }
-
 
 }

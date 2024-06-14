@@ -10,7 +10,7 @@
     <div class="container">
         <h2 class="fs-3">Dodaj kategorię</h2>
         <form method="POST" th:object="${category}" th:action="@{/category/add}" class="mb-3">
-            <input type="hidden" th:field="*{categoryID}" th:value="*{categoryID}">
+            <input type="hidden" th:field="*{id}" th:value="*{id}">
             Nazwa: <input type="text" th:field="*{categoryName}" th:value="*{categoryName}" class="form-control"><br>
             <p th:if="${#fields.hasErrors('categoryName')}" th:each="err : ${#fields.errors('categoryName')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
 

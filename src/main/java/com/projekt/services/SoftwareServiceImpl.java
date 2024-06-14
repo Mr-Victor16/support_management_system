@@ -1,7 +1,9 @@
 package com.projekt.services;
 
 import com.projekt.models.Software;
+import com.projekt.repositories.KnowledgeRepository;
 import com.projekt.repositories.SoftwareRepository;
+import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,13 +12,13 @@ import java.util.List;
 @Service("softwareDetailsService")
 public class SoftwareServiceImpl implements SoftwareService {
     private final SoftwareRepository softwareRepository;
-    private final TicketService ticketService;
-    private final KnowledgeBaseService knowledgeBaseService;
+    private final KnowledgeRepository knowledgeRepository;
+    private final TicketRepository ticketRepository;
 
-    public SoftwareServiceImpl(SoftwareRepository softwareRepository, TicketService ticketService, KnowledgeBaseService knowledgeBaseService) {
+    public SoftwareServiceImpl(SoftwareRepository softwareRepository, KnowledgeRepository knowledgeRepository, TicketRepository ticketRepository) {
         this.softwareRepository = softwareRepository;
-        this.ticketService = ticketService;
-        this.knowledgeBaseService = knowledgeBaseService;
+        this.knowledgeRepository = knowledgeRepository;
+        this.ticketRepository = ticketRepository;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class SoftwareServiceImpl implements SoftwareService {
             return new Software();
         }
 
-        return softwareRepository.getById(Long.valueOf(id));
+        return softwareRepository.getReferenceById(Long.valueOf(id));
     }
 
     @Override
@@ -40,7 +42,7 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public void delete(Integer id) {
-        if(ticketService.countUseSoftware(Long.valueOf(id)) == 0 && knowledgeBaseService.countUseSoftware(id) == 0 && softwareRepository.existsById(Long.valueOf(id))){
+        if(ticketRepository.countByVersion_SoftwareId(Long.valueOf(id)) == 0 && knowledgeRepository.countBySoftwareId(Long.valueOf(id)) == 0 && softwareRepository.existsById(Long.valueOf(id))){
             softwareRepository.deleteById(Long.valueOf(id));
         }
     }
@@ -56,7 +58,7 @@ public class SoftwareServiceImpl implements SoftwareService {
         List<Software> softwareList = softwareRepository.findAll();
 
         for (int i=0; i<softwareList.size(); i++){
-            list.add(ticketService.countUseSoftware(softwareList.get(i).getSoftwareID()));
+            list.add(ticketRepository.countByVersion_SoftwareId(softwareList.get(i).getId()));
         }
 
         return list;
@@ -68,7 +70,7 @@ public class SoftwareServiceImpl implements SoftwareService {
         ArrayList<Integer> list = new ArrayList<>();
 
         for (int i=0; i<softwareList.size(); i++){
-            list.add(knowledgeBaseService.countUseSoftware(Math.toIntExact(softwareList.get(i).getSoftwareID())));
+            list.add((int) knowledgeRepository.countBySoftwareId(softwareList.get(i).getId()));
         }
 
         return list;
@@ -77,10 +79,9 @@ public class SoftwareServiceImpl implements SoftwareService {
     @Override
     public ArrayList<Integer> softwareUseInTicket(ArrayList<Software> software) {
         ArrayList<Integer> list = new ArrayList<>();
-        List<Software> softwareList = software;
 
-        for (int i=0; i<softwareList.size(); i++){
-            list.add(ticketService.countUseSoftware(softwareList.get(i).getSoftwareID()));
+        for (int i = 0; i< ((List<Software>) software).size(); i++){
+            list.add(ticketRepository.countByVersion_SoftwareId(((List<Software>) software).get(i).getId()));
         }
 
         return list;
@@ -88,11 +89,10 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public ArrayList<Integer> softwareUseInKnowledgeBase(ArrayList<Software> software) {
-        List<Software> softwareList = software;
         ArrayList<Integer> list = new ArrayList<>();
 
-        for (int i=0; i<softwareList.size(); i++){
-            list.add(knowledgeBaseService.countUseSoftware(Math.toIntExact(softwareList.get(i).getSoftwareID())));
+        for (int i = 0; i< ((List<Software>) software).size(); i++){
+            list.add((int) knowledgeRepository.countBySoftwareId(((List<Software>) software).get(i).getId()));
         }
 
         return list;
@@ -102,6 +102,5 @@ public class SoftwareServiceImpl implements SoftwareService {
     public ArrayList<Software> searchSoftwareByNameDescription(String phrase) {
         return softwareRepository.searchSoftwareByNameDescription(phrase);
     }
-
 
 }

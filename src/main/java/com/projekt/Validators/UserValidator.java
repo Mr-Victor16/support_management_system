@@ -18,7 +18,7 @@ public class UserValidator implements Validator {
             errors.rejectValue("passwordConfirm", "RozneHasla");
         }
 
-        if (user.getPasswordConfirm().equals("")){
+        if (user.getPasswordConfirm().isEmpty()){
             errors.rejectValue("passwordConfirm", "PustePole");
         }
     }

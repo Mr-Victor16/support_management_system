@@ -8,6 +8,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.projekt.models.Category;
 import com.projekt.models.Ticket;
 import com.projekt.models.TicketReply;
+import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -19,10 +20,10 @@ import java.util.stream.Stream;
 
 @Service
 public class PDFService {
-    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
 
-    public PDFService(TicketService ticketService) {
-        this.ticketService = ticketService;
+    public PDFService(TicketRepository ticketRepository) {
+        this.ticketRepository = ticketRepository;
     }
 
     public void createPDF(Integer ticketID) throws IOException, DocumentException {
@@ -39,7 +40,7 @@ public class PDFService {
         var myFont = FontFactory.getFont(BaseFont.COURIER, BaseFont.CP1250, BaseFont.EMBEDDED,16);
         var myFont1 = FontFactory.getFont(BaseFont.COURIER, BaseFont.CP1250, BaseFont.EMBEDDED,12);
 
-        Ticket ticket = ticketService.loadTicketById(ticketID);
+        Ticket ticket = ticketRepository.getReferenceById(ticketID);
         Chunk chunk = new Chunk("Zgłoszenie id "+ticketID, myFont);
 
         Paragraph paragraph = new Paragraph("Tytuł: "+ticket.getTicketTitle(),myFont1);
@@ -48,10 +49,10 @@ public class PDFService {
         Paragraph paragraph2 = new Paragraph("Data: "+ticket.getTicketDate(),myFont1);
         Paragraph paragraph3 = new Paragraph("Status: "+ticket.getStatus().getStatusName(),myFont1);
 
-        String kategorie = "";
+        StringBuilder kategorie = new StringBuilder();
         ArrayList<Category> arrayList = new ArrayList<>(ticket.getCategories());
         for(int i=0; i<arrayList.size(); i++){
-           kategorie += arrayList.get(i).getCategoryName() + " ";
+           kategorie.append(arrayList.get(i).getCategoryName()).append(" ");
         }
         Paragraph paragraph4 = new Paragraph("Kategorie: "+kategorie,myFont1);
 
@@ -74,7 +75,7 @@ public class PDFService {
         Paragraph paragraph10 = new Paragraph("Odpowiedzi",myFont1);
         document.add(paragraph10);
         document.add(Chunk.NEWLINE);
-        if(ticket.getTicketReplies().size() > 0) {
+        if(!ticket.getTicketReplies().isEmpty()) {
             PdfPTable table = new PdfPTable(3);
             addTableHeader(table);
             addRows(table, ticket.getTicketReplies(),myFont1);
@@ -88,7 +89,7 @@ public class PDFService {
         Paragraph paragraph8 = new Paragraph("Zrzuty ekranu",myFont1);
         document.add(paragraph8);
         document.add(Chunk.NEWLINE);
-        if(ticket.getImages().size() > 0){
+        if(!ticket.getImages().isEmpty()){
             for(int i=0; i<ticket.getImages().size(); i++){
                 Image img = Image.getInstance(ticket.getImages().get(i).getFileContent());
                 img.scaleAbsoluteWidth(600);

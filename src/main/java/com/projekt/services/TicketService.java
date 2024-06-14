@@ -33,16 +33,6 @@ public interface TicketService {
 
     void changeStatus(Integer id, Status status) throws MessagingException;
 
-    int countUseCategory(Integer id);
-
-    int countUsePriority(Integer priorityID);
-
-    int countUseSoftware(Long softwareID);
-
-    int countUseStatus(Integer statusID);
-
-    void deleteByUserId(Integer id);
-
     ArrayList<Ticket> searchByPhrase(String phrase);
 
     ArrayList<Ticket> searchByDate(LocalDate date1, LocalDate date2);

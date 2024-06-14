@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Size;
 public class Priority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer priorityID;
+    private Integer id;
 
     @NotBlank @Size(min = 4, max = 20)
     @Column(name = "priority_name", nullable = false)

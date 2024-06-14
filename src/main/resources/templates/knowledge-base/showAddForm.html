@@ -19,9 +19,9 @@
             <p th:if="${#fields.hasErrors('knowledgeDate')}" th:each="err : ${#fields.errors('knowledgeDate')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
 
             Oprogramowanie
-            <select th:field="*{software.softwareID}" class="form-select">
+            <select th:field="*{software.id}" class="form-select">
                 <option th:each="prov : ${softwareList}"
-                        th:value="${prov.softwareID}"
+                        th:value="${prov.id}"
                         th:text="${prov.softwareName}"></option>
             </select><br>
 

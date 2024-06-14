@@ -18,7 +18,7 @@ import jakarta.validation.constraints.Size;
 public class Software {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long softwareID;
+    private Long id;
 
     @Size(min = 2, max = 30) @NotBlank
     @Column(name = "software_name", nullable = false)

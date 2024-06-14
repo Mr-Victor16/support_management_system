@@ -9,8 +9,8 @@
 <div th:insert="~{fragments/fragments :: menu('admin')}"></div>
     <div class="container">
         <h2 class="fs-3">Edytuj priorytet</h2>
-        <form method="POST" th:object="${priority}" th:action="@{'/priority/edit/' + ${priority.priorityID}}" class="mb-3">
-            <input type="hidden" th:field="*{priorityID}" th:value="*{priorityID}">
+        <form method="POST" th:object="${priority}" th:action="@{'/priority/edit/' + ${priority.id}}" class="mb-3">
+            <input type="hidden" th:field="*{id}" th:value="*{id}">
             Nazwa: <input type="text" th:field="*{priorityName}" th:value="*{priorityName}" class="form-control"><br>
             <p th:if="${#fields.hasErrors('priorityName')}" th:each="err : ${#fields.errors('priorityName')}" th:text="${err}" class="alert alert-warning" role="alert"></p>
             Maksymalny czas: <input type="number" min="0" step="1" th:field="*{maxTime}" th:value="*{maxTime}" class="form-control"><br>

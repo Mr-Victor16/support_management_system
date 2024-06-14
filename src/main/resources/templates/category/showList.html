@@ -18,8 +18,8 @@
         <tbody>
             <tr th:each="k,iter : ${category}">
                 <td>
-                    <div sec:authorize="hasRole('ADMIN')"><a th:href="@{'/category/edit/'+${k.categoryID}}">Edytuj</a></br></div>
-                    <div sec:authorize="hasRole('ADMIN')" th:if="${#arrays.length(category) > 1 and use[iter.index]==0}" ><a th:href="@{'/category/delete/'+${k.categoryID}}">Usuń</a></br></div>
+                    <div sec:authorize="hasRole('ADMIN')"><a th:href="@{'/category/edit/'+${k.id}}">Edytuj</a></br></div>
+                    <div sec:authorize="hasRole('ADMIN')" th:if="${#arrays.length(category) > 1 and use[iter.index]==0}" ><a th:href="@{'/category/delete/'+${k.id}}">Usuń</a></br></div>
                 </td>
                 <td th:text="${k.categoryName}"></td>
                 <td th:text="${use[iter.index]}"></td>

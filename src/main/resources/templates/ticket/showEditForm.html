@@ -45,7 +45,7 @@
                 <div class="col-sm-10">
                     Kategorie:
                     <div th:each="kat:${categoryList}" class="custom-control custom-checkbox">
-                        <input type="checkbox" th:field="*{categories}" th:value="${kat.categoryID}" class="custom-control-input" th:id="${kat}" >
+                        <input type="checkbox" th:field="*{categories}" th:value="${kat.id}" class="custom-control-input" th:id="${kat}" >
                         <label class="custom-control-label" th:for="${kat}" th:text="${kat.categoryName}"></label>
                     </div>
                     <small style="color: red" th:if="${#fields.hasErrors('categories')}" th:each="err : ${#fields.errors('categories')}" th:text="${err}"/>
@@ -55,7 +55,7 @@
             <div>
                 Priorytet: <select th:field="*{priority}" class="form-select">
                 <option th:each="prov : ${priorityList}"
-                        th:value="${prov.priorityID}"
+                        th:value="${prov.id}"
                         th:text="${prov.priorityName + ' - ' + prov.maxTime + ' dni'}"></option>
                 </select>
             </div><br>
@@ -74,7 +74,7 @@
 
             Oprogramowanie: <select th:field="*{version.software}" class="form-select">
             <option th:each="prov : ${softwareList}"
-                    th:value="${prov.softwareID}"
+                    th:value="${prov.id}"
                     th:text="${prov.softwareName}"></option>
              </select><br>
 

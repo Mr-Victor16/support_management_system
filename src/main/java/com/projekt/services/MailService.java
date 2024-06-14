@@ -1,6 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.User;
+import com.projekt.repositories.UserRepository;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -13,12 +14,12 @@ import jakarta.mail.MessagingException;
 public class MailService {
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
-    public MailService(JavaMailSender javaMailSender, TemplateEngine templateEngine, UserService userService) {
+    public MailService(JavaMailSender javaMailSender, TemplateEngine templateEngine, UserRepository userRepository) {
         this.javaMailSender = javaMailSender;
         this.templateEngine = templateEngine;
-        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     public void sendRegisterMessage(String to, String username, boolean enabled) throws MessagingException {
@@ -30,7 +31,7 @@ public class MailService {
 
         var context = new Context();
         context.setVariable("username", username);
-        User user = userService.findUserByUsername(username);
+        User user = userRepository.findByUsername(username);
         String link = "http://localhost:8080/activate/"+user.getId();
         context.setVariable("link", link);
         context.setVariable("enabled", enabled);
@@ -60,7 +61,7 @@ public class MailService {
         var mimeMessage = javaMailSender.createMimeMessage();
         var helper = new MimeMessageHelper(mimeMessage, "utf-8");
         //helper.setFrom("noreply@uph.edu.pl");
-        helper.setTo(userService.loadById(id).getEmail());
+        helper.setTo(userRepository.getReferenceById(id).getEmail());
         helper.setSubject("Wsparcie techniczne - Zmiana statusu zgłoszenia");
 
         var context = new Context();

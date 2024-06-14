@@ -18,8 +18,8 @@
         <tbody>
             <tr th:each="k,iter : ${priority}">
                 <td>
-                    <div sec:authorize="hasRole('ADMIN')"><a th:href="@{'/priority/edit/'+${k.priorityID}}">Edytuj</a></br></div>
-                    <div sec:authorize="hasRole('ADMIN')" th:if="${#arrays.length(priority) > 1 and use[iter.index]==0}" ><a th:href="@{'/priority/delete/'+${k.priorityID}}">Usuń</a></br></div>
+                    <div sec:authorize="hasRole('ADMIN')"><a th:href="@{'/priority/edit/'+${k.id}}">Edytuj</a></br></div>
+                    <div sec:authorize="hasRole('ADMIN')" th:if="${#arrays.length(priority) > 1 and use[iter.index]==0}" ><a th:href="@{'/priority/delete/'+${k.id}}">Usuń</a></br></div>
                 </td>
                 <td th:text="${k.priorityName}"></td>
                 <td th:text="${k.maxTime + ' dni'}"></td>

@@ -19,8 +19,6 @@ public interface KnowledgeBaseService{
 
     boolean exists(Integer id);
 
-    int countUseSoftware(Integer id);
-
     ArrayList<Knowledge> searchKnowledgeByTitleContent(String phrase);
 
     ArrayList<Knowledge> searchKnowledgeByDate(LocalDate date1, LocalDate date2);

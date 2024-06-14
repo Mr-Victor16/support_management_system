@@ -2,8 +2,9 @@ package com.projekt.services;
 
 import com.projekt.config.ProfileNames;
 import com.projekt.models.Role;
+import com.projekt.repositories.RoleRepository;
+import com.projekt.repositories.TicketRepository;
 import com.projekt.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,17 +24,17 @@ import java.util.Set;
 @Service("userDetailsService")
 @Profile(ProfileNames.USERS_IN_DATABASE)
 public class UserServiceImpl implements UserService{
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final MailService mailService;
+    private final RoleRepository roleRepository;
+    private final TicketRepository ticketRepository;
 
-    @Autowired
-    private MailService mailService;
-
-    @Autowired
-    private TicketService ticketService;
-
-    @Autowired
-    private RoleService roleService;
+    public UserServiceImpl(UserRepository userRepository, MailService mailService, RoleRepository roleRepository, TicketRepository ticketRepository) {
+        this.userRepository = userRepository;
+        this.mailService = mailService;
+        this.roleRepository = roleRepository;
+        this.ticketRepository = ticketRepository;
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -79,7 +80,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public void delete(Integer id) {
         if(userRepository.existsById(id)){
-            ticketService.deleteByUserId(id);
+            ticketRepository.deleteByUserId(id);
             userRepository.deleteById(id);
         }
     }
@@ -98,6 +99,7 @@ public class UserServiceImpl implements UserService{
     public ArrayList<com.projekt.models.User> searchUserByRole(Integer id) {
         ArrayList<com.projekt.models.User> list = userRepository.findByRoles_Id(id);
         ArrayList<com.projekt.models.User> list2 = new ArrayList<>();
+
         for(int i=0; i<list.size(); i++){
             Set<Role> set = list.get(i).getRoles();
             if((set.size() == 1 && id == 1) || (set.size() == 2 && id == 2) || (set.size()==3 && id==3)){
@@ -110,8 +112,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public boolean activate(Integer userID) {
-        if(!userRepository.getById(userID).isEnabled()){
-            com.projekt.models.User user = userRepository.getById(userID);
+        if(!userRepository.getReferenceById(userID).isEnabled()){
+            com.projekt.models.User user = userRepository.getReferenceById(userID);
             user.setEnabled(true);
             userRepository.save(user);
             return true;
@@ -129,7 +131,7 @@ public class UserServiceImpl implements UserService{
 
             if(!admin) {
                 Set<Role> roleSet = new HashSet<>();
-                roleSet.add(roleService.loadById(1));
+                roleSet.add(roleRepository.getReferenceById(1));
                 user.setRoles(roleSet);
             }
 
@@ -147,10 +149,10 @@ public class UserServiceImpl implements UserService{
         Set<Role> roleList = user.getRoles();
         if (roleList.size() == 1){
             if(roleList.stream().findFirst().get().getType().toString() == "ROLE_ADMIN"){
-                roleList.add(roleService.loadById(1));
-                roleList.add(roleService.loadById(2));
+                roleList.add(roleRepository.getReferenceById(1));
+                roleList.add(roleRepository.getReferenceById(2));
             }else if(roleList.stream().findFirst().get().getType().toString() == "ROLE_OPERATOR"){
-                roleList.add(roleService.loadById(1));
+                roleList.add(roleRepository.getReferenceById(1));
             }
 
             user.setRoles(roleList);
@@ -180,7 +182,7 @@ public class UserServiceImpl implements UserService{
             return new com.projekt.models.User();
         }
 
-        return userRepository.getById(id);
+        return userRepository.getReferenceById(id);
     }
 
     private UserDetails convertToUserDetails(com.projekt.models.User user) {
@@ -191,7 +193,6 @@ public class UserServiceImpl implements UserService{
 
         return new User(user.getUsername(), user.getPassword(), user.isEnabled(), true, true, true, grantedAuthorities);
     }
-
 
 }
 

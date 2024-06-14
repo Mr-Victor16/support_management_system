@@ -1,6 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
+import com.projekt.repositories.TicketReplyRepository;
 import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,18 +21,18 @@ public class TicketServiceImpl implements TicketService{
     private final VersionService versionService;
     private final ImageService imageService;
     private final StatusService statusService;
-    private final TicketReplyService ticketReplyService;
     private final MailService mailService;
+    private final TicketReplyRepository ticketReplyRepository;
 
-    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, RoleService roleService, VersionService versionService, ImageService imageService, StatusService statusService, TicketReplyService ticketReplyService, MailService mailService) {
+    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, RoleService roleService, VersionService versionService, ImageService imageService, StatusService statusService, MailService mailService, TicketReplyRepository ticketReplyRepository) {
         this.ticketRepository = ticketRepository;
         this.userService = userService;
         this.roleService = roleService;
         this.versionService = versionService;
         this.imageService = imageService;
         this.statusService = statusService;
-        this.ticketReplyService = ticketReplyService;
         this.mailService = mailService;
+        this.ticketReplyRepository = ticketReplyRepository;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class TicketServiceImpl implements TicketService{
             return new Ticket();
         }
 
-        return ticketRepository.getById(id);
+        return ticketRepository.getReferenceById(id);
     }
 
     @Override
@@ -60,13 +61,13 @@ public class TicketServiceImpl implements TicketService{
         Version version = null;
 
         if(ticket.getTicketID() != null) {
-            ticket.setTicketReplies(ticketRepository.getById(ticket.getTicketID()).getTicketReplies());
-            version = ticketRepository.getById(ticket.getTicketID()).getVersion();
+            ticket.setTicketReplies(ticketRepository.getReferenceById(ticket.getTicketID()).getTicketReplies());
+            version = ticketRepository.getReferenceById(ticket.getTicketID()).getVersion();
 
             if(multipartFile.isEmpty() || multipartFile.get(0).getOriginalFilename().isEmpty()){
-                ticket.setImages(ticketRepository.getById(ticket.getTicketID()).getImages());
+                ticket.setImages(ticketRepository.getReferenceById(ticket.getTicketID()).getImages());
             }else{
-                ticket.setImages(imageService.save(multipartFile,ticketRepository.getById(ticket.getTicketID()).getImages()));
+                ticket.setImages(imageService.save(multipartFile,ticketRepository.getReferenceById(ticket.getTicketID()).getImages()));
             }
         }else{
             if(!multipartFile.isEmpty() && !multipartFile.get(0).getOriginalFilename().isEmpty()){
@@ -98,13 +99,13 @@ public class TicketServiceImpl implements TicketService{
     @Override
     public void delete(Integer id) {
         if(ticketRepository.existsById(id)){
-            List<TicketReply> ticketReplyList = ticketRepository.getById(id).getTicketReplies();
-            List<Image> imageList = ticketRepository.getById(id).getImages();
+            List<TicketReply> ticketReplyList = ticketRepository.getReferenceById(id).getTicketReplies();
+            List<Image> imageList = ticketRepository.getReferenceById(id).getImages();
 
             ticketRepository.deleteByTicketID(id);
-            ticketReplyService.deleteAll(ticketReplyList);
+            ticketReplyRepository.deleteAll(ticketReplyList);
             imageService.deleteAll(imageList);
-            versionService.delete(ticketRepository.getById(id).getVersion().getVersionID());
+            versionService.delete(ticketRepository.getReferenceById(id).getVersion().getVersionID());
         }
     }
 
@@ -115,14 +116,14 @@ public class TicketServiceImpl implements TicketService{
                 return true;
             }
 
-            return (userService.findUserByUsername(name).getId() == ticketRepository.getById(id).getUser().getId());
+            return (userService.findUserByUsername(name).getId() == ticketRepository.getReferenceById(id).getUser().getId());
         }
         return false;
     }
 
     @Override
     public Ticket loadTicketById(Integer id) {
-        return ticketRepository.getById(id);
+        return ticketRepository.getReferenceById(id);
     }
 
     @Override
@@ -144,40 +145,10 @@ public class TicketServiceImpl implements TicketService{
 
     @Override
     public void changeStatus(Integer id, Status status) throws MessagingException {
-        Ticket ticket = ticketRepository.getById(id);
+        Ticket ticket = ticketRepository.getReferenceById(id);
         ticket.setStatus(status);
         mailService.sendChangeStatusMessage(ticket.getUser().getId(), ticket.getTicketTitle(), status.getStatusName());
         ticketRepository.save(ticket);
-    }
-
-    @Override
-    public int countUseCategory(Integer id) {
-        return ticketRepository.countByCategories_CategoryID(id);
-    }
-
-    @Override
-    public int countUsePriority(Integer priorityID) {
-        return ticketRepository.countByPriority_PriorityID(priorityID);
-    }
-
-    @Override
-    public int countUseSoftware(Long softwareID) {
-        return ticketRepository.countByVersion_Software_SoftwareID(softwareID);
-    }
-
-    @Override
-    public int countUseStatus(Integer statusID) {
-        return ticketRepository.countByStatus_StatusID(statusID);
-    }
-
-    @Override
-    public void deleteByUserId(Integer id) {
-        List<Ticket> tickets = ticketRepository.findByUser_Id(id);
-        for(int i=0; i<tickets.size(); i++){
-            imageService.deleteAll(tickets.get(i).getImages());
-            ticketReplyService.deleteAll(tickets.get(i).getTicketReplies());
-            ticketRepository.delete(tickets.get(i));
-        }
     }
 
     @Override
@@ -192,7 +163,7 @@ public class TicketServiceImpl implements TicketService{
 
     @Override
     public ArrayList<Ticket> searchBySoftware(Software software) {
-        return ticketRepository.searchBySoftware(software.getSoftwareID());
+        return ticketRepository.searchBySoftware(software.getId());
     }
 
     @Override
@@ -202,7 +173,7 @@ public class TicketServiceImpl implements TicketService{
 
     @Override
     public ArrayList<Ticket> searchByPriority(Priority priority) {
-        return ticketRepository.searchByPriority(priority.getPriorityID());
+        return ticketRepository.searchByPriority(priority.getId());
     }
 
     @Override

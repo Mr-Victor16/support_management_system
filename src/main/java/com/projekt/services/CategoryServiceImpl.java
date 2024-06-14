@@ -2,6 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Category;
 import com.projekt.repositories.CategoryRepository;
+import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,11 +11,11 @@ import java.util.List;
 @Service("categoryDetailsService")
 public class CategoryServiceImpl implements CategoryService{
     private final CategoryRepository categoryRepository;
-    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, TicketService ticketService) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, TicketRepository ticketRepository) {
         this.categoryRepository = categoryRepository;
-        this.ticketService = ticketService;
+        this.ticketRepository = ticketRepository;
     }
 
     @Override
@@ -28,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService{
             return new Category();
         }
 
-        return categoryRepository.getById(id);
+        return categoryRepository.getReferenceById(id);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public void delete(Integer id) {
-        if(ticketService.countUseCategory(id) == 0 && categoryRepository.existsById(id)){
+        if(ticketRepository.countByCategoriesId(id) == 0 && categoryRepository.existsById(id)){
             categoryRepository.deleteById(id);
         }
     }
@@ -54,11 +55,10 @@ public class CategoryServiceImpl implements CategoryService{
         List<Category> categories = categoryRepository.findAll();
 
         for (int i=0; i<categories.size(); i++){
-            list.add(ticketService.countUseCategory(categories.get(i).getCategoryID()));
+            list.add(ticketRepository.countByCategoriesId(categories.get(i).getId()));
         }
 
         return list;
     }
-
 
 }

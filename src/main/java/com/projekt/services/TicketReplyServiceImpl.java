@@ -2,28 +2,28 @@ package com.projekt.services;
 
 import com.projekt.models.TicketReply;
 import com.projekt.repositories.TicketReplyRepository;
+import com.projekt.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
 import java.time.LocalDate;
-import java.util.List;
 
 @Service("ticketReplyDetailsService")
 public class TicketReplyServiceImpl implements TicketReplyService{
     private final TicketReplyRepository ticketReplyRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final TicketService ticketService;
 
-    public TicketReplyServiceImpl(TicketReplyRepository ticketReplyRepository, UserService userService, TicketService ticketService) {
+    public TicketReplyServiceImpl(TicketReplyRepository ticketReplyRepository, UserRepository userRepository, TicketService ticketService) {
         this.ticketReplyRepository = ticketReplyRepository;
-        this.userService = userService;
+        this.userRepository = userRepository;
         this.ticketService = ticketService;
     }
 
     @Override
     public void save(TicketReply ticketReply, String name, Integer id) throws MessagingException {
         ticketReply.setReplyDate(LocalDate.now());
-        ticketReply.setUser(userService.findUserByUsername(name));
+        ticketReply.setUser(userRepository.findByUsername(name));
         ticketReplyRepository.save(ticketReply);
 
         ticketService.addReply(ticketReply, id);
@@ -33,13 +33,6 @@ public class TicketReplyServiceImpl implements TicketReplyService{
     public void deleteById(Integer replyID) {
         if(ticketReplyRepository.existsById(replyID)){
             ticketReplyRepository.deleteById(replyID);
-        }
-    }
-
-    @Override
-    public void deleteAll(List<TicketReply> ticketReplies) {
-        for(int i=0; i<ticketReplies.size(); i++) {
-            ticketReplyRepository.deleteById(ticketReplies.get(i).getReplyID());
         }
     }
 
