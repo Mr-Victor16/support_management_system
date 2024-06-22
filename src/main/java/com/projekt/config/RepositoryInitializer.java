@@ -26,11 +26,10 @@ public class RepositoryInitializer {
     private final PriorityRepository priorityRepository;
     private final StatusRepository statusRepository;
     private final ImageRepository imageRepository;
-    private final VersionRepository versionRepository;
     private final TicketRepository ticketRepository;
     private final TicketReplyRepository ticketReplyRepository;
 
-    public RepositoryInitializer(UserRepository userRepository, RoleRepository roleRepository, SoftwareRepository softwareRepository, KnowledgeRepository knowledgeRepository, CategoryRepository categoryRepository, PriorityRepository priorityRepository, StatusRepository statusRepository, ImageRepository imageRepository, VersionRepository versionRepository, TicketRepository ticketRepository, TicketReplyRepository ticketReplyRepository) {
+    public RepositoryInitializer(UserRepository userRepository, RoleRepository roleRepository, SoftwareRepository softwareRepository, KnowledgeRepository knowledgeRepository, CategoryRepository categoryRepository, PriorityRepository priorityRepository, StatusRepository statusRepository, ImageRepository imageRepository, TicketRepository ticketRepository, TicketReplyRepository ticketReplyRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.softwareRepository = softwareRepository;
@@ -39,7 +38,6 @@ public class RepositoryInitializer {
         this.priorityRepository = priorityRepository;
         this.statusRepository = statusRepository;
         this.imageRepository = imageRepository;
-        this.versionRepository = versionRepository;
         this.ticketRepository = ticketRepository;
         this.ticketReplyRepository = ticketReplyRepository;
     }
@@ -83,43 +81,43 @@ public class RepositoryInitializer {
             if(softwareRepository.findAll().isEmpty() && knowledgeRepository.findAll().isEmpty()){
                 Software software = new Software();
                 software.setId(1L);
-                software.setSoftwareName("Steam");
-                software.setSoftwareDescription("Platforma dystrybucji cyfrowej i zarządzania prawami cyfrowymi, system gry wieloosobowej oraz serwis społecznościowy stworzony przez Valve Corporation");
+                software.setName("Steam");
+                software.setDescription("Platforma dystrybucji cyfrowej i zarządzania prawami cyfrowymi, system gry wieloosobowej oraz serwis społecznościowy stworzony przez Valve Corporation");
                 softwareRepository.save(software);
 
                 Software software1 = new Software();
                 software1.setId(2L);
-                software1.setSoftwareName("Origin");
-                software1.setSoftwareDescription("Platforma firmy Electronic Arts pełniąca funkcję sklepu z grami w wersji cyfrowej oraz systemu kontroli dostępu do danych w formie cyfrowej.");
+                software1.setName("Origin");
+                software1.setDescription("Platforma firmy Electronic Arts pełniąca funkcję sklepu z grami w wersji cyfrowej oraz systemu kontroli dostępu do danych w formie cyfrowej.");
                 softwareRepository.save(software1);
 
                 Software software2 = new Software();
                 software2.setId(3L);
-                software2.setSoftwareName("GOG");
-                software2.setSoftwareDescription("Serwis cyfrowej dystrybucji gier komputerowych, stworzony w 2008 roku przez polską firmę CDP Investment sp. z o.o.");
+                software2.setName("GOG");
+                software2.setDescription("Serwis cyfrowej dystrybucji gier komputerowych, stworzony w 2008 roku przez polską firmę CDP Investment sp. z o.o.");
                 softwareRepository.save(software2);
 
                 Knowledge knowledge = new Knowledge();
-                knowledge.setKnowledgeID(1);
-                knowledge.setKnowledgeTitle("Co to jest Steam?");
-                knowledge.setKnowledgeContent(software.getSoftwareDescription());
-                knowledge.setKnowledgeDate(LocalDate.now());
+                knowledge.setId(1);
+                knowledge.setTitle("Co to jest Steam?");
+                knowledge.setContent(software.getDescription());
+                knowledge.setDate(LocalDate.now());
                 knowledge.setSoftware(softwareRepository.getReferenceById(1L));
                 knowledgeRepository.save(knowledge);
 
                 Knowledge knowledge1 = new Knowledge();
-                knowledge1.setKnowledgeID(2);
-                knowledge1.setKnowledgeTitle("Co to jest Origin?");
-                knowledge1.setKnowledgeContent(software2.getSoftwareDescription());
-                knowledge1.setKnowledgeDate(LocalDate.of(2022,1,15));
+                knowledge1.setId(2);
+                knowledge1.setTitle("Co to jest Origin?");
+                knowledge1.setContent(software2.getDescription());
+                knowledge1.setDate(LocalDate.of(2022,1,15));
                 knowledge1.setSoftware(softwareRepository.getReferenceById(2L));
                 knowledgeRepository.save(knowledge1);
 
                 Knowledge knowledge2 = new Knowledge();
-                knowledge2.setKnowledgeID(3);
-                knowledge2.setKnowledgeTitle("Kiedy powstał Steam?");
-                knowledge2.setKnowledgeContent("Platformę zaczęto rozwijać w 2002 roku. Finalną wersję klienta Steam wydano 12 września 2003.");
-                knowledge2.setKnowledgeDate(LocalDate.of(2022,1,10));
+                knowledge2.setId(3);
+                knowledge2.setTitle("Kiedy powstał Steam?");
+                knowledge2.setContent("Platformę zaczęto rozwijać w 2002 roku. Finalną wersję klienta Steam wydano 12 września 2003.");
+                knowledge2.setDate(LocalDate.of(2022,1,10));
                 knowledge2.setSoftware(softwareRepository.getReferenceById(1L));
                 knowledgeRepository.save(knowledge2);
             }
@@ -143,20 +141,17 @@ public class RepositoryInitializer {
                 statusRepository.save(new Status(3,"Zamknięte", true));
             }
 
-            if(versionRepository.findAll().isEmpty()){
-                Version version = new Version(1,2020,10,18,softwareRepository.getReferenceById(1L));
-                versionRepository.save(version);
-            }
-
             if(ticketReplyRepository.findAll().isEmpty() && ticketRepository.findAll().isEmpty() && imageRepository.findAll().isEmpty()){
                 Ticket ticket = new Ticket();
-                ticket.setTicketID(1);
-                ticket.setTicketDate(LocalDate.of(2021,12,10));
-                ticket.setUser(userRepository.getReferenceById(1));
-                ticket.setTicketTitle("Witryna jest nieosiągalna");
+                ticket.setId(1);
+                ticket.setDate(LocalDate.of(2021,12,10));
+                ticket.setTitle("Witryna jest nieosiągalna");
                 ticket.setStatus(statusRepository.getReferenceById(1));
                 ticket.setPriority(priorityRepository.getReferenceById(2));
-                ticket.setTicketDescription("Podczas próby wejścia na wskazaną na zrzucie ekranu podstronę, otrzymuję błąd - Ta witryna jest nieosiągalna :(");
+                ticket.setDescription("Podczas próby wejścia na wskazaną na zrzucie ekranu podstronę, otrzymuję błąd - Ta witryna jest nieosiągalna :(");
+
+                User user = userRepository.getReferenceById(1);
+                user.setTickets(List.of(ticket));
 
                 Set<Category> categorySet = new HashSet<>();
                 categorySet.add(categoryRepository.getReferenceById(1));
@@ -179,8 +174,6 @@ public class RepositoryInitializer {
                 ticketReplyList.add(ticketReply);
                 ticketReplyList.add(ticketReply1);
                 ticket.setTicketReplies(ticketReplyList);
-
-                ticket.setVersion(versionRepository.getReferenceById(1));
 
                 ticketRepository.save(ticket);
             }

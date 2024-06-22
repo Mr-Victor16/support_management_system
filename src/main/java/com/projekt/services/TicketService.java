@@ -43,7 +43,7 @@ public interface TicketService {
 
     ArrayList<Ticket> searchByPriority(Priority priority);
 
-    ArrayList<Ticket> searchByVersion(Version version);
+    ArrayList<Ticket> searchByVersion(String version);
 
     ArrayList<Ticket> searchByCategory(Set<Category> categories);
 

@@ -22,7 +22,7 @@ public class TicketReplyServiceImpl implements TicketReplyService{
 
     @Override
     public void save(TicketReply ticketReply, String name, Integer id) throws MessagingException {
-        ticketReply.setReplyDate(LocalDate.now());
+        ticketReply.setDate(LocalDate.now());
         ticketReply.setUser(userRepository.findByUsername(name));
         ticketReplyRepository.save(ticketReply);
 

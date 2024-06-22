@@ -20,16 +20,18 @@ public class Software {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Size(min = 2, max = 30) @NotBlank
+    @Size(min = 2, max = 30)
+    @NotBlank
     @Column(name = "software_name", nullable = false)
-    private String softwareName;
+    private String name;
 
-    @Size(min = 10, max = 200) @NotBlank
+    @Size(min = 10, max = 200)
+    @NotBlank
     @Column(name = "software_description", nullable = false)
-    private String softwareDescription;
+    private String description;
 
     public Software(String softwareName, String softwareDescription){
-        this.softwareName = softwareName;
-        this.softwareDescription = softwareDescription;
+        this.name = softwareName;
+        this.description = softwareDescription;
     }
 }

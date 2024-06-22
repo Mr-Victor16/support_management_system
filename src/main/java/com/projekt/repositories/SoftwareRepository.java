@@ -10,6 +10,6 @@ import java.util.ArrayList;
 @Repository
 public interface SoftwareRepository extends JpaRepository<Software, Long> {
 
-    @Query("Select s FROM Software s where (lower(s.softwareName) like lower(concat('%',?1,'%')) or (lower(s.softwareDescription) like lower(concat('%',?1,'%'))))")
+    @Query("Select s FROM Software s where (lower(s.name) like lower(concat('%',?1,'%')) or (lower(s.description) like lower(concat('%',?1,'%'))))")
     ArrayList<Software> searchSoftwareByNameDescription(String phrase);
 }

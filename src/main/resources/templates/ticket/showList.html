@@ -24,7 +24,6 @@
                     <div sec:authorize="hasRole('OPERATOR')"><a th:href="@{'/tickets/edit/'+${k.ticketID}}">Edytuj</a></br></div>
                     <div sec:authorize="hasRole('OPERATOR')"><a th:href="@{'/tickets/delete/'+${k.ticketID}}">Usuń</a></br></div>
                     <div><a th:href="@{'/ticket/'+${k.ticketID}}">Pokaż</a></br></div>
-                    <div><a th:href="@{'/ticket/pdf/'+${k.ticketID}}">PDF</a></br></div>
                 </td>
                 <td th:text="${k.ticketTitle}"></td>
                 <td th:text="${k.ticketDate}"></td>

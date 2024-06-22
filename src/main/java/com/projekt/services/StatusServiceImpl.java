@@ -48,7 +48,7 @@ public class StatusServiceImpl implements StatusService{
         List<Status> statuses = statusRepository.findAll();
 
         for (int i=0; i<statuses.size(); i++){
-            list.add(ticketRepository.countByStatus_StatusID(statuses.get(i).getStatusID()));
+            list.add(ticketRepository.countByStatus_Id(statuses.get(i).getId()));
         }
 
         return list;
@@ -56,7 +56,7 @@ public class StatusServiceImpl implements StatusService{
 
     @Override
     public void delete(Integer id) {
-        if(ticketRepository.countByStatus_StatusID(id) == 0 && statusRepository.existsById(id)){
+        if(ticketRepository.countByStatus_Id(id) == 0 && statusRepository.existsById(id)){
             statusRepository.deleteById(id);
         }
     }

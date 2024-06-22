@@ -1,27 +1,17 @@
 package com.projekt.controllers;
 
-import com.itextpdf.text.DocumentException;
-import com.projekt.exceptions.TicketNotFoundException;
-import com.projekt.formatters.VersionFormatter;
 import com.projekt.models.*;
 import com.projekt.services.*;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -37,9 +27,8 @@ public class TicketController {
     private final SoftwareService softwareService;
     private final ImageService imageService;
     private final UserService userService;
-    private final PDFService pdfService;
 
-    public TicketController(TicketService ticketService, TicketReplyService ticketReplyService, StatusService statusService, PriorityService priorityService, CategoryService categoryService, SoftwareService softwareService, ImageService imageService, UserService userService, PDFService pdfService) {
+    public TicketController(TicketService ticketService, TicketReplyService ticketReplyService, StatusService statusService, PriorityService priorityService, CategoryService categoryService, SoftwareService softwareService, ImageService imageService, UserService userService) {
         this.ticketService = ticketService;
         this.ticketReplyService = ticketReplyService;
         this.statusService = statusService;
@@ -48,7 +37,6 @@ public class TicketController {
         this.softwareService = softwareService;
         this.imageService = imageService;
         this.userService = userService;
-        this.pdfService = pdfService;
     }
 
     @GetMapping("/tickets")
@@ -108,10 +96,6 @@ public class TicketController {
         model.addAttribute("ticketReply", new TicketReply());
         model.addAttribute("status", new Status());
         return "ticket/showItem";
-
-//        model.addAttribute("ticket", ticketService.loadAll());
-//        model.addAttribute("search", new Search());
-//        return "ticket/showList";
     }
 
     @Secured("ROLE_OPERATOR")
@@ -182,31 +166,6 @@ public class TicketController {
         }
     }
 
-    @GetMapping(value = "/ticket/pdf/{id}")
-    public ResponseEntity<InputStreamResource> getTermsConditions(@PathVariable(name = "id", required = false) Integer ticketID,
-                                                                  Principal principal) throws IOException, DocumentException, com.lowagie.text.DocumentException {
-        if(ticketService.isAuthorized(ticketID,principal.getName())) {
-            String filePath = "src/main/resources/pdf/";
-            String fileName = ticketID + ".pdf";
-            File file = new File(filePath + fileName);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("content-disposition", "inline;filename=" + fileName);
-
-            pdfService.createPDF(ticketID);
-            InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .contentLength(file.length())
-                    .contentType(MediaType.parseMediaType("application/pdf"))
-                    .body(resource);
-        }
-        else{
-            throw new TicketNotFoundException();
-        }
-
-    }
-
     @ModelAttribute("statusList")
     public ArrayList<Status> loadStatus(){
         return statusService.loadAll();
@@ -230,11 +189,6 @@ public class TicketController {
     @ModelAttribute("usersList")
     public ArrayList<User> loadUser(){
         return userService.loadAll();
-    }
-
-    @InitBinder
-    public void initFormatters(WebDataBinder binder){
-        binder.addCustomFormatter(new VersionFormatter());
     }
 
 }

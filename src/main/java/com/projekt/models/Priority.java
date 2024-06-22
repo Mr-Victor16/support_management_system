@@ -21,9 +21,10 @@ public class Priority {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank @Size(min = 4, max = 20)
+    @NotBlank
+    @Size(min = 4, max = 20)
     @Column(name = "priority_name", nullable = false)
-    private String priorityName;
+    private String name;
 
     @Min(1)
     @Column(name = "max_time", nullable = false)

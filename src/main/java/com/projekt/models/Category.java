@@ -20,7 +20,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Size(min = 2, max = 20) @NotBlank
-    @Column(name = "category_name", nullable = false)
-    private String categoryName;
+    @Size(min = 2, max = 20)
+    @NotBlank
+    private String name;
 }

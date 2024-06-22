@@ -6,7 +6,6 @@ Przy tworzeniu projektu użyto: Java Spring, Spring Security, Thymeleaf, Bootstr
 - rejestracja/logowanie do systemu (z wysyłaniem maila aktywacyjnego)
 - podział na 3 role: użytkownik, operator wsparcia technicznego, administrator systemu
 - dodawanie/edycja/usuwanie wpisów do bazy wiedzy, oprogramowania, kategorii, statusów, zgłoszeń oraz użytkowników
-- generowanie pliku PDF ze zgłoszenia
 - zmiana statusu/dodawanie odpowiedzi do zgłoszeń - skutkuje to powiadomieniem mailowym do dodającego zgłoszenie
 - edycja danych własnego konta
 - wyszukiwanie zgłoszeń/użytkowników/wpisów

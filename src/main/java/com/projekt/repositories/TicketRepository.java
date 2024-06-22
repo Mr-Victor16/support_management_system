@@ -14,34 +14,31 @@ import java.util.Set;
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 
-    void deleteByTicketID(Integer ticketID);
-
-    ArrayList<Ticket> findByUser_UsernameOrderByTicketDateAsc(String username);
+    ArrayList<Ticket> findByUser_UsernameOrderByDateAsc(String username);
 
     int countByCategoriesId(Integer categoryID);
 
     int countByPriorityId(Integer priorityID);
 
-    int countByVersion_SoftwareId(Long softwareID);
+    long countBySoftwareId(Long id);
 
-    int countByStatus_StatusID(Integer statusID);
+    int countByStatus_Id(Integer statusID);
 
-    @Query("Select t From Ticket t WHERE (lower(t.ticketTitle) like lower(concat('%',:fraza,'%')) or (lower(t.ticketDescription) like lower(concat('%',:fraza,'%'))) )")
+    @Query("Select t From Ticket t WHERE (lower(t.title) like lower(concat('%',:fraza,'%')) or (lower(t.description) like lower(concat('%',:fraza,'%'))) )")
     ArrayList<Ticket> searchByPhrase(@Param("fraza") String phrase);
 
-    @Query("select t From Ticket t where t.ticketDate BETWEEN :date1 and :date2")
-    ArrayList<Ticket> searchByDate(@Param("date1")LocalDate date1, @Param("date2")LocalDate date2);
+    @Query("select t From Ticket t where t.date BETWEEN :date1 and :date2")
+    ArrayList<Ticket> searchByDate(@Param("date1") LocalDate date1, @Param("date2") LocalDate date2);
 
-    @Query("select t From Ticket t where t.version.software.id = ?1")
+    @Query("select t From Ticket t where t.software.id = ?1")
     ArrayList<Ticket> searchBySoftware(Long id);
 
-//    @Query("select t From Ticket t where t.status.statusID = ?1")
     ArrayList<Ticket> searchByStatus(Integer statusID);
 
     @Query("select t From Ticket t where t.priority.id = ?1")
     ArrayList<Ticket> searchByPriority(Integer priorityID);
 
-    @Query("select t From Ticket t WHERE concat(t.version.versionYear,'.',t.version.versionMonth,'.',t.version.versionNumber) like %?1% ")
+    @Query("select t From Ticket t WHERE t.version like %?1% ")
     ArrayList<Ticket> searchByVersion(String toString);
 
     ArrayList<Ticket> findDistinctByCategoriesIn(Set<Category> categories);

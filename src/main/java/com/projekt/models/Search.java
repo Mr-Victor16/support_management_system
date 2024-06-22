@@ -25,7 +25,7 @@ public class Search {
 
     private Software software;
 
-    private Version version;
+    private String version;
 
     private Status status;
     private Priority priority;

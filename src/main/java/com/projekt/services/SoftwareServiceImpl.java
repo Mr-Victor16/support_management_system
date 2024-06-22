@@ -42,7 +42,7 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public void delete(Integer id) {
-        if(ticketRepository.countByVersion_SoftwareId(Long.valueOf(id)) == 0 && knowledgeRepository.countBySoftwareId(Long.valueOf(id)) == 0 && softwareRepository.existsById(Long.valueOf(id))){
+        if(ticketRepository.countBySoftwareId(Long.valueOf(id)) == 0 && knowledgeRepository.countBySoftwareId(Long.valueOf(id)) == 0 && softwareRepository.existsById(Long.valueOf(id))){
             softwareRepository.deleteById(Long.valueOf(id));
         }
     }
@@ -58,7 +58,7 @@ public class SoftwareServiceImpl implements SoftwareService {
         List<Software> softwareList = softwareRepository.findAll();
 
         for (int i=0; i<softwareList.size(); i++){
-            list.add(ticketRepository.countByVersion_SoftwareId(softwareList.get(i).getId()));
+            list.add((int) ticketRepository.countBySoftwareId(softwareList.get(i).getId()));
         }
 
         return list;
@@ -81,7 +81,7 @@ public class SoftwareServiceImpl implements SoftwareService {
         ArrayList<Integer> list = new ArrayList<>();
 
         for (int i = 0; i< ((List<Software>) software).size(); i++){
-            list.add(ticketRepository.countByVersion_SoftwareId(((List<Software>) software).get(i).getId()));
+            list.add((int) ticketRepository.countBySoftwareId(((List<Software>) software).get(i).getId()));
         }
 
         return list;

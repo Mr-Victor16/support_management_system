@@ -1,14 +1,11 @@
 package com.projekt.controllers;
 
-import com.projekt.formatters.VersionFormatter;
 import com.projekt.models.*;
 import com.projekt.services.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -142,8 +139,4 @@ public class SearchController {
         return roleService.loadAll();
     }
 
-    @InitBinder
-    public void initFormatters(WebDataBinder binder){
-        binder.addCustomFormatter(new VersionFormatter());
-    }
 }

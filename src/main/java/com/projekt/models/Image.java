@@ -15,7 +15,8 @@ import jakarta.persistence.*;
 @Getter
 @Setter
 public class Image {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer imageID;
 
     @Column(name = "file_name", nullable = false)
