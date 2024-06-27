@@ -21,7 +21,7 @@ import java.time.LocalDate;
 public class Knowledge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Size(min = 2, max = 50)
     @NotBlank

@@ -1,27 +1,25 @@
 package com.projekt.services;
 
 import com.projekt.models.Knowledge;
-import com.projekt.models.Software;
+import com.projekt.payload.request.AddKnowledgeRequest;
+import com.projekt.payload.request.EditKnowledgeRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public interface KnowledgeBaseService{
-    ArrayList<Knowledge> loadAll();
+    List<Knowledge> getAll();
 
-    Knowledge loadById(Integer id);
+    Knowledge loadById(Long id);
 
-    void save(Knowledge knowledge);
+    void save(AddKnowledgeRequest knowledgeRequest);
 
-    void delete(Integer id);
+    void delete(Long id);
 
-    boolean exists(Integer id);
+    boolean existsById(Long id);
 
-    ArrayList<Knowledge> searchKnowledgeByTitleContent(String phrase);
+    boolean findDuplicate(String knowledgeTitle, Long softwareID);
 
-    ArrayList<Knowledge> searchKnowledgeByDate(LocalDate date1, LocalDate date2);
-
-    ArrayList<Knowledge> searchKnowledgeBySoftware(Software software);
+    void update(EditKnowledgeRequest knowledgeRequest);
 }
