@@ -18,7 +18,7 @@ import jakarta.validation.constraints.Size;
 public class Status {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Size(min = 2, max = 20)
     @NotBlank
@@ -27,4 +27,9 @@ public class Status {
 
     @Column(name = "close_ticket", nullable = false)
     private boolean closeTicket;
+
+    public Status(String name, boolean closeTicket) {
+        this.name = name;
+        this.closeTicket = closeTicket;
+    }
 }

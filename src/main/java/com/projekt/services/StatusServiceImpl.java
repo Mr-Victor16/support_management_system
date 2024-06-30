@@ -1,12 +1,15 @@
 package com.projekt.services;
 
 import com.projekt.models.Status;
+import com.projekt.payload.request.AddStatusRequest;
+import com.projekt.payload.request.EditStatusRequest;
+import com.projekt.payload.response.StatusResponse;
 import com.projekt.repositories.StatusRepository;
 import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service("statusDetailsService")
 public class StatusServiceImpl implements StatusService{
@@ -19,46 +22,53 @@ public class StatusServiceImpl implements StatusService{
     }
 
     @Override
-    public ArrayList<Status> loadAll() {
-        return (ArrayList<Status>) statusRepository.findAll();
-    }
-
-    @Override
-    public Status loadById(Integer id) {
-        if(id == null || !statusRepository.existsById(id)){
-            return new Status();
-        }
-
+    public Status loadById(Long id) {
         return statusRepository.getReferenceById(id);
     }
 
     @Override
-    public boolean exists(Integer id) {
+    public boolean existsById(Long id) {
         return statusRepository.existsById(id);
     }
 
     @Override
-    public void save(Status status) {
+    public void save(AddStatusRequest request) {
+        statusRepository.save(new Status(request.getStatusName(), request.isCloseTicket()));
+    }
+
+    @Override
+    public List<Status> getAll() {
+        return statusRepository.findAll();
+    }
+
+    @Override
+    public List<StatusResponse> getAllWithUseNumber() {
+        return statusRepository.findAll().stream()
+                .map(status -> new StatusResponse(
+                        status.getId(),
+                        status.getName(),
+                        status.isCloseTicket(),
+                        ticketRepository.countByStatusId(status.getId())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void update(EditStatusRequest request) {
+        Status status = statusRepository.getReferenceById(request.getStatusId());
+        status.setName(request.getStatusName());
+        status.setCloseTicket(request.isCloseTicket());
+
         statusRepository.save(status);
     }
 
     @Override
-    public ArrayList<Integer> statusUse() {
-        ArrayList<Integer> list = new ArrayList<>();
-        List<Status> statuses = statusRepository.findAll();
-
-        for (int i=0; i<statuses.size(); i++){
-            list.add(ticketRepository.countByStatus_Id(statuses.get(i).getId()));
-        }
-
-        return list;
+    public boolean existsByName(String statusName) {
+        return statusRepository.existsByName(statusName);
     }
 
     @Override
-    public void delete(Integer id) {
-        if(ticketRepository.countByStatus_Id(id) == 0 && statusRepository.existsById(id)){
-            statusRepository.deleteById(id);
-        }
+    public void delete(Long id) {
+        statusRepository.deleteById(id);
     }
-
 }

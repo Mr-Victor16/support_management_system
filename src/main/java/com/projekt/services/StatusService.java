@@ -1,21 +1,28 @@
 package com.projekt.services;
 
 import com.projekt.models.Status;
+import com.projekt.payload.request.AddStatusRequest;
+import com.projekt.payload.request.EditStatusRequest;
+import com.projekt.payload.response.StatusResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public interface StatusService {
-    ArrayList<Status> loadAll();
+    Status loadById(Long id);
 
-    Status loadById(Integer id);
+    boolean existsById(Long id);
 
-    boolean exists(Integer id);
+    void delete(Long id);
 
-    void delete(Integer id);
+    void save(AddStatusRequest statusRequest);
 
-    void save(Status status);
+    List<Status> getAll();
 
-    ArrayList<Integer> statusUse();
+    List<StatusResponse> getAllWithUseNumber();
+
+    boolean existsByName(String statusName);
+
+    void update(EditStatusRequest statusRequest);
 }
