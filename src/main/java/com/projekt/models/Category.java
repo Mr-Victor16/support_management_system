@@ -18,9 +18,13 @@ import jakarta.validation.constraints.Size;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Size(min = 2, max = 20)
     @NotBlank
     private String name;
+
+    public Category(String categoryName) {
+        this.name = categoryName;
+    }
 }

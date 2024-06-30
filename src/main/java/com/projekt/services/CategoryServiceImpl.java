@@ -1,12 +1,14 @@
 package com.projekt.services;
 
 import com.projekt.models.Category;
+import com.projekt.payload.request.EditCategoryRequest;
+import com.projekt.payload.response.CategoryResponse;
 import com.projekt.repositories.CategoryRepository;
 import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service("categoryDetailsService")
 public class CategoryServiceImpl implements CategoryService{
@@ -19,46 +21,50 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public ArrayList<Category> loadAll() {
-        return (ArrayList<Category>) categoryRepository.findAll();
-    }
-
-    @Override
-    public Category loadById(Integer id) {
-        if(id == null || !categoryRepository.existsById(id)){
-            return new Category();
-        }
-
+    public Category loadById(Long id) {
         return categoryRepository.getReferenceById(id);
     }
 
     @Override
-    public boolean exists(Integer id) {
+    public boolean existsById(Long id) {
         return categoryRepository.existsById(id);
     }
 
     @Override
-    public void save(Category category) {
+    public void save(String categoryName) {
+        categoryRepository.save(new Category(categoryName));
+    }
+
+    @Override
+    public void delete(Long id) {
+        categoryRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Category> getAll() {
+        return categoryRepository.findAll();
+    }
+
+    @Override
+    public boolean findByName(String categoryName) {
+        return categoryRepository.findByName(categoryName);
+    }
+
+    @Override
+    public void update(EditCategoryRequest request) {
+        Category category = categoryRepository.getReferenceById(request.getCategoryId());
+        category.setName(request.getCategoryName());
         categoryRepository.save(category);
     }
 
     @Override
-    public void delete(Integer id) {
-        if(ticketRepository.countByCategoriesId(id) == 0 && categoryRepository.existsById(id)){
-            categoryRepository.deleteById(id);
-        }
+    public List<CategoryResponse> getAllWithUseNumber() {
+        return categoryRepository.findAll().stream()
+                .map(category -> new CategoryResponse(
+                        category.getId(),
+                        category.getName(),
+                        ticketRepository.countByCategoriesId(category.getId())
+                ))
+                .collect(Collectors.toList());
     }
-
-    @Override
-    public ArrayList<Integer> categoriesUse() {
-        ArrayList<Integer> list = new ArrayList<>();
-        List<Category> categories = categoryRepository.findAll();
-
-        for (int i=0; i<categories.size(); i++){
-            list.add(ticketRepository.countByCategoriesId(categories.get(i).getId()));
-        }
-
-        return list;
-    }
-
 }

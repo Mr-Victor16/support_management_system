@@ -1,21 +1,27 @@
 package com.projekt.services;
 
 import com.projekt.models.Category;
+import com.projekt.payload.request.EditCategoryRequest;
+import com.projekt.payload.response.CategoryResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public interface CategoryService {
-    ArrayList<Category> loadAll();
+    Category loadById(Long id);
 
-    Category loadById(Integer id);
+    boolean existsById(Long id);
 
-    boolean exists(Integer id);
+    void save(String categoryName);
 
-    void save(Category category);
+    void delete(Long id);
 
-    void delete(Integer id);
+    List<Category> getAll();
 
-    ArrayList<Integer> categoriesUse();
+    boolean findByName(String name);
+
+    void update(EditCategoryRequest request);
+
+    List<CategoryResponse> getAllWithUseNumber();
 }
