@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Size;
 public class Priority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @NotBlank
     @Size(min = 4, max = 20)
@@ -29,4 +29,9 @@ public class Priority {
     @Min(1)
     @Column(name = "max_time", nullable = false)
     private Integer maxTime;
+
+    public Priority(String name, Integer maxTime) {
+        this.name = name;
+        this.maxTime = maxTime;
+    }
 }

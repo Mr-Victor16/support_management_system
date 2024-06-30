@@ -1,12 +1,15 @@
 package com.projekt.services;
 
 import com.projekt.models.Priority;
+import com.projekt.payload.request.AddPriorityRequest;
+import com.projekt.payload.request.EditPriorityRequest;
+import com.projekt.payload.response.PriorityResponse;
 import com.projekt.repositories.PriorityRepository;
 import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service("priorityDetailsService")
 public class PriorityServiceImpl implements PriorityService{
@@ -19,46 +22,51 @@ public class PriorityServiceImpl implements PriorityService{
     }
 
     @Override
-    public ArrayList<Priority> loadAll() {
-        return (ArrayList<Priority>) priorityRepository.findAll();
-    }
-
-    @Override
-    public Priority loadById(Integer id) {
-        if(id == null || !priorityRepository.existsById(id)){
-            return new Priority();
-        }
-
+    public Priority loadById(Long id) {
         return priorityRepository.getReferenceById(id);
     }
 
     @Override
-    public boolean exists(Integer id) {
+    public boolean existsById(Long id) {
         return priorityRepository.existsById(id);
     }
 
     @Override
-    public void save(Priority priority) {
+    public boolean findByName(String priorityName) {
+        return priorityRepository.findByName(priorityName);
+    }
+
+    @Override
+    public void update(EditPriorityRequest request) {
+        Priority priority = priorityRepository.getReferenceById(request.getPriorityId());
+        priority.setName(request.getPriorityName());
+        priority.setMaxTime(request.getMaxTime());
         priorityRepository.save(priority);
     }
 
     @Override
-    public void delete(Integer id) {
-        if(ticketRepository.countByPriorityId(id) == 0 && priorityRepository.existsById(id)){
-            priorityRepository.deleteById(id);
-        }
+    public void save(AddPriorityRequest request) {
+        priorityRepository.save(new Priority(request.getPriorityName(), request.getMaxTime()));
     }
 
     @Override
-    public ArrayList<Integer> prioritiesUse() {
-        ArrayList<Integer> list = new ArrayList<>();
-        List<Priority> priorities = priorityRepository.findAll();
-
-        for (int i=0; i<priorities.size(); i++){
-            list.add(ticketRepository.countByPriorityId(priorities.get(i).getId()));
-        }
-
-        return list;
+    public void delete(Long id) {
+        priorityRepository.deleteById(id);
     }
 
+    @Override
+    public List<Priority> getAll() {
+        return priorityRepository.findAll();
+    }
+
+    @Override
+    public List<PriorityResponse> getAllWithUseNumber(){
+        return priorityRepository.findAll().stream()
+                .map(priority -> new PriorityResponse(
+                        priority.getId(),
+                        priority.getName(),
+                        ticketRepository.countByPriorityId(priority.getId())
+                ))
+                .collect(Collectors.toList());
+    }
 }

@@ -1,21 +1,28 @@
 package com.projekt.services;
 
 import com.projekt.models.Priority;
+import com.projekt.payload.request.AddPriorityRequest;
+import com.projekt.payload.request.EditPriorityRequest;
+import com.projekt.payload.response.PriorityResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public interface PriorityService {
-    ArrayList<Priority> loadAll();
+    Priority loadById(Long id);
 
-    Priority loadById(Integer id);
+    void save(AddPriorityRequest priorityRequest);
 
-    boolean exists(Integer id);
+    void delete(Long id);
 
-    void save(Priority priority);
+    List<Priority> getAll();
 
-    void delete(Integer id);
+    List<PriorityResponse> getAllWithUseNumber();
 
-    ArrayList<Integer> prioritiesUse();
+    boolean existsById(Long priorityID);
+
+    boolean findByName(String priorityName);
+
+    void update(EditPriorityRequest priorityRequest);
 }
