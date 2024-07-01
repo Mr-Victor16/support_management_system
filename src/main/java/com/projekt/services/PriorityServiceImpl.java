@@ -32,8 +32,8 @@ public class PriorityServiceImpl implements PriorityService{
     }
 
     @Override
-    public boolean findByName(String priorityName) {
-        return priorityRepository.findByName(priorityName);
+    public boolean existsByName(String priorityName) {
+        return priorityRepository.existsByName(priorityName);
     }
 
     @Override

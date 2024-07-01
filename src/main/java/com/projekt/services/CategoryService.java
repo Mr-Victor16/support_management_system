@@ -19,7 +19,7 @@ public interface CategoryService {
 
     List<Category> getAll();
 
-    boolean findByName(String name);
+    boolean existsByName(String name);
 
     void update(EditCategoryRequest request);
 

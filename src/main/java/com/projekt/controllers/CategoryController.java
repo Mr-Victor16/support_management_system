@@ -4,7 +4,6 @@ import com.projekt.payload.request.AddCategoryRequest;
 import com.projekt.payload.request.EditCategoryRequest;
 import com.projekt.services.CategoryService;
 import com.projekt.services.TicketService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,7 +18,7 @@ public class CategoryController {
     private final CategoryService categoryService;
     private final TicketService ticketService;
 
-    public CategoryController(CategoryService categoryService, @Qualifier("ticketService") TicketService ticketService) {
+    public CategoryController(CategoryService categoryService, TicketService ticketService) {
         this.categoryService = categoryService;
         this.ticketService = ticketService;
     }
@@ -56,7 +55,7 @@ public class CategoryController {
             return new ResponseEntity<>("Category name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!categoryService.findByName(request.getCategoryName())){
+        if(!categoryService.existsByName(request.getCategoryName())){
             categoryService.update(request);
             return new ResponseEntity<>("Category name edited", HttpStatus.OK);
         }
@@ -67,7 +66,7 @@ public class CategoryController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addCategory(@RequestBody @Valid AddCategoryRequest request){
-        if(!categoryService.findByName(request.getCategoryName())){
+        if(!categoryService.existsByName(request.getCategoryName())){
             categoryService.save(request.getCategoryName());
             return new ResponseEntity<>("Category added", HttpStatus.OK);
         }

@@ -22,7 +22,7 @@ public interface PriorityService {
 
     boolean existsById(Long priorityID);
 
-    boolean findByName(String priorityName);
+    boolean existsByName(String priorityName);
 
     void update(EditPriorityRequest priorityRequest);
 }

@@ -55,7 +55,7 @@ public class PriorityController {
             return new ResponseEntity<>("Priority name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!priorityService.findByName(request.getPriorityName())){
+        if(!priorityService.existsByName(request.getPriorityName())){
             priorityService.update(request);
             return new ResponseEntity<>("Priority name edited", HttpStatus.OK);
         }
@@ -66,7 +66,7 @@ public class PriorityController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addPriority(@RequestBody @Valid AddPriorityRequest request){
-        if(!priorityService.findByName(request.getPriorityName())){
+        if(!priorityService.existsByName(request.getPriorityName())){
             priorityService.save(request);
             return new ResponseEntity<>("Priority added", HttpStatus.OK);
         }
