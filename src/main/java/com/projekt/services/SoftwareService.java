@@ -1,30 +1,28 @@
 package com.projekt.services;
 
 import com.projekt.models.Software;
+import com.projekt.payload.request.EditSoftwareRequest;
+import com.projekt.payload.request.AddSoftwareRequest;
+import com.projekt.payload.response.SoftwareResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public interface SoftwareService {
-    ArrayList<Software> loadAll();
+    List<Software> getAll();
 
-    Software loadById(Integer id);
+    Software loadById(Long id);
 
-    boolean exists(Integer id);
+    boolean existsById(Long id);
 
-    void delete(Integer id);
+    void delete(Long id);
 
-    void save(Software software);
+    void save(AddSoftwareRequest software);
 
-    ArrayList<Integer> softwareUseInTicket();
+    List<SoftwareResponse> getAllWithUseNumber();
 
-    ArrayList<Integer> softwareUseInKnowledgeBase();
+    void update(EditSoftwareRequest request);
 
-    ArrayList<Integer> softwareUseInTicket(ArrayList<Software> software);
-
-    ArrayList<Integer> softwareUseInKnowledgeBase(ArrayList<Software> software);
-
-    ArrayList<Software> searchSoftwareByNameDescription(String phrase);
-
+    boolean existsByName(String softwareName);
 }
