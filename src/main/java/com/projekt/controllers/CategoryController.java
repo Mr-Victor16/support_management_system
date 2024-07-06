@@ -2,8 +2,8 @@ package com.projekt.controllers;
 
 import com.projekt.payload.request.AddCategoryRequest;
 import com.projekt.payload.request.EditCategoryRequest;
+import com.projekt.repositories.TicketRepository;
 import com.projekt.services.CategoryService;
-import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,11 +16,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/category")
 public class CategoryController {
     private final CategoryService categoryService;
-    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
 
-    public CategoryController(CategoryService categoryService, TicketService ticketService) {
+    public CategoryController(CategoryService categoryService, TicketRepository ticketRepository) {
         this.categoryService = categoryService;
-        this.ticketService = ticketService;
+        this.ticketRepository = ticketRepository;
     }
 
     @GetMapping
@@ -81,7 +81,7 @@ public class CategoryController {
             return new ResponseEntity<>("No category found", HttpStatus.NOT_FOUND);
         }
 
-        if(!ticketService.existsByCategoryId(categoryID)){
+        if(!ticketRepository.existsByCategoriesId(categoryID)){
             categoryService.delete(categoryID);
             return new ResponseEntity<>("Category removed successfully", HttpStatus.OK);
         }

@@ -9,4 +9,6 @@ public interface KnowledgeRepository extends JpaRepository<Knowledge, Long> {
     Long countBySoftwareId(Long id);
 
     Knowledge findByTitle(String title);
+
+    boolean existsBySoftwareId(Long softwareID);
 }
