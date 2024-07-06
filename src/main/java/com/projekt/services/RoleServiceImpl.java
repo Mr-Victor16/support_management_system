@@ -4,7 +4,7 @@ import com.projekt.models.Role;
 import com.projekt.repositories.RoleRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Service("roleService")
 public class RoleServiceImpl implements RoleService{
@@ -15,18 +15,12 @@ public class RoleServiceImpl implements RoleService{
     }
 
     @Override
-    public ArrayList<Role> loadAll() {
-        return (ArrayList<Role>) roleRepository.findAll();
+    public List<Role> getAll() {
+        return roleRepository.findAll();
     }
 
     @Override
-    public Role loadById(int id) {
+    public Role getById(Long id) {
         return roleRepository.getReferenceById(id);
     }
-
-    @Override
-    public boolean existsByIdAndUsername(Integer idRole, String username) {
-        return roleRepository.existsByIdAndUsers_Username(idRole,username);
-    }
-
 }
