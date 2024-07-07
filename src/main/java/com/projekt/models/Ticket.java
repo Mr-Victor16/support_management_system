@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "tickets")
@@ -20,11 +19,10 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@NamedQuery(name = "Ticket.searchByStatus", query = "select t From Ticket t where t.status.statusID = ?1")
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Size(min = 5, max = 100)
     @NotBlank
@@ -36,7 +34,7 @@ public class Ticket {
     @Column(name = "ticket_description", nullable = false)
     private String description;
 
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ticket_ticket_id")
     private List<Image> images = new ArrayList<>();
 
@@ -44,8 +42,9 @@ public class Ticket {
     @Column(name = "ticket_date", nullable = false)
     private LocalDate date;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Category> categories;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "priorityID", nullable = false)
@@ -55,6 +54,8 @@ public class Ticket {
     @JoinColumn(name = "statusID", nullable = false)
     private Status status;
 
+    @Size(min = 1, max = 10)
+    @NotBlank
     private String version;
 
     @ManyToOne
@@ -64,5 +65,4 @@ public class Ticket {
     @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ticket_id")
     private List<TicketReply> ticketReplies = new ArrayList<>();
-
 }

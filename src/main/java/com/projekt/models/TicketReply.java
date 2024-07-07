@@ -20,10 +20,10 @@ import java.time.LocalDate;
 public class TicketReply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Size(min = 5, max = 500)
@@ -34,5 +34,4 @@ public class TicketReply {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "reply_date", nullable = false)
     private LocalDate date;
-
 }

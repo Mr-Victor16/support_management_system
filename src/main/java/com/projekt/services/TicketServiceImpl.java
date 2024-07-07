@@ -1,181 +1,167 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
-import com.projekt.repositories.TicketReplyRepository;
-import com.projekt.repositories.TicketRepository;
+import com.projekt.payload.request.AddTicketReply;
+import com.projekt.payload.request.AddTicketRequest;
+import com.projekt.payload.request.EditTicketRequest;
+import com.projekt.repositories.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service("ticketDetailsService")
 public class TicketServiceImpl implements TicketService{
     private final TicketRepository ticketRepository;
     private final UserService userService;
-    private final RoleService roleService;
-    private final ImageService imageService;
-    private final StatusService statusService;
     private final MailService mailService;
     private final TicketReplyRepository ticketReplyRepository;
+    private final UserRepository userRepository;
+    private final StatusRepository statusRepository;
+    private final CategoryRepository categoryRepository;
+    private final PriorityRepository priorityRepository;
+    private final SoftwareRepository softwareRepository;
 
-    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, RoleService roleService, ImageService imageService, StatusService statusService, MailService mailService, TicketReplyRepository ticketReplyRepository) {
+    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, MailService mailService, TicketReplyRepository ticketReplyRepository, UserRepository userRepository, StatusRepository statusRepository, CategoryRepository categoryRepository, PriorityRepository priorityRepository, SoftwareRepository softwareRepository) {
         this.ticketRepository = ticketRepository;
         this.userService = userService;
-        this.roleService = roleService;
-        this.imageService = imageService;
-        this.statusService = statusService;
         this.mailService = mailService;
         this.ticketReplyRepository = ticketReplyRepository;
+        this.userRepository = userRepository;
+        this.statusRepository = statusRepository;
+        this.categoryRepository = categoryRepository;
+        this.priorityRepository = priorityRepository;
+        this.softwareRepository = softwareRepository;
     }
 
     @Override
-    public ArrayList<Ticket> loadAll() {
-        return (ArrayList<Ticket>) ticketRepository.findAll();
+    public List<Ticket> getAll() {
+        return ticketRepository.findAll();
     }
 
     @Override
-    public Ticket loadById(Integer id) {
-        if(id == null || !ticketRepository.existsById(id)){
-            return new Ticket();
-        }
-
-        return ticketRepository.getReferenceById(id);
-    }
-
-    @Override
-    public boolean exists(Integer id) {
+    public boolean existsById(Long id) {
         return ticketRepository.existsById(id);
     }
 
-
     @Override
-    public Integer save(Ticket ticket, List<MultipartFile> multipartFile, String name) throws IOException {
-        if(ticket.getId() != null) {
-            ticket.setTicketReplies(ticketRepository.getReferenceById(ticket.getId()).getTicketReplies());
-
-            if(multipartFile.isEmpty() || multipartFile.get(0).getOriginalFilename().isEmpty()){
-                ticket.setImages(ticketRepository.getReferenceById(ticket.getId()).getImages());
-            }else{
-                ticket.setImages(imageService.save(multipartFile,ticketRepository.getReferenceById(ticket.getId()).getImages()));
-            }
-        }else{
-            if(!multipartFile.isEmpty() && !multipartFile.get(0).getOriginalFilename().isEmpty()){
-                ticket.setImages(imageService.save(multipartFile, null));
-            }
-        }
-
-        if(ticket.getDate() == null){
-            ticket.setDate(LocalDate.now());
-        }
-        if(ticket.getStatus() == null){
-            ticket.setStatus(statusService.loadById(1));
-        }
-//        if(ticket.getUser() == null){
-//            ticket.setUser(userService.findUserByUsername(name));
-//        }
-
-        Ticket ticket1 = ticketRepository.save(ticket);
-
-        return ticket1.getId();
+    public void delete(Long id) {
+        ticketRepository.deleteById(id);
     }
 
     @Override
-    public void delete(Integer id) {
-        if(ticketRepository.existsById(id)){
-            List<TicketReply> ticketReplyList = ticketRepository.getReferenceById(id).getTicketReplies();
-            List<Image> imageList = ticketRepository.getReferenceById(id).getImages();
+    public boolean isAuthorized(Long ticketID, String username){
+        if(userRepository.existsByUsernameAndRolesType(username, Role.Types.ROLE_OPERATOR)) return true;
 
-            ticketRepository.deleteById(id);
-            ticketReplyRepository.deleteAll(ticketReplyList);
-            imageService.deleteAll(imageList);
-        }
+        return (userService.findUserByUsername(username).getId() == userRepository.findByTicketsId(ticketID).getId());
     }
 
     @Override
-    public boolean isAuthorized(Integer id, String name){
-        if(ticketRepository.existsById(id)) {
-            if(roleService.existsByIdAndUsername(2,name)){
-                return true;
-            }
-
-            //return (userService.findUserByUsername(name).getId() == ticketRepository.getReferenceById(id).getUser().getId());
-        }
-        return false;
-    }
-
-    @Override
-    public Ticket loadTicketById(Integer id) {
+    public Ticket getById(Long id) {
         return ticketRepository.getReferenceById(id);
     }
 
     @Override
-    public ArrayList<Ticket> loadTicketsByUser(String name) {
-        return ticketRepository.findByUser_UsernameOrderByDateAsc(name);
+    public List<Ticket> getTicketsByUserId(Long id) {
+        return userRepository.getReferenceById(id).getTickets();
     }
 
     @Override
-    public void addReply(TicketReply ticketReply, Integer id) throws MessagingException {
-        Ticket ticket = ticketRepository.findById(id).get();
+    public void addReply(AddTicketReply request) throws MessagingException {
+        TicketReply ticketReply = new TicketReply();
+        ticketReply.setDate(LocalDate.now());
+        ticketReply.setUser(userRepository.getReferenceById(request.getUserID()));
+        ticketReplyRepository.save(ticketReply);
+
+        Ticket ticket = ticketRepository.getReferenceById(request.getTicketID());
         ticket.getTicketReplies().add(ticketReply);
 
-//        if(ticket.getUser().getId() != ticketReply.getUser().getId()){
-//            mailService.sendTicketReplyMessage(ticket.getUser().getEmail(),ticket.getTitle());
-//        }
+        User user = userRepository.findByTicketsId(request.getTicketID());
+
+        if(user.getId() != request.getUserID()){
+            mailService.sendTicketReplyMessage(user.getEmail(), ticket.getTitle());
+        }
 
         ticketRepository.save(ticket);
     }
 
     @Override
-    public void changeStatus(Integer id, Status status) throws MessagingException {
-        Ticket ticket = ticketRepository.getReferenceById(id);
+    public void changeStatus(Long ticketID, Long statusID) throws MessagingException {
+        Status status = statusRepository.getReferenceById(statusID);
+
+        Ticket ticket = ticketRepository.getReferenceById(ticketID);
         ticket.setStatus(status);
-//        mailService.sendChangeStatusMessage(ticket.getUser().getId(), ticket.getTitle(), status.getName());
+
+        User user = userRepository.findByTicketsId(ticketID);
+        mailService.sendChangeStatusMessage(user.getId(), ticket.getTitle(), status.getName());
+
         ticketRepository.save(ticket);
     }
 
     @Override
-    public ArrayList<Ticket> searchByPhrase(String phrase) {
-        return ticketRepository.searchByPhrase(phrase);
+    public Ticket findByImageId(Long imageID) {
+        return ticketRepository.findByImagesImageID(imageID);
     }
 
     @Override
-    public ArrayList<Ticket> searchByDate(LocalDate date1, LocalDate date2) {
-        return ticketRepository.searchByDate(date1,date2);
+    public void add(AddTicketRequest request) {
+        Ticket ticket = new Ticket();
+        ticket.setTitle(request.getTitle());
+        ticket.setDescription(request.getDescription());
+
+        List<Image> images = request.getMultipartFiles().stream()
+                .map(file -> {
+                    try {
+                        return new Image(file.getOriginalFilename(), file.getBytes());
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to process file", e);
+                    }
+                })
+                .collect(Collectors.toList());
+        ticket.setImages(images);
+
+        ticket.setDate(LocalDate.now());
+        ticket.setCategory(categoryRepository.getReferenceById(request.getCategoryID()));
+        ticket.setPriority(priorityRepository.getReferenceById(request.getPriorityID()));
+        ticket.setStatus(statusRepository.getReferenceById(request.getStatusID()));
+        ticket.setVersion(request.getVersion());
+        ticket.setSoftware(softwareRepository.getReferenceById(request.getSoftwareID()));
+
+        ticketRepository.save(ticket);
     }
 
     @Override
-    public ArrayList<Ticket> searchBySoftware(Software software) {
-        return ticketRepository.searchBySoftware(software.getId());
+    public void update(EditTicketRequest request) {
+        Ticket ticket = ticketRepository.getReferenceById(request.getTicketID());
+        ticket.setTitle(request.getTitle());
+        ticket.setDescription(request.getDescription());
+        ticket.setCategory(categoryRepository.getReferenceById(request.getCategoryID()));
+        ticket.setPriority(priorityRepository.getReferenceById(request.getPriorityID()));
+        ticket.setVersion(request.getVersion());
+        ticket.setSoftware(softwareRepository.getReferenceById(request.getSoftwareID()));
+
+        ticketRepository.save(ticket);
     }
 
     @Override
-    public ArrayList<Ticket> searchByStatus(Status status) {
-        return ticketRepository.searchByStatus(status.getId());
+    public void addImage(Long ticketID, MultipartFile file) throws IOException {
+        Ticket ticket = ticketRepository.getReferenceById(ticketID);
+        ticket.getImages().add(new Image(file.getOriginalFilename(), file.getBytes()));
+
+        ticketRepository.save(ticket);
     }
 
     @Override
-    public ArrayList<Ticket> searchByPriority(Priority priority) {
-        return ticketRepository.searchByPriority(priority.getId());
-    }
+    public boolean entitiesExist(Long categoryID, Long statusID, Long priorityID, Long softwareID) {
+        boolean categoryExists = categoryRepository.existsById(categoryID);
+        boolean statusExists = statusRepository.existsById(statusID);
+        boolean priorityExists = priorityRepository.existsById(priorityID);
+        boolean softwareExists = softwareRepository.existsById(softwareID);
 
-    @Override
-    public ArrayList<Ticket> searchByVersion(String version) {
-        return ticketRepository.searchByVersion(version);
+        return categoryExists && priorityExists && statusExists && softwareExists;
     }
-
-    @Override
-    public ArrayList<Ticket> searchByCategory(Set<Category> categories) {
-        return ticketRepository.findDistinctByCategoriesIn(categories);
-    }
-
-    @Override
-    public ArrayList<Ticket> searchByReplyNumber(int number1, int number2) {
-        return ticketRepository.searchByReplyNumber(number1, number2);
-    }
-
 }

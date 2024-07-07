@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.Base64;
 
 import jakarta.persistence.*;
 
@@ -17,16 +16,17 @@ import jakarta.persistence.*;
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer imageID;
+    private Long imageID;
 
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
     @Lob
-    @Column(columnDefinition="BLOB", nullable = false)
+    @Column(columnDefinition="MEDIUMBLOB", nullable = false)
     private byte[] fileContent;
 
-    public String getB64Content(){
-        return Base64.getEncoder().encodeToString(this.fileContent);
+    public Image(String fileName, byte[] fileContent) {
+        this.fileName = fileName;
+        this.fileContent = fileContent;
     }
 }

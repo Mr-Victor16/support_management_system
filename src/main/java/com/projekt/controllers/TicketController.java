@@ -1,194 +1,165 @@
 package com.projekt.controllers;
 
-import com.projekt.models.*;
+import com.projekt.payload.request.AddTicketReply;
+import com.projekt.payload.request.AddTicketRequest;
+import com.projekt.payload.request.ChangeTicketStatus;
+import com.projekt.payload.request.EditTicketRequest;
 import com.projekt.services.*;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
 
-@Controller
+@CrossOrigin(origins = "*", maxAge = 3600)
+@RestController
+@RequestMapping("/api/ticket")
 public class TicketController {
     private final TicketService ticketService;
     private final TicketReplyService ticketReplyService;
-    private final StatusService statusService;
-    private final PriorityService priorityService;
-    private final CategoryService categoryService;
-    private final SoftwareService softwareService;
     private final ImageService imageService;
-    private final UserService userService;
+    private final StatusService statusService;
 
-    public TicketController(TicketService ticketService, TicketReplyService ticketReplyService, StatusService statusService, PriorityService priorityService, CategoryService categoryService, SoftwareService softwareService, ImageService imageService, UserService userService) {
+    public TicketController(TicketService ticketService, TicketReplyService ticketReplyService, ImageService imageService, StatusService statusService) {
         this.ticketService = ticketService;
         this.ticketReplyService = ticketReplyService;
-        this.statusService = statusService;
-        this.priorityService = priorityService;
-        this.categoryService = categoryService;
-        this.softwareService = softwareService;
         this.imageService = imageService;
-        this.userService = userService;
+        this.statusService = statusService;
     }
 
-    @GetMapping("/tickets")
-    public String showTicketList(Model model){
-        model.addAttribute("ticket", ticketService.loadAll());
-        model.addAttribute("search", new Search());
-        return "ticket/showList";
-    }
-
-    @GetMapping("/my-tickets")
-    public String showMyTicketsList(Model model, Principal principal){
-        model.addAttribute("ticket", ticketService.loadTicketsByUser(principal.getName()));
-        model.addAttribute("search", new Search());
-        return "ticket/showList";
-    }
-
-    @GetMapping("/ticket/{id}")
-    public String showTicket(@PathVariable(name = "id", required = false) Integer id, Model model, Principal principal){
-        if(ticketService.isAuthorized(id, principal.getName())){
-            model.addAttribute("ticket", ticketService.loadTicketById(id));
-            model.addAttribute("ticketReply", new TicketReply());
-            model.addAttribute("status", new Status());
-
-            return "ticket/showItem";
-        }else{
-            model.addAttribute("ticket", ticketService.loadTicketsByUser(principal.getName()));
-            model.addAttribute("search", new Search());
-            return "ticket/showList";
+    @GetMapping("{ticketID}")
+    public ResponseEntity<?> getTicketById(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
+        if(!ticketService.existsById(ticketID)){
+            return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
         }
-    }
 
-    @GetMapping({"/tickets/edit/{id}","/ticket/add"})
-    public String showTicketForm(@PathVariable(name = "id", required = false) Integer id, Model model, Principal principal){
-        model.addAttribute("ticket", ticketService.loadById(id));
-
-        if(id == null || !ticketService.exists(id)){
-            model.addAttribute("user", userService.findUserByUsername(principal.getName()).getId());
-            return "ticket/showAddForm";
+        if(ticketService.isAuthorized(ticketID, principal.getName())){
+            return ResponseEntity.ok(ticketService.getById(ticketID));
         }
-        return "ticket/showEditForm";
+
+        return new ResponseEntity<>("You don't have access rights to this resource", HttpStatus.FORBIDDEN);
     }
 
-    @PostMapping(value = {"/tickets/edit/{id}","/ticket/add"})
-    public String processTicketForm(@Valid @ModelAttribute(name = "ticket") Ticket ticket, BindingResult bindingResult,
-                                    @PathVariable(name = "id", required = false) Integer id, Model model,
-                                    List<MultipartFile> multipartFile, Principal principal) throws IOException {
-        if(bindingResult.hasErrors()){
-            if(id == null){
-                return "ticket/showAddForm";
+    @PostMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> addTicket(@RequestBody @Valid AddTicketRequest request){
+        if(!ticketService.entitiesExist(request.getCategoryID(), request.getStatusID(), request.getPriorityID(), request.getSoftwareID())){
+            return new ResponseEntity<>("One or more entities do not exist", HttpStatus.NOT_FOUND);
+        }
+
+        ticketService.add(request);
+        return new ResponseEntity<>("Ticket added", HttpStatus.OK);
+    }
+
+    @PutMapping
+    public ResponseEntity<?> updateTicket(@RequestBody @Valid EditTicketRequest request, Principal principal) {
+        if(!ticketService.existsById(request.getTicketID())){
+            return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
+        }
+
+        if(ticketService.isAuthorized(request.getTicketID(), principal.getName())){
+            ticketService.update(request);
+            return ResponseEntity.ok("Ticket details changed successfully");
+        }
+
+        return new ResponseEntity<>("You have no rights to update this resource", HttpStatus.FORBIDDEN);
+    }
+
+    @PostMapping("{ticketID}/image")
+    public ResponseEntity<?> addImage(@PathVariable("ticketID") Long ticketID, @RequestBody MultipartFile file, Principal principal) {
+        try {
+            if (!ticketService.existsById(ticketID)) {
+                return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
             }
-            return "ticket/showEditForm";
+
+            if (ticketService.isAuthorized(ticketID, principal.getName())) {
+                ticketService.addImage(ticketID, file);
+                return ResponseEntity.ok("Image added successfully");
+            }
+
+            return new ResponseEntity<>("You have no rights to add image to this ticket", HttpStatus.FORBIDDEN);
+        } catch (IOException e) {
+            return new ResponseEntity<>("Error occurred while processing the image", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/image/{imageID}")
+    public ResponseEntity<?> deleteImage(@PathVariable(name = "imageID", required = false) Long imageID, Principal principal) {
+        if(!imageService.existsById(imageID)){
+            return new ResponseEntity<>("Image not found", HttpStatus.NOT_FOUND);
         }
 
-        Integer idTicket = ticketService.save(ticket, multipartFile, principal.getName());
-
-        model.addAttribute("ticket", ticketService.loadTicketById(idTicket));
-        model.addAttribute("ticketReply", new TicketReply());
-        model.addAttribute("status", new Status());
-        return "ticket/showItem";
-    }
-
-    @Secured("ROLE_OPERATOR")
-    @GetMapping("/tickets/{tID}/delete-image/{id}")
-    public String deleteImage(@PathVariable(name = "tID", required = false) Integer ticketID,
-            @PathVariable(name = "id", required = false) Integer imageID, Model model){
-        imageService.delete(imageID);
-
-        model.addAttribute("ticket", ticketService.loadById(ticketID));
-        return "ticket/showEditForm";
-    }
-
-    @PostMapping("/ticket/reply/{id}")
-    public String processAddReplyForm(@Valid @ModelAttribute(name = "ticketReply") TicketReply ticketReply, BindingResult bindingResult,
-                                      @PathVariable(name = "id", required = false) Integer id, Model model, Principal principal) throws MessagingException {
-        if(bindingResult.hasErrors()){
-            model.addAttribute("ticket", ticketService.loadTicketById(id));
-            return "ticket/showItem";
+        if(ticketService.isAuthorized(ticketService.findByImageId(imageID).getId(), principal.getName())){
+            imageService.deleteById(imageID);
+            return new ResponseEntity<>("Image removed successfully", HttpStatus.OK);
         }
 
-        ticketReplyService.save(ticketReply, principal.getName(), id);
-
-        model.addAttribute("ticket", ticketService.loadTicketById(id));
-        model.addAttribute("ticketReply", new TicketReply());
-        return "ticket/showItem";
+        return new ResponseEntity<>("You have no rights to delete this resource", HttpStatus.FORBIDDEN);
     }
 
-    @PostMapping("/tickets/status/{id}")
-    public String changeTicketStatus(@PathVariable(name = "id", required = false) Integer id, Model model,
-                                     @ModelAttribute(name = "status") Status status) throws MessagingException {
+    @PostMapping("/reply")
+    public ResponseEntity<?> addTicketReply(@RequestBody @Valid AddTicketReply request, Principal principal) {
+        try {
+            if(!ticketService.existsById(request.getTicketID())){
+                return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
+            }
 
-        ticketService.changeStatus(id, status);
-        model.addAttribute("ticket", ticketService.loadAll());
-        model.addAttribute("search", new Search());
-        return "ticket/showList";
+            if(ticketService.isAuthorized(request.getTicketID(), principal.getName())){
+                ticketService.addReply(request);
+                return ResponseEntity.ok("Ticket reply added successfully");
+            }
+
+            return new ResponseEntity<>("You have no rights to add reply to this ticket", HttpStatus.FORBIDDEN);
+        } catch (MessagingException e) {
+            return new ResponseEntity<>("Error occurred while sending notification", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/status")
+    @PreAuthorize("hasRole('OPERATOR')")
+    public ResponseEntity<?> changeTicketStatus(@RequestBody @Valid ChangeTicketStatus request) {
+        try {
+            if (!ticketService.existsById(request.getTicketID())) {
+                return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
+            }
+
+            if (!statusService.existsById(request.getStatusID())) {
+                return new ResponseEntity<>("Status not found", HttpStatus.NOT_FOUND);
+            }
+
+            ticketService.changeStatus(request.getTicketID(), request.getStatusID());
+            return ResponseEntity.ok("Ticket status changed successfully");
+        } catch (MessagingException e) {
+            return new ResponseEntity<>("Error occurred while sending notification", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Transactional
-    @GetMapping("/tickets/delete/{id}")
-    public String deleteTicket(@PathVariable(name = "id", required = false) Integer id, Model model, Principal principal){
-        if(ticketService.isAuthorized(id,principal.getName())){
-            ticketService.delete(id);
+    @DeleteMapping("{ticketID}")
+    public ResponseEntity<?> deleteTicket(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
+        if(ticketService.isAuthorized(ticketID,principal.getName())){
+            ticketService.delete(ticketID);
+            return new ResponseEntity<>("Ticket removed successfully", HttpStatus.OK);
         }
 
-        model.addAttribute("ticket", ticketService.loadAll());
-        model.addAttribute("search", new Search());
-        return "ticket/showList";
+        return new ResponseEntity<>("You have no rights to delete this resource", HttpStatus.FORBIDDEN);
     }
 
-    @Secured("ROLE_OPERATOR")
-    @GetMapping("/tickets/{tID}/delete-reply/{id}")
-    public String deleteReply(@PathVariable(name = "tID", required = false) Integer ticketID,
-                              @PathVariable(name = "id", required = false) Integer replyID,
-                              Model model){
-
-        if(ticketService.exists(ticketID) && ticketReplyService.exists(replyID)){
+    @DeleteMapping("/reply/{replyID}")
+    @PreAuthorize("hasRole('OPERATOR')")
+    public ResponseEntity<?> deleteReply(@PathVariable(name = "replyID", required = false) Long replyID) {
+        if(ticketReplyService.existsById(replyID)){
             ticketReplyService.deleteById(replyID);
-
-            model.addAttribute("ticket", ticketService.loadTicketById(ticketID));
-            model.addAttribute("ticketReply", new TicketReply());
-            model.addAttribute("status", new Status());
-
-            return "ticket/showItem";
-        }else{
-            model.addAttribute("ticket", ticketService.loadAll());
-            model.addAttribute("search", new Search());
-            return "ticket/showList";
+            return new ResponseEntity<>("Ticket reply removed successfully", HttpStatus.OK);
         }
-    }
 
-    @ModelAttribute("statusList")
-    public ArrayList<Status> loadStatus(){
-        return statusService.loadAll();
+        return new ResponseEntity<>("Ticket reply not found", HttpStatus.NOT_FOUND);
     }
-
-    @ModelAttribute("priorityList")
-    public ArrayList<Priority> loadPriority(){
-        return priorityService.loadAll();
-    }
-
-    @ModelAttribute("categoryList")
-    public ArrayList<Category> loadCategory(){
-        return categoryService.loadAll();
-    }
-
-    @ModelAttribute("softwareList")
-    public ArrayList<Software> loadSoftware(){
-        return softwareService.loadAll();
-    }
-
-    @ModelAttribute("usersList")
-    public ArrayList<User> loadUser(){
-        return userService.loadAll();
-    }
-
 }
