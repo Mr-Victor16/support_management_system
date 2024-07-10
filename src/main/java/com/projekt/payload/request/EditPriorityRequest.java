@@ -15,7 +15,7 @@ import lombok.Setter;
 public class EditPriorityRequest {
     private Long priorityId;
 
-    @Size(min = 4, max = 20)
+    @Size(min = 3, max = 20)
     @NotBlank
     private String priorityName;
 

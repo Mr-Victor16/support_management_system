@@ -38,5 +38,7 @@ public interface TicketService {
 
     void addImage(Long ticketID, MultipartFile file) throws IOException;
 
+    boolean existsByCategoryId(Long categoryID);
+
     boolean entitiesExist(Long categoryID, Long statusID, Long priorityID, Long softwareID);
 }

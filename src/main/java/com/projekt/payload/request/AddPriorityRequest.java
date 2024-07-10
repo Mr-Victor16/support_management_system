@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddPriorityRequest {
-    @Size(min = 4, max = 20)
+    @Size(min = 3, max = 20)
     @NotBlank
     private String priorityName;
 

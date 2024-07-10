@@ -63,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService{
                 .map(category -> new CategoryResponse(
                         category.getId(),
                         category.getName(),
-                        ticketRepository.countByCategoriesId(category.getId())
+                        ticketRepository.countByCategoryId(category.getId())
                 ))
                 .collect(Collectors.toList());
     }

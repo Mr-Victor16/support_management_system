@@ -22,7 +22,7 @@ public class Priority {
     private Long id;
 
     @NotBlank
-    @Size(min = 4, max = 20)
+    @Size(min = 3, max = 20)
     @Column(name = "priority_name", nullable = false)
     private String name;
 

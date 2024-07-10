@@ -82,91 +82,89 @@ public class RepositoryInitializer {
                 Software software = new Software();
                 software.setId(1L);
                 software.setName("Steam");
-                software.setDescription("Platforma dystrybucji cyfrowej i zarządzania prawami cyfrowymi, system gry wieloosobowej oraz serwis społecznościowy stworzony przez Valve Corporation");
+                software.setDescription("Digital distribution and rights management platform, multiplayer game system and social network created by Valve Corporation");
                 softwareRepository.save(software);
 
                 Software software1 = new Software();
                 software1.setId(2L);
                 software1.setName("Origin");
-                software1.setDescription("Platforma firmy Electronic Arts pełniąca funkcję sklepu z grami w wersji cyfrowej oraz systemu kontroli dostępu do danych w formie cyfrowej.");
+                software1.setDescription("A platform from Electronic Arts that acts as a digital game shop and digital access control system.");
                 softwareRepository.save(software1);
 
                 Software software2 = new Software();
                 software2.setId(3L);
                 software2.setName("GOG");
-                software2.setDescription("Serwis cyfrowej dystrybucji gier komputerowych, stworzony w 2008 roku przez polską firmę CDP Investment sp. z o.o.");
+                software2.setDescription("Digital distribution service for computer games, created in 2008 by the Polish company CDP Investment sp. z o.o.");
                 softwareRepository.save(software2);
 
                 Knowledge knowledge = new Knowledge();
-                knowledge.setId(1);
-                knowledge.setTitle("Co to jest Steam?");
+                knowledge.setId(1L);
+                knowledge.setTitle("What is Steam?");
                 knowledge.setContent(software.getDescription());
                 knowledge.setDate(LocalDate.now());
                 knowledge.setSoftware(softwareRepository.getReferenceById(1L));
                 knowledgeRepository.save(knowledge);
 
                 Knowledge knowledge1 = new Knowledge();
-                knowledge1.setId(2);
-                knowledge1.setTitle("Co to jest Origin?");
+                knowledge1.setId(2L);
+                knowledge1.setTitle("What is Origin?");
                 knowledge1.setContent(software2.getDescription());
                 knowledge1.setDate(LocalDate.of(2022,1,15));
                 knowledge1.setSoftware(softwareRepository.getReferenceById(2L));
                 knowledgeRepository.save(knowledge1);
 
                 Knowledge knowledge2 = new Knowledge();
-                knowledge2.setId(3);
-                knowledge2.setTitle("Kiedy powstał Steam?");
-                knowledge2.setContent("Platformę zaczęto rozwijać w 2002 roku. Finalną wersję klienta Steam wydano 12 września 2003.");
+                knowledge2.setId(3L);
+                knowledge2.setTitle("When was Steam created?");
+                knowledge2.setContent("The platform began development in 2002. The final version of the Steam client was released on 12 September 2003.");
                 knowledge2.setDate(LocalDate.of(2022,1,10));
                 knowledge2.setSoftware(softwareRepository.getReferenceById(1L));
                 knowledgeRepository.save(knowledge2);
             }
 
             if(categoryRepository.findAll().isEmpty()){
-                categoryRepository.save(new Category(1, "Ogólne"));
-                categoryRepository.save(new Category(2, "Pytanie"));
-                categoryRepository.save(new Category(3, "Błąd"));
-                categoryRepository.save(new Category(4, "Sugestia"));
+                categoryRepository.save(new Category(1L, "General"));
+                categoryRepository.save(new Category(2L, "Question"));
+                categoryRepository.save(new Category(3L, "Bug"));
+                categoryRepository.save(new Category(4L, "Suggestion"));
             }
 
             if(priorityRepository.findAll().isEmpty()){
-                priorityRepository.save(new Priority(1,"Wysoki",1));
-                priorityRepository.save(new Priority(2, "Normalny",2));
-                priorityRepository.save(new Priority(3,"Niski", 5));
+                priorityRepository.save(new Priority(1L,"High",1));
+                priorityRepository.save(new Priority(2L, "Normal",2));
+                priorityRepository.save(new Priority(3L,"Low", 5));
             }
 
             if(statusRepository.findAll().isEmpty()){
-                statusRepository.save(new Status(1,"Nowe",false));
-                statusRepository.save(new Status(2, "W realizacji", false));
-                statusRepository.save(new Status(3,"Zamknięte", true));
+                statusRepository.save(new Status(1L,"New",false));
+                statusRepository.save(new Status(2L, "In progress", false));
+                statusRepository.save(new Status(3L,"Closed", true));
             }
 
             if(ticketReplyRepository.findAll().isEmpty() && ticketRepository.findAll().isEmpty() && imageRepository.findAll().isEmpty()){
                 Ticket ticket = new Ticket();
-                ticket.setId(1);
+                ticket.setId(1L);
                 ticket.setDate(LocalDate.of(2021,12,10));
-                ticket.setTitle("Witryna jest nieosiągalna");
-                ticket.setStatus(statusRepository.getReferenceById(1));
-                ticket.setPriority(priorityRepository.getReferenceById(2));
-                ticket.setDescription("Podczas próby wejścia na wskazaną na zrzucie ekranu podstronę, otrzymuję błąd - Ta witryna jest nieosiągalna :(");
+                ticket.setTitle("The website is unreachable");
+                ticket.setStatus(statusRepository.getReferenceById(1L));
+                ticket.setPriority(priorityRepository.getReferenceById(2L));
+                ticket.setDescription("When trying to enter the site, I get an error - This site is unreachable :(");
 
-                User user = userRepository.getReferenceById(1);
+                User user = userRepository.getReferenceById(1L);
                 user.setTickets(List.of(ticket));
 
-                Set<Category> categorySet = new HashSet<>();
-                categorySet.add(categoryRepository.getReferenceById(1));
-                ticket.setCategories(categorySet);
+                ticket.setCategory(categoryRepository.getReferenceById(1L));
 
                 BufferedImage bi = ImageIO.read(new File("src/main/resources/images/1.png"));
-                Image image = new Image(1,"1.png",toByteArray(bi, "png"));
+                Image image = new Image(1L,"1.png",toByteArray(bi, "png"));
                 imageRepository.save(image);
 
                 List<Image> imageList = new ArrayList<>();
                 imageList.add(image);
                 ticket.setImages(imageList);
 
-                TicketReply ticketReply = new TicketReply(1,userRepository.getReferenceById(2),"Sprawdzałeś, czy dobrze wpisujesz adres?", LocalDate.of(2021,12,11));
-                TicketReply ticketReply1 = new TicketReply(2, userRepository.getReferenceById(1), "Tak, jest poprawny", LocalDate.of(2021,12,12));
+                TicketReply ticketReply = new TicketReply(1L,userRepository.getReferenceById(2L),"Have you checked that you have entered the correct address?", LocalDate.of(2021,12,11));
+                TicketReply ticketReply1 = new TicketReply(2L, userRepository.getReferenceById(1L), "Yes, it is correct", LocalDate.of(2021,12,12));
                 ticketReplyRepository.save(ticketReply);
                 ticketReplyRepository.save(ticketReply1);
 
@@ -181,9 +179,9 @@ public class RepositoryInitializer {
     }
 
     public static byte[] toByteArray(BufferedImage bi, String format) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bi, format, baos);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(bi, format, stream);
 
-        return baos.toByteArray();
+        return stream.toByteArray();
     }
 }

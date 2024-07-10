@@ -156,6 +156,11 @@ public class TicketServiceImpl implements TicketService{
     }
 
     @Override
+    public boolean existsByCategoryId(Long categoryID) {
+        return ticketRepository.existsByCategoryId(categoryID);
+    }
+
+    @Override
     public boolean entitiesExist(Long categoryID, Long statusID, Long priorityID, Long softwareID) {
         boolean categoryExists = categoryRepository.existsById(categoryID);
         boolean statusExists = statusRepository.existsById(statusID);
