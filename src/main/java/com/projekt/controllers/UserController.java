@@ -1,174 +1,86 @@
 package com.projekt.controllers;
 
-import com.projekt.Validators.UserValidator;
-import com.projekt.models.Role;
-import com.projekt.models.Search;
-import com.projekt.models.User;
-import com.projekt.services.RoleService;
+import com.projekt.payload.request.AddUserRequest;
+import com.projekt.payload.request.EditUserRequest;
+import com.projekt.validators.UserValidator;
 import com.projekt.services.UserService;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.security.Principal;
-import java.util.ArrayList;
 
-@Controller
+@CrossOrigin(origins = "*", maxAge = 3600)
+@RestController
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
-    private final RoleService roleService;
 
-    public UserController(UserService userService, RoleService roleService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.roleService = roleService;
     }
 
-    @GetMapping("/register")
-    public String showRegisterForm(Model model){
-        model.addAttribute("user", new User());
-        return "register";
+    @GetMapping("{userID}")
+    @PreAuthorize("hasRole('OPERATOR')")
+    public ResponseEntity<?> getUser(@PathVariable(name = "userID", required = false) Long userID){
+        if (!userService.exists(userID)) {
+            return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
+        }
+
+        return ResponseEntity.ok(userService.loadById(userID));
     }
 
-    @PostMapping("/register")
-    public String processRegisterForm(@Valid @ModelAttribute(name = "user") User user, BindingResult result, Model model){
-        if(result.hasErrors()){
-            return "register";
+    @PostMapping
+    @PreAuthorize("hasRole('OPERATOR')")
+    public ResponseEntity<?> addUser(@RequestBody @Valid AddUserRequest request){
+        if (userService.existsByUsername(request.getUsername()) || userService.existsByEmail(request.getEmail())){
+            return new ResponseEntity<>("Username or Email already exists", HttpStatus.CONFLICT);
+        }
+
+        userService.addUser(request);
+        return new ResponseEntity<>("User added", HttpStatus.OK);
+    }
+
+    @PutMapping
+    @PreAuthorize("hasRole('OPERATOR')")
+    public ResponseEntity<?> editUser(@RequestBody @Valid EditUserRequest request){
+        if (!userService.exists(request.getId())) {
+            return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }
 
         try {
-            userService.saveUser(user, true, false,false);
-        } catch (Exception exception){
-            model.addAttribute("errorEmailOrUsername",true);
-            return "register";
+            userService.editUser(request);
+            return new ResponseEntity<>("User edited", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Username or Email already exists", HttpStatus.CONFLICT);
         }
-
-        return "login";
     }
 
-    @GetMapping({"/user/add", "/user/edit/{id}"})
-    public String showUserForm(@PathVariable(name = "id", required = false) Integer id, Model model){
-        model.addAttribute("user", userService.loadById(id));
-
-        if(id == null || !userService.exists(id)){
-            return "user/showAddForm";
-        }
-        return "user/showEditForm";
+    @GetMapping
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    public ResponseEntity<?> getAllUsers(){
+        return ResponseEntity.ok(userService.loadAll());
     }
 
-    @PostMapping("/user/add")
-    public String processUserAddForm(@Valid @ModelAttribute(name = "user") User user, BindingResult result, Model model){
-        if(result.hasErrors()){
-            return "user/showAddForm";
-        }
-
-        try {
-            userService.saveUser(user,true,true,true);
-        } catch (Exception exception){
-            model.addAttribute("errorEmailOrUsername",true);
-            return "user/showAddForm";
-        }
-
-        model.addAttribute("user", userService.loadAll());
-        model.addAttribute("search", new Search());
-        return "user/showList";
-    }
-
-    @PostMapping("/user/edit/{id}")
-    public String processUserForm(@Valid @ModelAttribute(name = "user") User user, BindingResult result,
-                                @PathVariable(name = "id", required = false) Integer id, Model model){
-        if(result.hasErrors()){
-            return "user/showEditForm";
-        }
-
-        try {
-            userService.editUser(user);
-        } catch (Exception exception){
-            model.addAttribute("errorEmailOrUsername",true);
-            return "user/showEditForm";
-        }
-
-        model.addAttribute("user", userService.loadAll());
-        model.addAttribute("search", new Search());
-        return "user/showList";
-    }
-
-    @GetMapping("/user")
-    public String showUserList(Model model){
-        model.addAttribute("user", userService.loadAll());
-        model.addAttribute("search", new Search());
-        return "user/showList";
-    }
-
-    @GetMapping("/profile")
-    public String showProfileInfo(Model model, Principal principal){
-        model.addAttribute("user", userService.findUserByUsername(principal.getName()));
-        return "user/profile";
-    }
-
-    @GetMapping("/profile/edit/{id}")
-    public String showEditProfileForm(Model model, @PathVariable(name = "id", required = false) Integer id, Principal principal){
-        if(userService.permit(id,principal.getName())){
-            model.addAttribute("user", userService.loadById(id));
-            return "user/editProfile";
-        }
-
-        model.addAttribute("user", userService.findUserByUsername(principal.getName()));
-        return "user/profile";
-    }
-
-    @PostMapping("/profile/edit/{id}")
-    public String processEditProfile(@Valid @ModelAttribute(name = "user") User user, BindingResult result,
-                                     @PathVariable(name = "id", required = false) Integer id, Model model, Principal principal){
-        if(result.hasErrors()){
-            return "user/editProfile";
-        }
-
-        try {
-            userService.editUser(user);
-        } catch (Exception exception){
-            model.addAttribute("errorEmailOrUsername",true);
-            return "user/editProfile";
-        }
-
-        model.addAttribute("user", userService.findUserByUsername(principal.getName()));
-        return "user/profile";
-    }
-
-    @Transactional
-    @GetMapping("/user/delete/{id}")
-    public String deleteUser(@PathVariable(name = "id", required = false) Integer id, Model model){
-        userService.delete(id);
-
-        model.addAttribute("user", userService.loadAll());
-        model.addAttribute("search", new Search());
-        return "user/showList";
-    }
-
-    @GetMapping("/activate/{userID}")
-    public String activateUser(@PathVariable(name = "userID", required = false) Integer userID, Model model){
-        if(userService.exists(userID)){
-            if(userService.activate(userID)){
-                model.addAttribute("success", true);
-            }else{
-                model.addAttribute("success", false);
+    @DeleteMapping("{userID}")
+    @PreAuthorize("hasRole('OPERATOR')")
+    public ResponseEntity<?> deleteUser(@PathVariable("userID") Long userID){
+        if(userID != 1) {
+            if (userService.exists(userID)) {
+                userService.delete(userID);
+                return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
             }
-            return "user/activation";
-        }else{
-            return "index";
+        } else {
+            return new ResponseEntity<>("Default administrator account cannot be deleted", HttpStatus.FORBIDDEN);
         }
+
+        return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
     }
 
     @InitBinder("user")
     public void initBinder(WebDataBinder binder){
         binder.addValidators(new UserValidator());
-    }
-
-    @ModelAttribute("rolesList")
-    public ArrayList<Role> loadUser(){
-        return roleService.loadAll();
     }
 }

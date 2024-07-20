@@ -1,7 +1,7 @@
 package com.projekt.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.projekt.Validators.FirstCharacterConstraint;
+import com.projekt.validators.FirstCharacterConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +28,7 @@ import java.util.Set;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Size(min = 2, max = 36)
     @NotBlank
@@ -38,9 +38,6 @@ public class User {
     @NotBlank
     @JsonIgnore
     private String password;
-
-    @Transient
-    private String passwordConfirm;
 
     @Email
     @NotEmpty
@@ -70,18 +67,8 @@ public class User {
     @JoinColumn(name = "user_id")
     private List<Ticket> tickets = new ArrayList<>();
 
-    public User(String username){
-        this(username, false);
-    }
-
     public User(String username, boolean enabled){
         this.username = username;
         this.enabled = enabled;
-    }
-
-    public User(String username, String password, String passwordConfirm){
-        this.username = username;
-        this.password = password;
-        this.passwordConfirm = passwordConfirm;
     }
 }

@@ -1,4 +1,4 @@
-package com.projekt.Validators;
+package com.projekt.validators;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

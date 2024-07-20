@@ -1,35 +1,44 @@
 package com.projekt.services;
 
 import com.projekt.models.User;
+import com.projekt.payload.request.*;
+import com.projekt.payload.response.LoginResponse;
+import com.projekt.payload.response.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
-import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public interface UserService extends UserDetailsService {
-    void saveUser(User user, boolean mail, boolean admin, boolean enabled) throws MessagingException;
-
     User findUserByUsername(String name);
 
-    ArrayList<User> loadAll();
+    List<UserDetails> loadAll();
 
-    boolean exists(Integer id);
+    boolean exists(Long id);
 
-    User loadById(Integer id);
+    UserDetails loadById(Long id);
 
-    void editUser(User user);
+    void editUser(EditUserRequest request) throws Exception;
 
-    boolean permit(Integer id, String name);
+    void delete(Long id);
 
-    void delete(Integer id);
+    void activate(Long userID);
 
-    ArrayList<User> searchUserByNameSurnameUsername(String phrase);
+    boolean existsByUsername(String username);
 
-    ArrayList<User> searchUserByEmail(String email);
+    boolean existsByEmail(String email);
 
-    ArrayList<User> searchUserByRole(Integer id);
+    void register(RegisterRequest request) throws MessagingException;
 
-    boolean activate(Integer userID);
+    LoginResponse authenticate(LoginRequest request);
+
+    com.projekt.payload.response.UserDetails getUserDetails(String name);
+
+    void updateProfile(ProfileDetailsRequest request);
+
+    boolean isActive(Long userID);
+
+    void addUser(AddUserRequest request);
 }

@@ -1,4 +1,4 @@
-package com.projekt.Validators;
+package com.projekt.validators;
 
 import com.projekt.models.User;
 import org.springframework.validation.Errors;
