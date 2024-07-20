@@ -1,65 +1,91 @@
 package com.projekt.controllers;
 
-import com.projekt.models.Priority;
+import com.projekt.payload.request.AddPriorityRequest;
+import com.projekt.payload.request.EditPriorityRequest;
+import com.projekt.repositories.TicketRepository;
 import com.projekt.services.PriorityService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
-@Controller
+@CrossOrigin(origins = "*", maxAge = 3600)
+@RestController
+@RequestMapping("/api/priority")
 public class PriorityController {
     private final PriorityService priorityService;
+    private final TicketRepository ticketRepository;
 
-    public PriorityController(PriorityService priorityService) {
+    public PriorityController(PriorityService priorityService, TicketRepository ticketRepository) {
         this.priorityService = priorityService;
+        this.ticketRepository = ticketRepository;
     }
 
-    @GetMapping("/priority-list")
-    public String showPriorityList(Model model){
-        model.addAttribute("priority", priorityService.loadAll());
-        model.addAttribute("use", priorityService.prioritiesUse());
-        return "priority/showList";
+    @GetMapping
+    public ResponseEntity<?> getAllPriorities(){
+        return ResponseEntity.ok(priorityService.getAll());
     }
 
-    @GetMapping(value = {"/priority/edit/{id}","/priority/add"})
-    public String showFormPriority(@PathVariable(name = "id", required = false) Integer id, Model model){
-        model.addAttribute("priority", priorityService.loadById(id));
-
-        if(id == null || !priorityService.exists(id)){
-            return "priority/showAddForm";
-        }
-        return "priority/showEditForm";
+    @GetMapping("/use")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    public ResponseEntity<?> getAllPrioritiesWithUseNumber(){
+        return ResponseEntity.ok(priorityService.getAllWithUseNumber());
     }
 
-    @PostMapping(value = {"/priority/edit/{id}","/priority/add"})
-    public String processFormPriority(@Valid @ModelAttribute(name = "priority") Priority priority, BindingResult bindingResult,
-                                      @PathVariable(name = "id", required = false) Integer id, Model model){
-        if(bindingResult.hasErrors()){
-            if(id == null){
-                return "priority/showAddForm";
-            }
-            return "priority/showEditForm";
+    @GetMapping("{priorityID}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getPriorityById(@PathVariable(name = "priorityID") Long priorityID){
+        if(priorityService.existsById(priorityID)){
+            return ResponseEntity.ok(priorityService.loadById(priorityID));
         }
 
-        priorityService.save(priority);
-
-        model.addAttribute("priority", priorityService.loadAll());
-        model.addAttribute("use", priorityService.prioritiesUse());
-        return "priority/showList";
+        return new ResponseEntity<>("No priority found", HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/priority/delete/{id}")
-    public String deletePriority(@PathVariable(name = "id", required = false) Integer id, Model model){
-        priorityService.delete(id);
+    @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> editPriority(@RequestBody @Valid EditPriorityRequest request){
+        if(!priorityService.existsById(request.getPriorityId())){
+            return new ResponseEntity<>("No priority found", HttpStatus.NOT_FOUND);
+        }
 
-        model.addAttribute("priority", priorityService.loadAll());
-        model.addAttribute("use", priorityService.prioritiesUse());
-        return "priority/showList";
+        if(priorityService.loadById(request.getPriorityId()).getName().equals(request.getPriorityName())){
+            return new ResponseEntity<>("Priority name is the same as the current name", HttpStatus.OK);
+        }
+
+        if(!priorityService.existsByName(request.getPriorityName())){
+            priorityService.update(request);
+            return new ResponseEntity<>("Priority name edited", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("Priority already exists", HttpStatus.CONFLICT);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> addPriority(@RequestBody @Valid AddPriorityRequest request){
+        if(!priorityService.existsByName(request.getPriorityName())){
+            priorityService.save(request);
+            return new ResponseEntity<>("Priority added", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("Priority already exists", HttpStatus.CONFLICT);
+    }
+
+    @DeleteMapping("{priorityID}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deletePriority(@PathVariable(name = "priorityID") Long priorityID){
+        if(!priorityService.existsById(priorityID)){
+            return new ResponseEntity<>("No priority found", HttpStatus.NOT_FOUND);
+        }
+
+        if(!ticketRepository.existsByPriorityId(priorityID)){
+            priorityService.delete(priorityID);
+            return new ResponseEntity<>("Priority removed successfully", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("You cannot remove a priority if it has a ticket assigned to it", HttpStatus.CONFLICT);
     }
 }

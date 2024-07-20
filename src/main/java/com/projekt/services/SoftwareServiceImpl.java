@@ -1,13 +1,16 @@
 package com.projekt.services;
 
 import com.projekt.models.Software;
+import com.projekt.payload.request.AddSoftwareRequest;
+import com.projekt.payload.request.EditSoftwareRequest;
+import com.projekt.payload.response.SoftwareResponse;
 import com.projekt.repositories.KnowledgeRepository;
 import com.projekt.repositories.SoftwareRepository;
 import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service("softwareDetailsService")
 public class SoftwareServiceImpl implements SoftwareService {
@@ -22,85 +25,53 @@ public class SoftwareServiceImpl implements SoftwareService {
     }
 
     @Override
-    public ArrayList<Software> loadAll() {
-        return (ArrayList<Software>) softwareRepository.findAll();
+    public List<Software> getAll() {
+        return softwareRepository.findAll();
     }
 
     @Override
-    public Software loadById(Integer id) {
-        if(id == null || !softwareRepository.existsById(Long.valueOf(id))){
-            return new Software();
-        }
-
-        return softwareRepository.getReferenceById(Long.valueOf(id));
+    public Software loadById(Long id) {
+        return softwareRepository.getReferenceById(id);
     }
 
     @Override
-    public boolean exists(Integer id) {
-        return softwareRepository.existsById(Long.valueOf(id));
+    public boolean existsById(Long id) {
+        return softwareRepository.existsById(id);
     }
 
     @Override
-    public void delete(Integer id) {
-        if(ticketRepository.countByVersion_SoftwareId(Long.valueOf(id)) == 0 && knowledgeRepository.countBySoftwareId(Long.valueOf(id)) == 0 && softwareRepository.existsById(Long.valueOf(id))){
-            softwareRepository.deleteById(Long.valueOf(id));
-        }
+    public void delete(Long id) {
+        softwareRepository.deleteById(id);
     }
 
     @Override
-    public void save(Software software) {
+    public void update(EditSoftwareRequest request) {
+        Software software = softwareRepository.getReferenceById(request.getSoftwareId());
+        software.setName(request.getSoftwareName());
+        software.setDescription(request.getDescription());
         softwareRepository.save(software);
     }
 
     @Override
-    public ArrayList<Integer> softwareUseInTicket() {
-        ArrayList<Integer> list = new ArrayList<>();
-        List<Software> softwareList = softwareRepository.findAll();
-
-        for (int i=0; i<softwareList.size(); i++){
-            list.add(ticketRepository.countByVersion_SoftwareId(softwareList.get(i).getId()));
-        }
-
-        return list;
+    public boolean existsByName(String softwareName) {
+        return softwareRepository.existsByName(softwareName);
     }
 
     @Override
-    public ArrayList<Integer> softwareUseInKnowledgeBase() {
-        List<Software> softwareList = softwareRepository.findAll();
-        ArrayList<Integer> list = new ArrayList<>();
-
-        for (int i=0; i<softwareList.size(); i++){
-            list.add((int) knowledgeRepository.countBySoftwareId(softwareList.get(i).getId()));
-        }
-
-        return list;
+    public void save(AddSoftwareRequest request) {
+        softwareRepository.save(new Software(request.getSoftwareName(), request.getDescription()));
     }
 
     @Override
-    public ArrayList<Integer> softwareUseInTicket(ArrayList<Software> software) {
-        ArrayList<Integer> list = new ArrayList<>();
-
-        for (int i = 0; i< ((List<Software>) software).size(); i++){
-            list.add(ticketRepository.countByVersion_SoftwareId(((List<Software>) software).get(i).getId()));
-        }
-
-        return list;
+    public List<SoftwareResponse> getAllWithUseNumber() {
+        return softwareRepository.findAll().stream()
+                .map(software -> new SoftwareResponse(
+                        software.getId(),
+                        software.getName(),
+                        software.getDescription(),
+                        ticketRepository.countBySoftwareId(software.getId()),
+                        knowledgeRepository.countBySoftwareId(software.getId())
+                ))
+                .collect(Collectors.toList());
     }
-
-    @Override
-    public ArrayList<Integer> softwareUseInKnowledgeBase(ArrayList<Software> software) {
-        ArrayList<Integer> list = new ArrayList<>();
-
-        for (int i = 0; i< ((List<Software>) software).size(); i++){
-            list.add((int) knowledgeRepository.countBySoftwareId(((List<Software>) software).get(i).getId()));
-        }
-
-        return list;
-    }
-
-    @Override
-    public ArrayList<Software> searchSoftwareByNameDescription(String phrase) {
-        return softwareRepository.searchSoftwareByNameDescription(phrase);
-    }
-
 }

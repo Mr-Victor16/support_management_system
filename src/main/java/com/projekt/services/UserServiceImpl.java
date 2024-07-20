@@ -1,39 +1,48 @@
 package com.projekt.services;
 
-import com.projekt.config.ProfileNames;
 import com.projekt.models.Role;
+import com.projekt.payload.request.*;
+import com.projekt.payload.response.LoginResponse;
 import com.projekt.repositories.RoleRepository;
-import com.projekt.repositories.TicketRepository;
 import com.projekt.repositories.UserRepository;
-import org.springframework.context.annotation.Profile;
+import com.projekt.security.jwt.JWTUtils;
+import com.projekt.security.services.UserDetailsImpl;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.mail.MessagingException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service("userDetailsService")
-@Profile(ProfileNames.USERS_IN_DATABASE)
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final MailService mailService;
     private final RoleRepository roleRepository;
-    private final TicketRepository ticketRepository;
+    private final PasswordEncoder encoder;
+    private final JWTUtils jwtUtils;
+    private final AuthenticationManager authenticationManager;
 
-    public UserServiceImpl(UserRepository userRepository, MailService mailService, RoleRepository roleRepository, TicketRepository ticketRepository) {
+    public UserServiceImpl(UserRepository userRepository, MailService mailService, RoleRepository roleRepository,
+                           PasswordEncoder encoder, JWTUtils jwtUtils, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.mailService = mailService;
         this.roleRepository = roleRepository;
-        this.ticketRepository = ticketRepository;
+        this.encoder = encoder;
+        this.jwtUtils = jwtUtils;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -48,117 +57,144 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void editUser(com.projekt.models.User user){
-        if((userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail()) == null) ||
-                (userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail()).getId() == user.getId())) {
+    public void editUser(EditUserRequest request) throws Exception {
+        com.projekt.models.User user = userRepository.getReferenceById(request.getId());
 
-            if(user.getPassword().equals("-")){
-                com.projekt.models.User user1 = userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail());
-                user.setPassword(user1.getPassword());
-            }else {
-                PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-            user.setEnabled(true);
-
-            if(user.getRoles() == null){
-                Set<Role> role = userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail()).getRoles();
-                user.setRoles(role);
-            }
-
-            userRepository.save(setRole(user));
-        }else{
-            throw new RuntimeException();
-        }
-    }
-
-    @Override
-    public boolean permit(Integer id, String name) {
-        return (findUserByUsername(name).getId() == id);
-    }
-
-    @Override
-    public void delete(Integer id) {
-        if(userRepository.existsById(id)){
-            ticketRepository.deleteByUserId(id);
-            userRepository.deleteById(id);
-        }
-    }
-
-    @Override
-    public ArrayList<com.projekt.models.User> searchUserByNameSurnameUsername(String phrase) {
-        return userRepository.searchUserByNameSurnameUsername(phrase);
-    }
-
-    @Override
-    public ArrayList<com.projekt.models.User> searchUserByEmail(String email) {
-        return userRepository.searchUserByEmail(email);
-    }
-
-    @Override
-    public ArrayList<com.projekt.models.User> searchUserByRole(Integer id) {
-        ArrayList<com.projekt.models.User> list = userRepository.findByRoles_Id(id);
-        ArrayList<com.projekt.models.User> list2 = new ArrayList<>();
-
-        for(int i=0; i<list.size(); i++){
-            Set<Role> set = list.get(i).getRoles();
-            if((set.size() == 1 && id == 1) || (set.size() == 2 && id == 2) || (set.size()==3 && id==3)){
-                list2.add(list.get(i));
-            }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new Exception("Email is already in use");
         }
 
-        return list2;
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new Exception("Username is already in use");
+        }
+
+        user.setName(request.getName());
+        user.setSurname(request.getSurname());
+        Set<Role> roles = request.getRoles().stream()
+                .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
+                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
+                .collect(Collectors.toSet());
+
+        user.setRoles(roles);
+        user.setEnabled(request.isEnabled());
+
+        userRepository.save(user);
     }
 
     @Override
-    public boolean activate(Integer userID) {
-        if(!userRepository.getReferenceById(userID).isEnabled()){
-            com.projekt.models.User user = userRepository.getReferenceById(userID);
-            user.setEnabled(true);
-            userRepository.save(user);
-            return true;
-        }else{
-            return false;
-        }
+    public void delete(Long id) {
+        userRepository.deleteById(id);
     }
 
     @Override
-    public void saveUser(com.projekt.models.User user, boolean mail, boolean admin, boolean enabled) throws MessagingException {
-        if(userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail()) == null){
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            user.setEnabled(enabled);
+    public void activate(Long userID) {
+        com.projekt.models.User user = userRepository.getReferenceById(userID);
+        user.setEnabled(true);
 
-            if(!admin) {
-                Set<Role> roleSet = new HashSet<>();
-                roleSet.add(roleRepository.getReferenceById(1));
-                user.setRoles(roleSet);
-            }
-
-            userRepository.save(setRole(user));
-
-            if(mail){
-                mailService.sendRegisterMessage(user.getEmail(),user.getUsername(),enabled);
-            }
-        }else{
-            throw new RuntimeException();
-        }
+        userRepository.save(user);
     }
 
-    private com.projekt.models.User setRole(com.projekt.models.User user){
-        Set<Role> roleList = user.getRoles();
-        if (roleList.size() == 1){
-            if(roleList.stream().findFirst().get().getType().toString() == "ROLE_ADMIN"){
-                roleList.add(roleRepository.getReferenceById(1));
-                roleList.add(roleRepository.getReferenceById(2));
-            }else if(roleList.stream().findFirst().get().getType().toString() == "ROLE_OPERATOR"){
-                roleList.add(roleRepository.getReferenceById(1));
-            }
+    @Override
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username.toLowerCase());
+    }
 
-            user.setRoles(roleList);
-        }
+    @Override
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email.toLowerCase());
+    }
 
-        return user;
+    @Override
+    public void register(RegisterRequest request) throws MessagingException {
+        com.projekt.models.User newUser = new com.projekt.models.User();
+        newUser.setUsername(request.getUsername());
+        newUser.setEmail(request.getEmail());
+
+        newUser.setPassword(encoder.encode(request.getPassword()));
+        newUser.setName(request.getName());
+        newUser.setSurname(request.getSurname());
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(roleRepository.findByType(Role.Types.ROLE_USER));
+        newUser.setRoles(roles);
+
+        com.projekt.models.User user = userRepository.save(newUser);
+        mailService.sendRegisterMessage(user.getId(), user.isEnabled());
+    }
+
+    @Override
+    public LoginResponse authenticate(LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = jwtUtils.generateJwtToken(authentication);
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        return new LoginResponse(
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getName(),
+                userDetails.getSurname(),
+                userDetails.getEmail(),
+                token,
+                roles
+        );
+    }
+
+    @Override
+    public com.projekt.payload.response.UserDetails getUserDetails(String name) {
+        com.projekt.models.User user = userRepository.findByUsername(name);
+        List<String> roles = user.getRoles().stream()
+                .map(role -> role.getType().name())
+                .toList();
+
+        return new com.projekt.payload.response.UserDetails(
+                user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                roles
+        );
+    }
+
+    @Override
+    public void updateProfile(ProfileDetailsRequest request) {
+        com.projekt.models.User user = userRepository.getReferenceById(request.getId());
+        user.setName(request.getName());
+        user.setSurname(request.getSurname());
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public boolean isActive(Long userID) {
+        return userRepository.getReferenceById(userID).isEnabled();
+    }
+
+    @Override
+    public void addUser(AddUserRequest request) {
+        com.projekt.models.User user = new com.projekt.models.User();
+
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(encoder.encode(request.getPassword()));
+        user.setName(request.getName());
+        user.setSurname(request.getSurname());
+        Set<Role> roles = request.getRoles().stream()
+                .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
+                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
+                .collect(Collectors.toSet());
+
+        user.setRoles(roles);
+        user.setEnabled(true);
+
+        userRepository.save(user);
     }
 
     @Override
@@ -167,22 +203,40 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public ArrayList<com.projekt.models.User> loadAll() {
-        return (ArrayList<com.projekt.models.User>) userRepository.findAll();
+    public List<com.projekt.payload.response.UserDetails> loadAll() {
+        return userRepository.findAll().stream()
+                .map(user -> new com.projekt.payload.response.UserDetails(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getName(),
+                        user.getSurname(),
+                        user.getEmail(),
+                        user.getRoles().stream()
+                                .map(role -> role.getType().name())
+                                .collect(Collectors.toList())))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public boolean exists(Integer id) {
+    public boolean exists(Long id) {
         return userRepository.existsById(id);
     }
 
     @Override
-    public com.projekt.models.User loadById(Integer id) {
-        if(id == null || !userRepository.existsById(id)){
-            return new com.projekt.models.User();
-        }
+    public com.projekt.payload.response.UserDetails loadById(Long id) {
+        com.projekt.models.User user = userRepository.getReferenceById(id);
+        List<String> roles = user.getRoles().stream()
+                .map(role -> role.getType().name())
+                .toList();
 
-        return userRepository.getReferenceById(id);
+        return new com.projekt.payload.response.UserDetails(
+                user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                roles
+        );
     }
 
     private UserDetails convertToUserDetails(com.projekt.models.User user) {
@@ -193,6 +247,4 @@ public class UserServiceImpl implements UserService{
 
         return new User(user.getUsername(), user.getPassword(), user.isEnabled(), true, true, true, grantedAuthorities);
     }
-
 }
-

@@ -1,88 +1,75 @@
 package com.projekt.controllers;
 
-import com.projekt.models.Knowledge;
-import com.projekt.models.Search;
-import com.projekt.models.Software;
+import com.projekt.payload.request.AddKnowledgeRequest;
+import com.projekt.payload.request.EditKnowledgeRequest;
 import com.projekt.services.KnowledgeBaseService;
-import com.projekt.services.SoftwareService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.ArrayList;
 
-@Controller
+@CrossOrigin(origins = "*", maxAge = 3600)
+@RestController
+@RequestMapping("/api/knowledge-base")
 public class KnowledgeBaseController {
     private final KnowledgeBaseService knowledgeBaseService;
-    private final SoftwareService softwareService;
 
-    public KnowledgeBaseController(KnowledgeBaseService knowledgeBaseService, SoftwareService softwareService) {
+    public KnowledgeBaseController(KnowledgeBaseService knowledgeBaseService) {
         this.knowledgeBaseService = knowledgeBaseService;
-        this.softwareService = softwareService;
     }
 
-    @GetMapping("/knowledge-base")
-    public String showKnowledgeBaseList(Model model){
-        model.addAttribute("knowledgeBase", knowledgeBaseService.loadAll());
-        model.addAttribute("search", new Search());
-        return "knowledge-base/showList";
+    @GetMapping
+    public ResponseEntity<?> getAllKnowledgeItems(){
+        return ResponseEntity.ok(knowledgeBaseService.getAll());
     }
 
-    @GetMapping("/knowledge-base/{id}")
-    public String showKnowledgeBase(@PathVariable(name = "id", required = false) Integer id, Model model){
-        if(knowledgeBaseService.exists(id)) {
-            model.addAttribute("knowledgeBaseItem", knowledgeBaseService.loadById(id));
-            return "knowledge-base/showItem";
+    @GetMapping("{knowledgeID}")
+    public ResponseEntity<?> getKnowledgeById(@PathVariable(name = "knowledgeID") Long knowledgeID){
+        if(knowledgeBaseService.existsById(knowledgeID)){
+            return ResponseEntity.ok(knowledgeBaseService.loadById(knowledgeID));
         }
-        model.addAttribute("knowledgeBase", knowledgeBaseService.loadAll());
-        model.addAttribute("search", new Search());
-        return "knowledge-base/showList";
+
+        return new ResponseEntity<>("No knowledge found", HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = {"/knowledge/edit/{id}","/knowledge/add"})
-    public String showFormKnowledgeBase(@PathVariable(name = "id", required = false) Integer id, Model model){
-        model.addAttribute("knowledge", knowledgeBaseService.loadById(id));
-
-        if(id == null || !knowledgeBaseService.exists(id)){
-            return "knowledge-base/showAddForm";
+    @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> editKnowledge(@RequestBody @Valid EditKnowledgeRequest request){
+        if(!knowledgeBaseService.existsById(request.getKnowledgeId())) {
+            return new ResponseEntity<>("No knowledge found", HttpStatus.NOT_FOUND);
         }
-        return "knowledge-base/showEditForm";
-    }
 
-    @PostMapping(value = {"/knowledge/edit/{id}","/knowledge/add"})
-    public String processFormKnowledgeBase(@Valid @ModelAttribute(name = "knowledge") Knowledge knowledge, BindingResult bindingResult,
-                                           @PathVariable(name = "id", required = false) Integer id, Model model){
-        if(bindingResult.hasErrors()){
-            if(id == null){
-                return "knowledge-base/showAddForm";
+        if(knowledgeBaseService.loadById(request.getKnowledgeId()).getTitle() != request.getTitle()){
+            if(knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareId())){
+                return new ResponseEntity<>("Knowledge already exists", HttpStatus.CONFLICT);
             }
-            return "knowledge-base/showEditForm";
         }
 
-        knowledgeBaseService.save(knowledge);
-
-        model.addAttribute("knowledgeBase", knowledgeBaseService.loadAll());
-        model.addAttribute("search", new Search());
-        return "knowledge-base/showList";
+        knowledgeBaseService.update(request);
+        return new ResponseEntity<>("Knowledge edited", HttpStatus.OK);
     }
 
-    @GetMapping("/knowledge/delete/{id}")
-    public String deleteKnowledgeBase(@PathVariable(name = "id", required = false) Integer id, Model model){
-        knowledgeBaseService.delete(id);
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> addKnowledge(@RequestBody @Valid AddKnowledgeRequest request){
+        if(!knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareId())){
+            knowledgeBaseService.save(request);
+            return new ResponseEntity<>("Knowledge added", HttpStatus.OK);
+        }
 
-        model.addAttribute("knowledgeBase", knowledgeBaseService.loadAll());
-        model.addAttribute("search", new Search());
-        return "knowledge-base/showList";
+        return new ResponseEntity<>("Knowledge already exists", HttpStatus.CONFLICT);
     }
 
-    @ModelAttribute("softwareList")
-    public ArrayList<Software> loadSoftware(){
-        return softwareService.loadAll();
-    }
+    @DeleteMapping("{knowledgeID}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteKnowledge(@PathVariable(name = "knowledgeID") Long knowledgeID){
+        if(knowledgeBaseService.existsById(knowledgeID)){
+            knowledgeBaseService.delete(knowledgeID);
+            return new ResponseEntity<>("Knowledge removed successfully", HttpStatus.OK);
+        }
 
+        return new ResponseEntity<>("No knowledge found", HttpStatus.NOT_FOUND);
+    }
 }

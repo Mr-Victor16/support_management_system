@@ -1,86 +1,93 @@
 package com.projekt.controllers;
 
-import com.projekt.models.Search;
-import com.projekt.models.Software;
+import com.projekt.payload.request.AddSoftwareRequest;
+import com.projekt.payload.request.EditSoftwareRequest;
+import com.projekt.repositories.KnowledgeRepository;
+import com.projekt.repositories.TicketRepository;
 import com.projekt.services.SoftwareService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
-@Controller
+@CrossOrigin(origins = "*", maxAge = 3600)
+@RestController
+@RequestMapping("/api/software")
 public class SoftwareController {
     private final SoftwareService softwareService;
+    private final KnowledgeRepository knowledgeRepository;
+    private final TicketRepository ticketRepository;
 
-    public SoftwareController(SoftwareService softwareService) {
+    public SoftwareController(SoftwareService softwareService, KnowledgeRepository knowledgeRepository, TicketRepository ticketRepository) {
         this.softwareService = softwareService;
+        this.knowledgeRepository = knowledgeRepository;
+        this.ticketRepository = ticketRepository;
     }
 
-    @GetMapping("/software-list")
-    public String showSoftwareList(Model model){
-        model.addAttribute("software", softwareService.loadAll());
-        model.addAttribute("useInTickets", softwareService.softwareUseInTicket());
-        model.addAttribute("useInKnowledgeBase", softwareService.softwareUseInKnowledgeBase());
-        model.addAttribute("search", new Search());
-        return "software/showList";
+    @GetMapping
+    public ResponseEntity<?> getAllSoftware() {
+        return ResponseEntity.ok(softwareService.getAll());
     }
 
-    @GetMapping("/software-list/{id}")
-    public String showSoftware(@PathVariable(name = "id", required = false) Integer id, Model model){
-        if(softwareService.exists(id)){
-            model.addAttribute("softwareItem", softwareService.loadById(id));
-            return "software/showItem";
+    @GetMapping("/use")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    public ResponseEntity<?> getAllSoftwareWithUseNumbers(){
+        return ResponseEntity.ok(softwareService.getAllWithUseNumber());
+    }
+
+    @GetMapping("{softwareID}")
+    public ResponseEntity<?> getSoftwareById(@PathVariable(name = "softwareID") Long softwareID){
+        if(softwareService.existsById(softwareID)){
+            return ResponseEntity.ok(softwareService.loadById(softwareID));
         }
 
-        model.addAttribute("software", softwareService.loadAll());
-        model.addAttribute("useInTickets", softwareService.softwareUseInTicket());
-        model.addAttribute("useInKnowledgeBase", softwareService.softwareUseInKnowledgeBase());
-        model.addAttribute("search", new Search());
-        return "software/showList";
+        return new ResponseEntity<>("No software found", HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = {"/software/edit/{id}","/software/add"})
-    public String showFormSoftware(@PathVariable(name = "id", required = false) Integer id, Model model){
-        model.addAttribute("software", softwareService.loadById(id));
-
-        if(id == null || !softwareService.exists(id)){
-            return "software/showAddForm";
-        }
-        return "software/showEditForm";
-    }
-
-    @PostMapping(value = {"/software/edit/{id}","/software/add"})
-    public String processFormSoftware(@Valid @ModelAttribute(name = "software") Software software, BindingResult bindingResult,
-                                           @PathVariable(name = "id", required = false) Integer id, Model model){
-        if(bindingResult.hasErrors()){
-            if(id == null){
-                return "software/showAddForm";
-            }
-            return "software/showEditForm";
+    @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> editSoftware(@RequestBody @Valid EditSoftwareRequest request){
+        if(!softwareService.existsById(request.getSoftwareId())){
+            return new ResponseEntity<>("No software found", HttpStatus.NOT_FOUND);
         }
 
-        softwareService.save(software);
+        if(softwareService.loadById(request.getSoftwareId()).getName().equals(request.getSoftwareName())){
+            return new ResponseEntity<>("Software name is the same as the current name", HttpStatus.OK);
+        }
 
-        model.addAttribute("software", softwareService.loadAll());
-        model.addAttribute("useInTickets", softwareService.softwareUseInTicket());
-        model.addAttribute("useInKnowledgeBase", softwareService.softwareUseInKnowledgeBase());
-        model.addAttribute("search", new Search());
-        return "software/showList";
+        if(!softwareService.existsByName(request.getSoftwareName())){
+            softwareService.update(request);
+            return new ResponseEntity<>("Software details edited", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("Software already exists", HttpStatus.CONFLICT);
     }
 
-    @GetMapping("/software/delete/{id}")
-    public String deleteSoftware(@PathVariable(name = "id", required = false) Integer id, Model model){
-        softwareService.delete(id);
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> addSoftware(@RequestBody @Valid AddSoftwareRequest request){
+        if(!softwareService.existsByName(request.getSoftwareName())){
+            softwareService.save(request);
+            return new ResponseEntity<>("Software added", HttpStatus.OK);
+        }
 
-        model.addAttribute("software", softwareService.loadAll());
-        model.addAttribute("useInTickets", softwareService.softwareUseInTicket());
-        model.addAttribute("useInKnowledgeBase", softwareService.softwareUseInKnowledgeBase());
-        model.addAttribute("search", new Search());
-        return "software/showList";
+        return new ResponseEntity<>("Software already exists", HttpStatus.CONFLICT);
+    }
+
+    @DeleteMapping("{softwareID}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteSoftware(@PathVariable(name = "softwareID") Long softwareID){
+        if(!softwareService.existsById(softwareID)){
+            return new ResponseEntity<>("No software found", HttpStatus.NOT_FOUND);
+        }
+
+        if(!ticketRepository.existsBySoftwareId(softwareID) && !knowledgeRepository.existsBySoftwareId(softwareID)){
+            softwareService.delete(softwareID);
+            return new ResponseEntity<>("Software removed successfully", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("You cannot remove a software if it has a ticket or knowledge assigned to it", HttpStatus.CONFLICT);
     }
 }

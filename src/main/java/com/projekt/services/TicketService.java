@@ -1,51 +1,44 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
+import com.projekt.payload.request.AddTicketReply;
+import com.projekt.payload.request.AddTicketRequest;
+import com.projekt.payload.request.EditTicketRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.mail.MessagingException;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public interface TicketService {
-    ArrayList<Ticket> loadAll();
+    List<Ticket> getAll();
 
-    Ticket loadById(Integer id);
+    boolean existsById(Long id);
 
-    boolean exists(Integer id);
+    void delete(Long id);
 
-    Integer save(Ticket ticket, List<MultipartFile> multipartFile, String name) throws IOException;
+    boolean isAuthorized(Long ticketID, String username);
 
-    void delete(Integer id);
+    Ticket getById(Long id);
 
-    boolean isAuthorized(Integer id, String name);
+    List<Ticket> getTicketsByUserId(Long id);
 
-    Ticket loadTicketById(Integer id);
+    void addReply(AddTicketReply ticketReply) throws MessagingException;
 
-    ArrayList<Ticket> loadTicketsByUser(String name);
+    void changeStatus(Long ticketID, Long statusID) throws MessagingException;
 
-    void addReply(TicketReply ticketReply, Integer id) throws MessagingException;
+    Ticket findByImageId(Long imageId);
 
-    void changeStatus(Integer id, Status status) throws MessagingException;
+    void add(AddTicketRequest request);
 
-    ArrayList<Ticket> searchByPhrase(String phrase);
+    void update(EditTicketRequest request);
 
-    ArrayList<Ticket> searchByDate(LocalDate date1, LocalDate date2);
+    void addImage(Long ticketID, MultipartFile file) throws IOException;
 
-    ArrayList<Ticket> searchBySoftware(Software software);
+    boolean existsByCategoryId(Long categoryID);
 
-    ArrayList<Ticket> searchByStatus(Status status);
-
-    ArrayList<Ticket> searchByPriority(Priority priority);
-
-    ArrayList<Ticket> searchByVersion(Version version);
-
-    ArrayList<Ticket> searchByCategory(Set<Category> categories);
-
-    ArrayList<Ticket> searchByReplyNumber(int number1, int number2);
+    boolean entitiesExist(Long categoryID, Long statusID, Long priorityID, Long softwareID);
 }

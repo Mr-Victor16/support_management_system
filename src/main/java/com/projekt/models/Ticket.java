@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "tickets")
@@ -20,34 +19,32 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@NamedQuery(name = "Ticket.searchByStatus", query = "select t From Ticket t where t.status.statusID = ?1")
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer ticketID;
+    private Long id;
 
-    @Size(min = 5, max = 100) @NotBlank
+    @Size(min = 5, max = 100)
+    @NotBlank
     @Column(name = "ticket_title", nullable = false)
-    private String ticketTitle;
+    private String title;
 
-    @Size(min = 5, max = 500) @NotBlank
+    @Size(min = 5, max = 500)
+    @NotBlank
     @Column(name = "ticket_description", nullable = false)
-    private String ticketDescription;
+    private String description;
 
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ticket_ticket_id")
     private List<Image> images = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id", nullable = false)
-    private User user;
-
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "ticket_date", nullable = false)
-    private LocalDate ticketDate;
+    private LocalDate date;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Category> categories;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "priorityID", nullable = false)
@@ -57,12 +54,15 @@ public class Ticket {
     @JoinColumn(name = "statusID", nullable = false)
     private Status status;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "versionID", nullable = false)
-    private Version version;
+    @Size(min = 1, max = 10)
+    @NotBlank
+    private String version;
 
-    @OneToMany
-    @JoinColumn(name = "ticket_ticket_id")
+    @ManyToOne
+    @JoinColumn(name = "software_id")
+    private Software software;
+
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "ticket_id")
     private List<TicketReply> ticketReplies = new ArrayList<>();
-
 }

@@ -1,6 +1,7 @@
 package com.projekt.models;
 
-import com.projekt.Validators.FirstCharacterConstraint;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.projekt.validators.FirstCharacterConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,35 +11,47 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
+@Table( name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username"),
+                @UniqueConstraint(columnNames = "email")
+        })
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Size(min = 2, max = 36) @NotBlank
+    @Size(min = 2, max = 36)
+    @NotBlank
     private String username;
 
-    @NotEmpty @NotBlank
+    @NotEmpty
+    @NotBlank
+    @JsonIgnore
     private String password;
 
-    @Transient
-    private String passwordConfirm;
-
-    @Email @NotEmpty
+    @Email
+    @NotEmpty
     private String email;
 
-    @NotEmpty @Size(min = 2, max = 30) @NotBlank
+    @NotEmpty
+    @Size(min = 2, max = 30)
+    @NotBlank
     @FirstCharacterConstraint
     private String name;
 
-    @NotEmpty @Size(min = 2, max = 60) @NotBlank
+    @NotEmpty
+    @Size(min = 2, max = 60)
+    @NotBlank
     @FirstCharacterConstraint
     private String surname;
 
@@ -50,18 +63,12 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
-    public User(String username){
-        this(username, false);
-    }
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "user_id")
+    private List<Ticket> tickets = new ArrayList<>();
 
     public User(String username, boolean enabled){
         this.username = username;
         this.enabled = enabled;
-    }
-
-    public User(String username, String password, String passwordConfirm){
-        this.username = username;
-        this.password = password;
-        this.passwordConfirm = passwordConfirm;
     }
 }

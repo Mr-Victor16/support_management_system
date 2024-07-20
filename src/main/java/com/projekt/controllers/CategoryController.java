@@ -1,65 +1,91 @@
 package com.projekt.controllers;
 
-import com.projekt.models.Category;
+import com.projekt.payload.request.AddCategoryRequest;
+import com.projekt.payload.request.EditCategoryRequest;
 import com.projekt.services.CategoryService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import com.projekt.services.TicketService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
-@Controller
+@CrossOrigin(origins = "*", maxAge = 3600)
+@RestController
+@RequestMapping("/api/category")
 public class CategoryController {
     private final CategoryService categoryService;
+    private final TicketService ticketService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, TicketService ticketService) {
         this.categoryService = categoryService;
+        this.ticketService = ticketService;
     }
 
-    @GetMapping("/category-list")
-    public String showCategoryList(Model model){
-        model.addAttribute("category", categoryService.loadAll());
-        model.addAttribute("use", categoryService.categoriesUse());
-        return "category/showList";
+    @GetMapping
+    public ResponseEntity<?> getAllCategories(){
+        return ResponseEntity.ok(categoryService.getAll());
     }
 
-    @GetMapping(value = {"/category/edit/{id}","/category/add"})
-    public String showFormCategory(@PathVariable(name = "id", required = false) Integer id, Model model){
-        model.addAttribute("category", categoryService.loadById(id));
-
-        if(id == null || !categoryService.exists(id)){
-            return "category/showAddForm";
-        }
-        return "category/showEditForm";
+    @GetMapping("/use")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    public ResponseEntity<?> getAllCategoriesWithUseNumber(){
+        return ResponseEntity.ok(categoryService.getAllWithUseNumber());
     }
 
-    @PostMapping(value = {"/category/edit/{id}","/category/add"})
-    public String processFormCategory(@Valid @ModelAttribute(name = "category") Category category, BindingResult bindingResult,
-                                      @PathVariable(name = "id", required = false) Integer id, Model model){
-        if(bindingResult.hasErrors()){
-            if(id == null){
-                return "category/showAddForm";
-            }
-            return "category/showEditForm";
+    @GetMapping("{categoryID}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getCategoryById(@PathVariable(name = "categoryID") Long categoryID){
+        if(categoryService.existsById(categoryID)){
+            return ResponseEntity.ok(categoryService.loadById(categoryID));
         }
 
-        categoryService.save(category);
-
-        model.addAttribute("category", categoryService.loadAll());
-        model.addAttribute("use",categoryService.categoriesUse());
-        return "category/showList";
+        return new ResponseEntity<>("No category found", HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/category/delete/{id}")
-    public String deleteCategory(@PathVariable(name = "id", required = false) Integer id, Model model){
-        categoryService.delete(id);
+    @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> editCategory(@RequestBody @Valid EditCategoryRequest request){
+        if(!categoryService.existsById(request.getCategoryId())){
+            return new ResponseEntity<>("No category found", HttpStatus.NOT_FOUND);
+        }
 
-        model.addAttribute("category", categoryService.loadAll());
-        model.addAttribute("use",categoryService.categoriesUse());
-        return "category/showList";
+        if(categoryService.loadById(request.getCategoryId()).getName().equals(request.getCategoryName())){
+            return new ResponseEntity<>("Category name is the same as the current name", HttpStatus.OK);
+        }
+
+        if(!categoryService.existsByName(request.getCategoryName())){
+            categoryService.update(request);
+            return new ResponseEntity<>("Category name edited", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("Category already exists", HttpStatus.CONFLICT);
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> addCategory(@RequestBody @Valid AddCategoryRequest request){
+        if(!categoryService.existsByName(request.getCategoryName())){
+            categoryService.save(request.getCategoryName());
+            return new ResponseEntity<>("Category added", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("Category already exists", HttpStatus.CONFLICT);
+    }
+
+    @DeleteMapping("{categoryID}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteCategory(@PathVariable(name = "categoryID") Long categoryID){
+        if(!categoryService.existsById(categoryID)){
+            return new ResponseEntity<>("No category found", HttpStatus.NOT_FOUND);
+        }
+
+        if(!ticketService.existsByCategoryId(categoryID)){
+            categoryService.delete(categoryID);
+            return new ResponseEntity<>("Category removed successfully", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("You cannot remove a category if it has a ticket assigned to it", HttpStatus.CONFLICT);
     }
 }

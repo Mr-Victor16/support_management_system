@@ -21,20 +21,22 @@ import java.time.LocalDate;
 public class Knowledge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer knowledgeID;
+    private Long id;
 
-    @Size(min = 2, max = 50) @NotBlank
+    @Size(min = 2, max = 50)
+    @NotBlank
     @Column(name = "knowledge_title", nullable = false)
-    private String knowledgeTitle;
+    private String title;
 
-    @Size(min = 20, max = 360) @NotBlank
+    @Size(min = 20, max = 360)
+    @NotBlank
     @Column(name = "knowledge_content", nullable = false)
-    private String knowledgeContent;
+    private String content;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull
     @Column(name = "knowledge_date", nullable = false)
-    private LocalDate knowledgeDate;
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "softwareID", nullable = false)

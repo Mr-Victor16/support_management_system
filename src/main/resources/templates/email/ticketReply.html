@@ -1,14 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <div>
-        <H1>Nowa odpowiedź do zgłoszenia</H1>
-        <div>Zgłoszenie o nazwie "<span th:text="${ticketName + ' '}"></span>" ma nową odpowiedź</span>.</div>
-        <div>Odwiedź stronę, aby sprawdzić zgłoszenie.</div>
-    </div>
-</body>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            .container {
+                padding: 20px;
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+            }
+            h1 {
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>New reply to the ticket</h1>
+            <div>
+                Ticket named "<span th:text="${ticketName + ' '}"></span>" has a new reply.
+            </div>
+            <div>Visit the website to check the ticket.</div>
+        </div>
+    </body>
 </html>
