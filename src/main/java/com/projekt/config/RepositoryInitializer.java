@@ -29,7 +29,11 @@ public class RepositoryInitializer {
     private final TicketRepository ticketRepository;
     private final TicketReplyRepository ticketReplyRepository;
 
-    public RepositoryInitializer(UserRepository userRepository, RoleRepository roleRepository, SoftwareRepository softwareRepository, KnowledgeRepository knowledgeRepository, CategoryRepository categoryRepository, PriorityRepository priorityRepository, StatusRepository statusRepository, ImageRepository imageRepository, TicketRepository ticketRepository, TicketReplyRepository ticketReplyRepository) {
+    public RepositoryInitializer(UserRepository userRepository, RoleRepository roleRepository,
+                                 SoftwareRepository softwareRepository, KnowledgeRepository knowledgeRepository,
+                                 CategoryRepository categoryRepository, PriorityRepository priorityRepository,
+                                 StatusRepository statusRepository, ImageRepository imageRepository,
+                                 TicketRepository ticketRepository, TicketReplyRepository ticketReplyRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.softwareRepository = softwareRepository;
@@ -149,9 +153,7 @@ public class RepositoryInitializer {
                 ticket.setStatus(statusRepository.getReferenceById(1L));
                 ticket.setPriority(priorityRepository.getReferenceById(2L));
                 ticket.setDescription("When trying to enter the site, I get an error - This site is unreachable :(");
-
-                User user = userRepository.getReferenceById(1L);
-                user.setTickets(List.of(ticket));
+                ticket.setVersion("1.0");
 
                 ticket.setCategory(categoryRepository.getReferenceById(1L));
 
@@ -174,6 +176,9 @@ public class RepositoryInitializer {
                 ticket.setTicketReplies(ticketReplyList);
 
                 ticketRepository.save(ticket);
+
+                User user = userRepository.getReferenceById(1L);
+                user.setTickets(Collections.singletonList(ticket));
             }
         };
     }
