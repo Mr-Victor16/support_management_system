@@ -2,12 +2,10 @@ package com.projekt.controllers;
 
 import com.projekt.payload.request.AddUserRequest;
 import com.projekt.payload.request.EditUserRequest;
-import com.projekt.validators.UserValidator;
 import com.projekt.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -77,10 +75,5 @@ public class UserController {
         }
 
         return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
-    }
-
-    @InitBinder("user")
-    public void initBinder(WebDataBinder binder){
-        binder.addValidators(new UserValidator());
     }
 }
