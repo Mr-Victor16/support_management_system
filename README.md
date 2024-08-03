@@ -48,7 +48,7 @@ Project was then refactored to a REST API backend to provide a more modern solut
   - manage knowledge base.
 
 ##  Database schema
-Schema  
+![db_schema](https://github.com/user-attachments/assets/5f601a90-fa7f-4db8-a194-fbc2bfd87263)  
 _The schema was created using Apache Workbench._
 
 ## Running the project with Docker Compose
@@ -73,7 +73,7 @@ spring.mail.password=<your_email_password>
 ```
 - JWT Configuration::
 ```
-app.activation-link-base-url=<server_host_with_protocole_and_server_port>/activate/ (e.g. http://localhost:8080/activate/)
+app.activation-link-base-url=<server_host_and_port>/activate/ (e.g. http://localhost:8080/activate/)
 sms.app.jwtSecret=<JWT_secret_key>
 sms.app.jwtExpirationMs=<token_expiration_time> (e.g. 86400000)
 ```
