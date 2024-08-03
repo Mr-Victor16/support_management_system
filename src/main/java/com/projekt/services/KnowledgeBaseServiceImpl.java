@@ -8,6 +8,7 @@ import com.projekt.repositories.SoftwareRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service("knowledgeBaseDetailsService")
 public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
@@ -52,9 +53,9 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
 
     @Override
     public boolean findDuplicate(String knowledgeTitle, Long softwareID) {
-        Knowledge knowledge = knowledgeRepository.findByTitle(knowledgeTitle);
+        Knowledge knowledge = knowledgeRepository.findByTitleIgnoreCase(knowledgeTitle);
         if (knowledge == null) return false;
-        else return knowledge.getSoftware().getId() == softwareID;
+        else return Objects.equals(knowledge.getSoftware().getId(), softwareID);
     }
 
     @Override

@@ -47,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public boolean existsByName(String categoryName) {
-        return categoryRepository.existsByName(categoryName);
+        return categoryRepository.existsByNameIgnoreCase(categoryName);
     }
 
     @Override

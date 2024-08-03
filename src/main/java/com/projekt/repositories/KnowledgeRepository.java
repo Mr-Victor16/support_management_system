@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface KnowledgeRepository extends JpaRepository<Knowledge, Long> {
     Long countBySoftwareId(Long id);
 
-    Knowledge findByTitle(String title);
+    Knowledge findByTitleIgnoreCase(String title);
 
     boolean existsBySoftwareId(Long softwareID);
 }
