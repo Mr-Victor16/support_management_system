@@ -1,5 +1,6 @@
-package com.projekt.payload.request;
+package com.projekt.payload.request.add;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -11,10 +12,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AddStatusRequest {
-    @Size(min = 2, max = 20)
+public class AddPriorityRequest {
+    @Size(min = 3, max = 20)
     @NotBlank
-    private String statusName;
+    private String priorityName;
 
-    private boolean closeTicket;
+    @Min(1)
+    private Integer maxTime;
 }

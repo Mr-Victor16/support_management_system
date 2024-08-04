@@ -2,6 +2,9 @@ package com.projekt.services;
 
 import com.projekt.models.User;
 import com.projekt.payload.request.*;
+import com.projekt.payload.request.add.AddUserRequest;
+import com.projekt.payload.request.edit.EditProfileDetailsRequest;
+import com.projekt.payload.request.edit.EditUserRequest;
 import com.projekt.payload.response.LoginResponse;
 import com.projekt.payload.response.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -36,7 +39,7 @@ public interface UserService extends UserDetailsService {
 
     com.projekt.payload.response.UserDetails getUserDetails(String name);
 
-    void updateProfile(ProfileDetailsRequest request);
+    void updateProfile(EditProfileDetailsRequest request);
 
     boolean isActive(Long userID);
 

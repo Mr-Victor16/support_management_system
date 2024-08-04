@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.AddPriorityRequest;
-import com.projekt.payload.request.EditPriorityRequest;
+import com.projekt.payload.request.add.AddPriorityRequest;
+import com.projekt.payload.request.edit.EditPriorityRequest;
 import com.projekt.repositories.TicketRepository;
 import com.projekt.services.PriorityService;
 import org.springframework.http.HttpStatus;

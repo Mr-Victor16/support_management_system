@@ -1,9 +1,9 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
-import com.projekt.payload.request.AddTicketReply;
-import com.projekt.payload.request.AddTicketRequest;
-import com.projekt.payload.request.EditTicketRequest;
+import com.projekt.payload.request.add.AddTicketReply;
+import com.projekt.payload.request.add.AddTicketRequest;
+import com.projekt.payload.request.edit.EditTicketRequest;
 import com.projekt.repositories.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

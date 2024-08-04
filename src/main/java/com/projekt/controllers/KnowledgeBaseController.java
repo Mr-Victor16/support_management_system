@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.AddKnowledgeRequest;
-import com.projekt.payload.request.EditKnowledgeRequest;
+import com.projekt.payload.request.add.AddKnowledgeRequest;
+import com.projekt.payload.request.edit.EditKnowledgeRequest;
 import com.projekt.services.KnowledgeBaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

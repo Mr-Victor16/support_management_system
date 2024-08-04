@@ -1,8 +1,8 @@
 package com.projekt.services;
 
 import com.projekt.models.Software;
-import com.projekt.payload.request.AddSoftwareRequest;
-import com.projekt.payload.request.EditSoftwareRequest;
+import com.projekt.payload.request.add.AddSoftwareRequest;
+import com.projekt.payload.request.edit.EditSoftwareRequest;
 import com.projekt.payload.response.SoftwareResponse;
 import com.projekt.repositories.KnowledgeRepository;
 import com.projekt.repositories.SoftwareRepository;
@@ -54,7 +54,7 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public boolean existsByName(String softwareName) {
-        return softwareRepository.existsByName(softwareName);
+        return softwareRepository.existsByNameIgnoreCase(softwareName);
     }
 
     @Override

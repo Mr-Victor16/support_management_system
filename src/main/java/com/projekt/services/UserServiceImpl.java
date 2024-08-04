@@ -2,6 +2,9 @@ package com.projekt.services;
 
 import com.projekt.models.Role;
 import com.projekt.payload.request.*;
+import com.projekt.payload.request.add.AddUserRequest;
+import com.projekt.payload.request.edit.EditProfileDetailsRequest;
+import com.projekt.payload.request.edit.EditUserRequest;
 import com.projekt.payload.response.LoginResponse;
 import com.projekt.repositories.RoleRepository;
 import com.projekt.repositories.UserRepository;
@@ -164,7 +167,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void updateProfile(ProfileDetailsRequest request) {
+    public void updateProfile(EditProfileDetailsRequest request) {
         com.projekt.models.User user = userRepository.getReferenceById(request.getId());
         user.setName(request.getName());
         user.setSurname(request.getSurname());

@@ -1,8 +1,8 @@
 package com.projekt.services;
 
 import com.projekt.models.Status;
-import com.projekt.payload.request.AddStatusRequest;
-import com.projekt.payload.request.EditStatusRequest;
+import com.projekt.payload.request.add.AddStatusRequest;
+import com.projekt.payload.request.edit.EditStatusRequest;
 import com.projekt.payload.response.StatusResponse;
 import com.projekt.repositories.StatusRepository;
 import com.projekt.repositories.TicketRepository;
@@ -64,7 +64,7 @@ public class StatusServiceImpl implements StatusService{
 
     @Override
     public boolean existsByName(String statusName) {
-        return statusRepository.existsByName(statusName);
+        return statusRepository.existsByNameIgnoreCase(statusName);
     }
 
     @Override

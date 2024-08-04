@@ -1,4 +1,4 @@
-package com.projekt.payload.request;
+package com.projekt.payload.request.edit;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,8 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AddCategoryRequest {
+public class EditCategoryRequest {
+    private Long categoryId;
+
     @Size(min = 2, max = 20)
     @NotBlank
-    String categoryName;
+    private String categoryName;
 }

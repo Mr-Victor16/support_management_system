@@ -1,8 +1,8 @@
 package com.projekt.services;
 
 import com.projekt.models.Software;
-import com.projekt.payload.request.EditSoftwareRequest;
-import com.projekt.payload.request.AddSoftwareRequest;
+import com.projekt.payload.request.edit.EditSoftwareRequest;
+import com.projekt.payload.request.add.AddSoftwareRequest;
 import com.projekt.payload.response.SoftwareResponse;
 import org.springframework.stereotype.Service;
 

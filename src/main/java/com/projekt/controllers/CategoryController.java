@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.AddCategoryRequest;
-import com.projekt.payload.request.EditCategoryRequest;
+import com.projekt.payload.request.add.AddCategoryRequest;
+import com.projekt.payload.request.edit.EditCategoryRequest;
 import com.projekt.services.CategoryService;
 import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;

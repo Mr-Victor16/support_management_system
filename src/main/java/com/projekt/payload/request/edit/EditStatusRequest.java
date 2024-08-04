@@ -1,4 +1,4 @@
-package com.projekt.payload.request;
+package com.projekt.payload.request.edit;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

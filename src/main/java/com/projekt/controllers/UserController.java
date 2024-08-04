@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.AddUserRequest;
-import com.projekt.payload.request.EditUserRequest;
+import com.projekt.payload.request.add.AddUserRequest;
+import com.projekt.payload.request.edit.EditUserRequest;
 import com.projekt.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

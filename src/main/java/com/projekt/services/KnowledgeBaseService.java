@@ -1,8 +1,8 @@
 package com.projekt.services;
 
 import com.projekt.models.Knowledge;
-import com.projekt.payload.request.AddKnowledgeRequest;
-import com.projekt.payload.request.EditKnowledgeRequest;
+import com.projekt.payload.request.add.AddKnowledgeRequest;
+import com.projekt.payload.request.edit.EditKnowledgeRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

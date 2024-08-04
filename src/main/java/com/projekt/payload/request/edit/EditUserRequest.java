@@ -1,4 +1,4 @@
-package com.projekt.payload.request;
+package com.projekt.payload.request.edit;
 
 import com.projekt.validators.FirstCharacterConstraint;
 import jakarta.validation.constraints.*;

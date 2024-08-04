@@ -1,6 +1,6 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.ProfileDetailsRequest;
+import com.projekt.payload.request.edit.EditProfileDetailsRequest;
 import com.projekt.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +31,7 @@ public class ProfileController {
 
     @PutMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody ProfileDetailsRequest request) {
+    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody EditProfileDetailsRequest request) {
         if (!userService.existsByUsername(principal.getName()) || !userService.exists(request.getId())){
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }

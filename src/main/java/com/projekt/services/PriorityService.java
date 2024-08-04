@@ -1,8 +1,8 @@
 package com.projekt.services;
 
 import com.projekt.models.Priority;
-import com.projekt.payload.request.AddPriorityRequest;
-import com.projekt.payload.request.EditPriorityRequest;
+import com.projekt.payload.request.add.AddPriorityRequest;
+import com.projekt.payload.request.edit.EditPriorityRequest;
 import com.projekt.payload.response.PriorityResponse;
 import org.springframework.stereotype.Service;
 

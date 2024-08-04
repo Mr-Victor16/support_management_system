@@ -1,6 +1,5 @@
-package com.projekt.payload.request;
+package com.projekt.payload.request.edit;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -12,11 +11,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AddPriorityRequest {
-    @Size(min = 3, max = 20)
-    @NotBlank
-    private String priorityName;
+public class EditSoftwareRequest {
+    private Long softwareId;
 
-    @Min(1)
-    private Integer maxTime;
+    @Size(min = 2, max = 30)
+    @NotBlank
+    private String softwareName;
+
+    @Size(min = 10, max = 200)
+    @NotBlank
+    private String description;
 }

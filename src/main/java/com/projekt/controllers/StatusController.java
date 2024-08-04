@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.AddStatusRequest;
-import com.projekt.payload.request.EditStatusRequest;
+import com.projekt.payload.request.add.AddStatusRequest;
+import com.projekt.payload.request.edit.EditStatusRequest;
 import com.projekt.repositories.TicketRepository;
 import com.projekt.services.StatusService;
 import org.springframework.http.HttpStatus;

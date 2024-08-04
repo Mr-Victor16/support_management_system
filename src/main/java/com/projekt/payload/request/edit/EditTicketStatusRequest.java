@@ -1,4 +1,4 @@
-package com.projekt.payload.request;
+package com.projekt.payload.request.edit;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ChangeTicketStatus {
+public class EditTicketStatusRequest {
     private Long ticketID;
     private Long statusID;
 }

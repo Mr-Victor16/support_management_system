@@ -1,4 +1,4 @@
-package com.projekt.payload.request;
+package com.projekt.payload.request.add;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,14 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class EditSoftwareRequest {
-    private Long softwareId;
-
-    @Size(min = 2, max = 30)
+public class AddStatusRequest {
+    @Size(min = 2, max = 20)
     @NotBlank
-    private String softwareName;
+    private String statusName;
 
-    @Size(min = 10, max = 200)
-    @NotBlank
-    private String description;
+    private boolean closeTicket;
 }

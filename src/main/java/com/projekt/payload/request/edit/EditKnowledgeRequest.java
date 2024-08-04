@@ -1,5 +1,7 @@
-package com.projekt.payload.request;
+package com.projekt.payload.request.edit;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,13 +15,21 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AddTicketReply {
-    private Long ticketID;
-    private Long userID;
+public class EditKnowledgeRequest {
+    private Long knowledgeId;
 
-    @Size(min = 5, max = 500)
+    @Size(min = 2, max = 50)
+    @NotBlank
+    private String title;
+
+    @Size(min = 20, max = 360)
+    @NotBlank
     private String content;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @NotNull
     private LocalDate date;
+
+    @NotNull
+    private Long softwareId;
 }

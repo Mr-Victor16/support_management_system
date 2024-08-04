@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PriorityRepository extends JpaRepository<Priority, Long> {
-    boolean existsByName(String priorityName);
+    boolean existsByNameIgnoreCase(String name);
 }

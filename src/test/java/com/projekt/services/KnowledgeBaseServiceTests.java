@@ -2,7 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Knowledge;
 import com.projekt.models.Software;
-import com.projekt.payload.request.EditKnowledgeRequest;
+import com.projekt.payload.request.edit.EditKnowledgeRequest;
 import com.projekt.repositories.KnowledgeRepository;
 import com.projekt.repositories.SoftwareRepository;
 import org.junit.jupiter.api.BeforeEach;

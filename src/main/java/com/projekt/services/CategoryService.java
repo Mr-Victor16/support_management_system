@@ -1,7 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.Category;
-import com.projekt.payload.request.EditCategoryRequest;
+import com.projekt.payload.request.edit.EditCategoryRequest;
 import com.projekt.payload.response.CategoryResponse;
 import org.springframework.stereotype.Service;
 
