@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
@@ -157,8 +156,14 @@ public class RepositoryInitializer {
 
                 ticket.setCategory(categoryRepository.getReferenceById(1L));
 
-                BufferedImage bi = ImageIO.read(new File("src/main/resources/images/1.png"));
-                Image image = new Image(1L,"1.png",toByteArray(bi, "png"));
+                Image image = new Image(1L,"1.png",null);
+                try {
+                    BufferedImage bi = ImageIO.read(getClass().getResourceAsStream("/images/1.png"));
+                    image.setFileContent(toByteArray(bi));
+                } catch (IOException e) {
+                    image.setFileContent(createEmptyImage());
+                }
+
                 imageRepository.save(image);
 
                 List<Image> imageList = new ArrayList<>();
@@ -183,10 +188,15 @@ public class RepositoryInitializer {
         };
     }
 
-    public static byte[] toByteArray(BufferedImage bi, String format) throws IOException {
+    private byte[] toByteArray(BufferedImage bi) throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ImageIO.write(bi, format, stream);
+        ImageIO.write(bi, "png", stream);
 
         return stream.toByteArray();
+    }
+
+    private byte[] createEmptyImage() throws IOException {
+        BufferedImage emptyImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        return toByteArray(emptyImage);
     }
 }

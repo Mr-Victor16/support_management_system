@@ -5,6 +5,7 @@ import com.projekt.security.jwt.AuthTokenFilter;
 import com.projekt.security.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -23,7 +24,7 @@ public class WebSecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJWT unauthorizedHandler;
 
-    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJWT unauthorizedHandler) {
+    public WebSecurityConfig(@Lazy UserDetailsServiceImpl userDetailsService, AuthEntryPointJWT unauthorizedHandler) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
     }

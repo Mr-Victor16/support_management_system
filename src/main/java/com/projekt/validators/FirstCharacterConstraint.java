@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Target( { ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FirstCharacterConstraint {
-    String message() default "Nazwa powinna rozpoczynać się od dużej litery";
+    String message() default "Name must start with a capital letter";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 
