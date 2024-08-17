@@ -6,22 +6,23 @@ import com.projekt.payload.request.add.AddUserRequest;
 import com.projekt.payload.request.edit.EditProfileDetailsRequest;
 import com.projekt.payload.request.edit.EditUserRequest;
 import com.projekt.payload.response.LoginResponse;
-import com.projekt.payload.response.UserDetails;
+import com.projekt.payload.response.UserDetailsResponse;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
+
 import java.util.List;
 
 @Service
 public interface UserService extends UserDetailsService {
     User findUserByUsername(String name);
 
-    List<UserDetails> loadAll();
+    List<UserDetailsResponse> loadAll();
 
-    boolean exists(Long id);
+    boolean existsById(Long id);
 
-    UserDetails loadById(Long id);
+    UserDetailsResponse loadById(Long id);
 
     void editUser(EditUserRequest request) throws Exception;
 
@@ -37,9 +38,9 @@ public interface UserService extends UserDetailsService {
 
     LoginResponse authenticate(LoginRequest request);
 
-    com.projekt.payload.response.UserDetails getUserDetails(String name);
+    UserDetailsResponse getUserDetails(String name);
 
-    void updateProfile(EditProfileDetailsRequest request);
+    void updateProfile(String username, EditProfileDetailsRequest request);
 
     boolean isActive(Long userID);
 

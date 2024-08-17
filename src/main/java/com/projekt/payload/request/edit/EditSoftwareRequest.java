@@ -12,11 +12,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EditSoftwareRequest {
-    private Long softwareId;
+    private Long softwareID;
 
     @Size(min = 2, max = 30)
     @NotBlank
-    private String softwareName;
+    private String name;
 
     @Size(min = 10, max = 200)
     @NotBlank

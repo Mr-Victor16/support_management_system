@@ -47,15 +47,15 @@ public class PriorityController {
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editPriority(@RequestBody @Valid EditPriorityRequest request){
-        if(!priorityService.existsById(request.getPriorityId())){
+        if(!priorityService.existsById(request.getPriorityID())){
             return new ResponseEntity<>("No priority found", HttpStatus.NOT_FOUND);
         }
 
-        if(priorityService.loadById(request.getPriorityId()).getName().equals(request.getPriorityName())){
+        if(priorityService.loadById(request.getPriorityID()).getName().equals(request.getName())){
             return new ResponseEntity<>("Priority name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!priorityService.existsByName(request.getPriorityName())){
+        if(!priorityService.existsByName(request.getName())){
             priorityService.update(request);
             return new ResponseEntity<>("Priority name edited", HttpStatus.OK);
         }
@@ -66,7 +66,7 @@ public class PriorityController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addPriority(@RequestBody @Valid AddPriorityRequest request){
-        if(!priorityService.existsByName(request.getPriorityName())){
+        if(!priorityService.existsByName(request.getName())){
             priorityService.save(request);
             return new ResponseEntity<>("Priority added", HttpStatus.OK);
         }

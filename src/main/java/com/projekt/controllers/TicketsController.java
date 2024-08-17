@@ -4,9 +4,9 @@ import com.projekt.repositories.UserRepository;
 import com.projekt.services.TicketService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -29,9 +29,8 @@ public class TicketsController {
 
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> getUserTickets(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userID = userRepository.findByUsername(authentication.getName()).getId();
+    public ResponseEntity<?> getUserTickets(Principal principal){
+        Long userID = userRepository.findByUsernameIgnoreCase(principal.getName()).getId();
 
         return ResponseEntity.ok(ticketService.getTicketsByUserId(userID));
     }

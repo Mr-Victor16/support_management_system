@@ -1,5 +1,6 @@
 package com.projekt.payload.request.add;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +15,10 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class AddTicketReply {
+    @NotNull
     private Long ticketID;
+
+    @NotNull
     private Long userID;
 
     @Size(min = 5, max = 500)

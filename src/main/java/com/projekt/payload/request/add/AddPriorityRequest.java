@@ -15,7 +15,7 @@ import lombok.Setter;
 public class AddPriorityRequest {
     @Size(min = 3, max = 20)
     @NotBlank
-    private String priorityName;
+    private String name;
 
     @Min(1)
     private Integer maxTime;

@@ -37,12 +37,12 @@ public class KnowledgeBaseController {
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editKnowledge(@RequestBody @Valid EditKnowledgeRequest request){
-        if(!knowledgeBaseService.existsById(request.getKnowledgeId())) {
+        if(!knowledgeBaseService.existsById(request.getKnowledgeID())) {
             return new ResponseEntity<>("No knowledge found", HttpStatus.NOT_FOUND);
         }
 
-        if(knowledgeBaseService.loadById(request.getKnowledgeId()).getTitle() != request.getTitle()){
-            if(knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareId())){
+        if(knowledgeBaseService.loadById(request.getKnowledgeID()).getTitle() != request.getTitle()){
+            if(knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareID())){
                 return new ResponseEntity<>("Knowledge already exists", HttpStatus.CONFLICT);
             }
         }
@@ -54,7 +54,7 @@ public class KnowledgeBaseController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addKnowledge(@RequestBody @Valid AddKnowledgeRequest request){
-        if(!knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareId())){
+        if(!knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareID())){
             knowledgeBaseService.save(request);
             return new ResponseEntity<>("Knowledge added", HttpStatus.OK);
         }

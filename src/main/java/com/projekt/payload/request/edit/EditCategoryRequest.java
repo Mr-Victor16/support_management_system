@@ -12,9 +12,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EditCategoryRequest {
-    private Long categoryId;
+    private Long categoryID;
 
     @Size(min = 2, max = 20)
     @NotBlank
-    private String categoryName;
+    private String name;
 }

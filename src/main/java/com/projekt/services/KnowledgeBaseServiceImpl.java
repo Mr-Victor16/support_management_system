@@ -60,11 +60,11 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
 
     @Override
     public void update(EditKnowledgeRequest request) {
-        Knowledge knowledge = knowledgeRepository.getReferenceById(request.getKnowledgeId());
+        Knowledge knowledge = knowledgeRepository.getReferenceById(request.getKnowledgeID());
         knowledge.setTitle(request.getTitle());
         knowledge.setContent(request.getContent());
         knowledge.setDate(request.getDate());
-        knowledge.setSoftware(softwareRepository.getReferenceById(request.getSoftwareId()));
+        knowledge.setSoftware(softwareRepository.getReferenceById(request.getSoftwareID()));
         knowledgeRepository.save(knowledge);
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class UserDetails {
+public class UserDetailsResponse {
     private Long id;
     private String username;
     private String name;

@@ -49,15 +49,15 @@ public class SoftwareController {
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editSoftware(@RequestBody @Valid EditSoftwareRequest request){
-        if(!softwareService.existsById(request.getSoftwareId())){
+        if(!softwareService.existsById(request.getSoftwareID())){
             return new ResponseEntity<>("No software found", HttpStatus.NOT_FOUND);
         }
 
-        if(softwareService.loadById(request.getSoftwareId()).getName().equals(request.getSoftwareName())){
+        if(softwareService.loadById(request.getSoftwareID()).getName().equals(request.getName())){
             return new ResponseEntity<>("Software name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!softwareService.existsByName(request.getSoftwareName())){
+        if(!softwareService.existsByName(request.getName())){
             softwareService.update(request);
             return new ResponseEntity<>("Software details edited", HttpStatus.OK);
         }
@@ -68,7 +68,7 @@ public class SoftwareController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addSoftware(@RequestBody @Valid AddSoftwareRequest request){
-        if(!softwareService.existsByName(request.getSoftwareName())){
+        if(!softwareService.existsByName(request.getName())){
             softwareService.save(request);
             return new ResponseEntity<>("Software added", HttpStatus.OK);
         }

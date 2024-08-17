@@ -13,11 +13,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EditPriorityRequest {
-    private Long priorityId;
+    private Long priorityID;
 
     @Size(min = 3, max = 20)
     @NotBlank
-    private String priorityName;
+    private String Name;
 
     @Min(1)
     private Integer maxTime;

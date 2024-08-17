@@ -48,15 +48,15 @@ public class StatusController {
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editStatus(@RequestBody @Valid EditStatusRequest request){
-        if(!statusService.existsById(request.getStatusId())){
+        if(!statusService.existsById(request.getStatusID())){
             return new ResponseEntity<>("No status found", HttpStatus.NOT_FOUND);
         }
 
-        if(statusService.loadById(request.getStatusId()).getName().equals(request.getStatusName())){
+        if(statusService.loadById(request.getStatusID()).getName().equals(request.getName())){
             return new ResponseEntity<>("Status name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!statusService.existsByName(request.getStatusName())){
+        if(!statusService.existsByName(request.getName())){
             statusService.update(request);
             return new ResponseEntity<>("Status name edited", HttpStatus.OK);
         }
@@ -67,7 +67,7 @@ public class StatusController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addStatus(@RequestBody @Valid AddStatusRequest request){
-        if(!statusService.existsByName(request.getStatusName())){
+        if(!statusService.existsByName(request.getName())){
             statusService.save(request);
             return new ResponseEntity<>("Status added", HttpStatus.OK);
         }

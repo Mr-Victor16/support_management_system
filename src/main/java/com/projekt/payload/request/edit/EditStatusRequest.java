@@ -12,11 +12,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EditStatusRequest {
-    private Long statusId;
+    private Long statusID;
 
     @Size(min = 2, max = 20)
     @NotBlank
-    private String statusName;
+    private String name;
 
     private boolean closeTicket;
 }

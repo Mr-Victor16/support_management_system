@@ -29,5 +29,5 @@ public class AddKnowledgeRequest {
     private LocalDate date;
 
     @NotNull
-    private Long softwareId;
+    private Long softwareID;
 }

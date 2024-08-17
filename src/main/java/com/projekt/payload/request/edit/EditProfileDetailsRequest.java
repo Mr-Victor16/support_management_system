@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class EditProfileDetailsRequest {
-    private Long id;
     private String name;
     private String surname;
+    private String password;
 }

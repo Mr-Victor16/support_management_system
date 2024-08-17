@@ -55,7 +55,7 @@ public class TicketServiceImpl implements TicketService{
 
     @Override
     public boolean isAuthorized(Long ticketID, String username){
-        if(userRepository.existsByUsernameAndRolesType(username, Role.Types.ROLE_OPERATOR)) return true;
+        if(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)) return true;
 
         return (userService.findUserByUsername(username).getId() == userRepository.findByTicketsId(ticketID).getId());
     }

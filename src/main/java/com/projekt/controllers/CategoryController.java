@@ -47,15 +47,15 @@ public class CategoryController {
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editCategory(@RequestBody @Valid EditCategoryRequest request){
-        if(!categoryService.existsById(request.getCategoryId())){
+        if(!categoryService.existsById(request.getCategoryID())){
             return new ResponseEntity<>("No category found", HttpStatus.NOT_FOUND);
         }
 
-        if(categoryService.loadById(request.getCategoryId()).getName().equals(request.getCategoryName())){
+        if(categoryService.loadById(request.getCategoryID()).getName().equals(request.getName())){
             return new ResponseEntity<>("Category name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!categoryService.existsByName(request.getCategoryName())){
+        if(!categoryService.existsByName(request.getName())){
             categoryService.update(request);
             return new ResponseEntity<>("Category name edited", HttpStatus.OK);
         }
@@ -66,8 +66,8 @@ public class CategoryController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addCategory(@RequestBody @Valid AddCategoryRequest request){
-        if(!categoryService.existsByName(request.getCategoryName())){
-            categoryService.save(request.getCategoryName());
+        if(!categoryService.existsByName(request.getName())){
+            categoryService.save(request.getName());
             return new ResponseEntity<>("Category added", HttpStatus.OK);
         }
 

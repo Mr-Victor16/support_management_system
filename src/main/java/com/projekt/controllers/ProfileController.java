@@ -32,17 +32,17 @@ public class ProfileController {
     @PutMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> updateProfile(Principal principal, @RequestBody EditProfileDetailsRequest request) {
-        if (!userService.existsByUsername(principal.getName()) || !userService.exists(request.getId())){
+        if (!userService.existsByUsername(principal.getName())){
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }
 
-        userService.updateProfile(request);
+        userService.updateProfile(principal.getName(), request);
         return new ResponseEntity<>("Profile updated", HttpStatus.OK);
     }
 
     @GetMapping("/activate/{userID}")
     public ResponseEntity<?> activateProfile(@PathVariable Long userID) {
-        if(!userService.exists(userID)){
+        if(!userService.existsById(userID)){
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }
 

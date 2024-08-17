@@ -52,8 +52,8 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public void update(EditCategoryRequest request) {
-        Category category = categoryRepository.getReferenceById(request.getCategoryId());
-        category.setName(request.getCategoryName());
+        Category category = categoryRepository.getReferenceById(request.getCategoryID());
+        category.setName(request.getName());
         categoryRepository.save(category);
     }
 

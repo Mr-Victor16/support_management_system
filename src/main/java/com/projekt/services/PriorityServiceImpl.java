@@ -38,15 +38,15 @@ public class PriorityServiceImpl implements PriorityService{
 
     @Override
     public void update(EditPriorityRequest request) {
-        Priority priority = priorityRepository.getReferenceById(request.getPriorityId());
-        priority.setName(request.getPriorityName());
+        Priority priority = priorityRepository.getReferenceById(request.getPriorityID());
+        priority.setName(request.getName());
         priority.setMaxTime(request.getMaxTime());
         priorityRepository.save(priority);
     }
 
     @Override
     public void save(AddPriorityRequest request) {
-        priorityRepository.save(new Priority(request.getPriorityName(), request.getMaxTime()));
+        priorityRepository.save(new Priority(request.getName(), request.getMaxTime()));
     }
 
     @Override

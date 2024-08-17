@@ -23,7 +23,7 @@ public class UserController {
     @GetMapping("{userID}")
     @PreAuthorize("hasRole('OPERATOR')")
     public ResponseEntity<?> getUser(@PathVariable(name = "userID", required = false) Long userID){
-        if (!userService.exists(userID)) {
+        if (!userService.existsById(userID)) {
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }
 
@@ -44,7 +44,7 @@ public class UserController {
     @PutMapping
     @PreAuthorize("hasRole('OPERATOR')")
     public ResponseEntity<?> editUser(@RequestBody @Valid EditUserRequest request){
-        if (!userService.exists(request.getId())) {
+        if (!userService.existsById(request.getId())) {
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }
 
@@ -66,7 +66,7 @@ public class UserController {
     @PreAuthorize("hasRole('OPERATOR')")
     public ResponseEntity<?> deleteUser(@PathVariable("userID") Long userID){
         if(userID != 1) {
-            if (userService.exists(userID)) {
+            if (userService.existsById(userID)) {
                 userService.delete(userID);
                 return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
             }

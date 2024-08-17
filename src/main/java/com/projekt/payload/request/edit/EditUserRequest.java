@@ -17,10 +17,6 @@ public class EditUserRequest {
     @NotNull
     private Long id;
 
-    @Size(min = 2, max = 36)
-    @NotBlank
-    private String username;
-
     @Email
     @NotEmpty
     private String email;

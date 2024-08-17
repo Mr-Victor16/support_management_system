@@ -14,7 +14,7 @@ import lombok.Setter;
 public class AddStatusRequest {
     @Size(min = 2, max = 20)
     @NotBlank
-    private String statusName;
+    private String name;
 
     private boolean closeTicket;
 }

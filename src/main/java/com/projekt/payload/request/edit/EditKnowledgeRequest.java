@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class EditKnowledgeRequest {
-    private Long knowledgeId;
+    private Long knowledgeID;
 
     @Size(min = 2, max = 50)
     @NotBlank
@@ -31,5 +31,5 @@ public class EditKnowledgeRequest {
     private LocalDate date;
 
     @NotNull
-    private Long softwareId;
+    private Long softwareID;
 }

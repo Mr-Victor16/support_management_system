@@ -14,5 +14,5 @@ import lombok.Setter;
 public class AddCategoryRequest {
     @Size(min = 2, max = 20)
     @NotBlank
-    String categoryName;
+    private String name;
 }

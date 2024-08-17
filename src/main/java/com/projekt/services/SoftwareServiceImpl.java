@@ -46,8 +46,8 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public void update(EditSoftwareRequest request) {
-        Software software = softwareRepository.getReferenceById(request.getSoftwareId());
-        software.setName(request.getSoftwareName());
+        Software software = softwareRepository.getReferenceById(request.getSoftwareID());
+        software.setName(request.getName());
         software.setDescription(request.getDescription());
         softwareRepository.save(software);
     }
@@ -59,7 +59,7 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public void save(AddSoftwareRequest request) {
-        softwareRepository.save(new Software(request.getSoftwareName(), request.getDescription()));
+        softwareRepository.save(new Software(request.getName(), request.getDescription()));
     }
 
     @Override
