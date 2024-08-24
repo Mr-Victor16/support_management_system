@@ -48,7 +48,7 @@ Project was then refactored to a REST API backend to provide a more modern solut
   - manage knowledge base.
 
 ##  Database schema
-![db_schema](https://github.com/user-attachments/assets/5f601a90-fa7f-4db8-a194-fbc2bfd87263)  
+![db_schema](https://github.com/user-attachments/assets/7b62e04e-940e-44e9-a2dc-ab4c12295a74) 
 _The schema was created using Apache Workbench._
 
 ## Running the project with Docker Compose
