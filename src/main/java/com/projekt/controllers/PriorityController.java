@@ -24,6 +24,7 @@ public class PriorityController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> getAllPriorities(){
         return ResponseEntity.ok(priorityService.getAll());
     }

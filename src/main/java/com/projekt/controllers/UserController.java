@@ -21,7 +21,7 @@ public class UserController {
     }
 
     @GetMapping("{userID}")
-    @PreAuthorize("hasRole('OPERATOR')")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public ResponseEntity<?> getUser(@PathVariable(name = "userID", required = false) Long userID){
         if (!userService.existsById(userID)) {
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('OPERATOR')")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public ResponseEntity<?> addUser(@RequestBody @Valid AddUserRequest request){
         if (userService.existsByUsername(request.getUsername()) || userService.existsByEmail(request.getEmail())){
             return new ResponseEntity<>("Username or Email already exists", HttpStatus.CONFLICT);
@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PutMapping
-    @PreAuthorize("hasRole('OPERATOR')")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public ResponseEntity<?> editUser(@RequestBody @Valid EditUserRequest request){
         if (!userService.existsById(request.getId())) {
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
@@ -63,7 +63,7 @@ public class UserController {
     }
 
     @DeleteMapping("{userID}")
-    @PreAuthorize("hasRole('OPERATOR')")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable("userID") Long userID){
         if(userID != 1) {
             if (userService.existsById(userID)) {

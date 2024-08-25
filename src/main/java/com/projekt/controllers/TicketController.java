@@ -35,6 +35,7 @@ public class TicketController {
     }
 
     @GetMapping("{ticketID}")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> getTicketById(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
         if(!ticketService.existsById(ticketID)){
             return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
@@ -48,7 +49,7 @@ public class TicketController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> addTicket(@RequestBody @Valid AddTicketRequest request, Principal principal){
         if(!ticketService.entitiesExist(request.getCategoryID(), request.getStatusID(), request.getPriorityID(), request.getSoftwareID())){
             return new ResponseEntity<>("One or more entities do not exist", HttpStatus.NOT_FOUND);
@@ -59,6 +60,7 @@ public class TicketController {
     }
 
     @PutMapping
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> updateTicket(@RequestBody @Valid EditTicketRequest request, Principal principal) {
         if(!ticketService.existsById(request.getTicketID())){
             return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
@@ -73,6 +75,7 @@ public class TicketController {
     }
 
     @PostMapping("{ticketID}/image")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> addImage(@PathVariable("ticketID") Long ticketID, @RequestBody MultipartFile file, Principal principal) {
         try {
             if (!ticketService.existsById(ticketID)) {
@@ -91,6 +94,7 @@ public class TicketController {
     }
 
     @DeleteMapping("/image/{imageID}")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> deleteImage(@PathVariable(name = "imageID", required = false) Long imageID, Principal principal) {
         if(!imageService.existsById(imageID)){
             return new ResponseEntity<>("Image not found", HttpStatus.NOT_FOUND);
@@ -105,6 +109,7 @@ public class TicketController {
     }
 
     @PostMapping("/reply")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> addTicketReply(@RequestBody @Valid AddTicketReplyRequest request, Principal principal) {
         try {
             if(!ticketService.existsById(request.getTicketID())){
@@ -123,7 +128,7 @@ public class TicketController {
     }
 
     @PostMapping("/status")
-    @PreAuthorize("hasRole('OPERATOR')")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public ResponseEntity<?> changeTicketStatus(@RequestBody @Valid EditTicketStatusRequest request) {
         try {
             if (!ticketService.existsById(request.getTicketID())) {
@@ -143,6 +148,7 @@ public class TicketController {
 
     @Transactional
     @DeleteMapping("{ticketID}")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> deleteTicket(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
         if(ticketService.isAuthorized(ticketID,principal.getName())){
             ticketService.delete(ticketID);
@@ -153,7 +159,7 @@ public class TicketController {
     }
 
     @DeleteMapping("/reply/{replyID}")
-    @PreAuthorize("hasRole('OPERATOR')")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public ResponseEntity<?> deleteReply(@PathVariable(name = "replyID", required = false) Long replyID) {
         if(ticketReplyService.existsById(replyID)){
             ticketReplyService.deleteById(replyID);
