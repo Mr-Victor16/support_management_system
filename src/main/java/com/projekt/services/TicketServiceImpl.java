@@ -1,7 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
-import com.projekt.payload.request.add.AddTicketReply;
+import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.edit.EditTicketRequest;
 import com.projekt.repositories.*;
@@ -57,7 +57,7 @@ public class TicketServiceImpl implements TicketService{
     public boolean isAuthorized(Long ticketID, String username){
         if(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)) return true;
 
-        return (userService.findUserByUsername(username).getId() == userRepository.findByTicketsId(ticketID).getId());
+        return (userService.findUserByUsername(username).getId() == ticketRepository.getReferenceById(ticketID).getUser().getId());
     }
 
     @Override
@@ -66,21 +66,16 @@ public class TicketServiceImpl implements TicketService{
     }
 
     @Override
-    public List<Ticket> getTicketsByUserId(Long id) {
-        return userRepository.getReferenceById(id).getTickets();
-    }
-
-    @Override
-    public void addReply(AddTicketReply request) throws MessagingException {
+    public void addReply(AddTicketReplyRequest request) throws MessagingException {
         TicketReply ticketReply = new TicketReply();
         ticketReply.setDate(LocalDate.now());
         ticketReply.setUser(userRepository.getReferenceById(request.getUserID()));
         ticketReplyRepository.save(ticketReply);
 
         Ticket ticket = ticketRepository.getReferenceById(request.getTicketID());
-        ticket.getTicketReplies().add(ticketReply);
+        ticket.getReplies().add(ticketReply);
 
-        User user = userRepository.findByTicketsId(request.getTicketID());
+        User user = ticketRepository.getReferenceById(request.getTicketID()).getUser();
 
         if(user.getId() != request.getUserID()){
             mailService.sendTicketReplyMessage(user.getEmail(), ticket.getTitle());
@@ -96,7 +91,7 @@ public class TicketServiceImpl implements TicketService{
         Ticket ticket = ticketRepository.getReferenceById(ticketID);
         ticket.setStatus(status);
 
-        User user = userRepository.findByTicketsId(ticketID);
+        User user = ticketRepository.getReferenceById(ticketID).getUser();
         mailService.sendChangeStatusMessage(user.getId(), ticket.getTitle(), status.getName());
 
         ticketRepository.save(ticket);
@@ -104,11 +99,11 @@ public class TicketServiceImpl implements TicketService{
 
     @Override
     public Ticket findByImageId(Long imageID) {
-        return ticketRepository.findByImagesImageID(imageID);
+        return ticketRepository.findByImagesId(imageID);
     }
 
     @Override
-    public void add(AddTicketRequest request) {
+    public void add(AddTicketRequest request, String username) {
         Ticket ticket = new Ticket();
         ticket.setTitle(request.getTitle());
         ticket.setDescription(request.getDescription());
@@ -130,6 +125,7 @@ public class TicketServiceImpl implements TicketService{
         ticket.setStatus(statusRepository.getReferenceById(request.getStatusID()));
         ticket.setVersion(request.getVersion());
         ticket.setSoftware(softwareRepository.getReferenceById(request.getSoftwareID()));
+        ticket.setUser(userRepository.findByUsernameIgnoreCase(username));
 
         ticketRepository.save(ticket);
     }

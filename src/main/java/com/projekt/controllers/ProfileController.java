@@ -2,6 +2,7 @@ package com.projekt.controllers;
 
 import com.projekt.payload.request.edit.EditProfileDetailsRequest;
 import com.projekt.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +32,7 @@ public class ProfileController {
 
     @PutMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody EditProfileDetailsRequest request) {
+    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody @Valid EditProfileDetailsRequest request) {
         if (!userService.existsByUsername(principal.getName())){
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }

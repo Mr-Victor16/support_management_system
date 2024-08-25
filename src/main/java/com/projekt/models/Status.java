@@ -22,7 +22,7 @@ public class Status {
 
     @Size(min = 2, max = 20)
     @NotBlank
-    @Column(name = "status_name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "close_ticket", nullable = false)

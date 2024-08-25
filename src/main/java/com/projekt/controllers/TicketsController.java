@@ -30,8 +30,6 @@ public class TicketsController {
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> getUserTickets(Principal principal){
-        Long userID = userRepository.findByUsernameIgnoreCase(principal.getName()).getId();
-
-        return ResponseEntity.ok(ticketService.getTicketsByUserId(userID));
+        return ResponseEntity.ok(userRepository.findByUsernameIgnoreCase(principal.getName()).getTickets());
     }
 }

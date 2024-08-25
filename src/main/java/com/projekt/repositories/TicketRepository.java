@@ -22,5 +22,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     boolean existsBySoftwareId(Long softwareID);
 
-    Ticket findByImagesImageID(Long imageID);
+    Ticket findByImagesId(Long imageID);
 }

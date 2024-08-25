@@ -28,10 +28,10 @@ public class TicketReply {
 
     @Size(min = 5, max = 500)
     @NotBlank
-    @Column(name = "reply_content", nullable = false)
+    @Column(name = "content", nullable = false)
     private String content;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "reply_date", nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 }

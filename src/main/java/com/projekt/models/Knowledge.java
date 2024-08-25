@@ -25,20 +25,20 @@ public class Knowledge {
 
     @Size(min = 2, max = 50)
     @NotBlank
-    @Column(name = "knowledge_title", nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Size(min = 20, max = 360)
     @NotBlank
-    @Column(name = "knowledge_content", nullable = false)
+    @Column(name = "content", nullable = false)
     private String content;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull
-    @Column(name = "knowledge_date", nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "softwareID", nullable = false)
+    @JoinColumn(name = "software_id", nullable = false)
     private Software software;
 }

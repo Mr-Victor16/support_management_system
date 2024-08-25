@@ -22,16 +22,16 @@ public class Software {
 
     @Size(min = 2, max = 30)
     @NotBlank
-    @Column(name = "software_name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Size(min = 10, max = 200)
     @NotBlank
-    @Column(name = "software_description", nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
-    public Software(String softwareName, String softwareDescription){
-        this.name = softwareName;
-        this.description = softwareDescription;
+    public Software(String name, String description){
+        this.name = name;
+        this.description = description;
     }
 }

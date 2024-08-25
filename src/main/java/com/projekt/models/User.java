@@ -32,29 +32,35 @@ public class User {
 
     @Size(min = 2, max = 36)
     @NotBlank
+    @Column(name = "username", nullable = false)
     private String username;
 
     @NotEmpty
     @NotBlank
     @JsonIgnore
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Email
     @NotEmpty
+    @Column(name = "email", nullable = false)
     private String email;
 
     @NotEmpty
     @Size(min = 2, max = 30)
     @NotBlank
     @FirstCharacterConstraint
+    @Column(name = "name", nullable = false)
     private String name;
 
     @NotEmpty
     @Size(min = 2, max = 60)
     @NotBlank
     @FirstCharacterConstraint
+    @Column(name = "surname", nullable = false)
     private String surname;
 
+    @Column(name = "enabled", nullable = false)
     private boolean enabled = false;
 
     @ManyToMany
@@ -63,8 +69,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "user_id")
+    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<Ticket> tickets = new ArrayList<>();
 
     public User(String username, boolean enabled){

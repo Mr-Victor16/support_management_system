@@ -1,6 +1,6 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.add.AddTicketReply;
+import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.edit.EditTicketStatusRequest;
 import com.projekt.payload.request.edit.EditTicketRequest;
@@ -49,12 +49,12 @@ public class TicketController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> addTicket(@RequestBody @Valid AddTicketRequest request){
+    public ResponseEntity<?> addTicket(@RequestBody @Valid AddTicketRequest request, Principal principal){
         if(!ticketService.entitiesExist(request.getCategoryID(), request.getStatusID(), request.getPriorityID(), request.getSoftwareID())){
             return new ResponseEntity<>("One or more entities do not exist", HttpStatus.NOT_FOUND);
         }
 
-        ticketService.add(request);
+        ticketService.add(request, principal.getName());
         return new ResponseEntity<>("Ticket added", HttpStatus.OK);
     }
 
@@ -105,7 +105,7 @@ public class TicketController {
     }
 
     @PostMapping("/reply")
-    public ResponseEntity<?> addTicketReply(@RequestBody @Valid AddTicketReply request, Principal principal) {
+    public ResponseEntity<?> addTicketReply(@RequestBody @Valid AddTicketReplyRequest request, Principal principal) {
         try {
             if(!ticketService.existsById(request.getTicketID())){
                 return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);

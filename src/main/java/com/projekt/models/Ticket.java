@@ -26,43 +26,48 @@ public class Ticket {
 
     @Size(min = 5, max = 100)
     @NotBlank
-    @Column(name = "ticket_title", nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Size(min = 5, max = 500)
     @NotBlank
-    @Column(name = "ticket_description", nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "ticket_ticket_id")
+    @JoinColumn(name = "ticket_id")
     private List<Image> images = new ArrayList<>();
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "ticket_date", nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "priorityID", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "priority_id", nullable = false)
     private Priority priority;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "statusID", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "status_id", nullable = false)
     private Status status;
 
     @Size(min = 1, max = 10)
     @NotBlank
+    @Column(name = "version", nullable = false)
     private String version;
 
     @ManyToOne
-    @JoinColumn(name = "software_id")
+    @JoinColumn(name = "software_id", nullable = false)
     private Software software;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ticket_id")
-    private List<TicketReply> ticketReplies = new ArrayList<>();
+    private List<TicketReply> replies = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }

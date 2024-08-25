@@ -22,9 +22,10 @@ public class Category {
 
     @Size(min = 2, max = 20)
     @NotBlank
+    @Column(name = "name", nullable = false)
     private String name;
 
-    public Category(String categoryName) {
-        this.name = categoryName;
+    public Category(String name) {
+        this.name = name;
     }
 }

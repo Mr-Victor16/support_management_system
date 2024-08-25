@@ -1,7 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
-import com.projekt.payload.request.add.AddTicketReply;
+import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.edit.EditTicketRequest;
 import org.springframework.stereotype.Service;
@@ -24,15 +24,13 @@ public interface TicketService {
 
     Ticket getById(Long id);
 
-    List<Ticket> getTicketsByUserId(Long id);
-
-    void addReply(AddTicketReply ticketReply) throws MessagingException;
+    void addReply(AddTicketReplyRequest ticketReply) throws MessagingException;
 
     void changeStatus(Long ticketID, Long statusID) throws MessagingException;
 
     Ticket findByImageId(Long imageId);
 
-    void add(AddTicketRequest request);
+    void add(AddTicketRequest request, String username);
 
     void update(EditTicketRequest request);
 

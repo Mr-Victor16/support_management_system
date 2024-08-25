@@ -11,8 +11,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsernameIgnoreCase(String username);
 
-    User findByTicketsId(Long id);
-
     boolean existsByUsernameIgnoreCaseAndRolesType(String username, Role.Types type);
 
     boolean existsByUsernameIgnoreCase(String username);

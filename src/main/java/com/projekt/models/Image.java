@@ -16,17 +16,17 @@ import jakarta.persistence.*;
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long imageID;
+    private Long id;
 
-    @Column(name = "file_name", nullable = false)
-    private String fileName;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @Lob
-    @Column(columnDefinition="MEDIUMBLOB", nullable = false)
-    private byte[] fileContent;
+    @Column(name = "content", columnDefinition="MEDIUMBLOB", nullable = false)
+    private byte[] content;
 
-    public Image(String fileName, byte[] fileContent) {
-        this.fileName = fileName;
-        this.fileContent = fileContent;
+    public Image(String name, byte[] content) {
+        this.name = name;
+        this.content = content;
     }
 }

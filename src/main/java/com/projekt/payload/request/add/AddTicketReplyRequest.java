@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AddTicketReply {
+public class AddTicketReplyRequest {
     @NotNull
     private Long ticketID;
 

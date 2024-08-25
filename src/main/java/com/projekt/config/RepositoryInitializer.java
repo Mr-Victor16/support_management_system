@@ -151,6 +151,8 @@ public class RepositoryInitializer {
                 ticket.setTitle("The website is unreachable");
                 ticket.setStatus(statusRepository.getReferenceById(1L));
                 ticket.setPriority(priorityRepository.getReferenceById(2L));
+                ticket.setSoftware(softwareRepository.getReferenceById(3L));
+                ticket.setUser(userRepository.getReferenceById(1L));
                 ticket.setDescription("When trying to enter the site, I get an error - This site is unreachable :(");
                 ticket.setVersion("1.0");
 
@@ -159,9 +161,9 @@ public class RepositoryInitializer {
                 Image image = new Image(1L,"1.png",null);
                 try {
                     BufferedImage bi = ImageIO.read(getClass().getResourceAsStream("/images/1.png"));
-                    image.setFileContent(toByteArray(bi));
+                    image.setContent(toByteArray(bi));
                 } catch (IOException e) {
-                    image.setFileContent(createEmptyImage());
+                    image.setContent(createEmptyImage());
                 }
 
                 imageRepository.save(image);
@@ -178,12 +180,9 @@ public class RepositoryInitializer {
                 List<TicketReply> ticketReplyList = new ArrayList<>();
                 ticketReplyList.add(ticketReply);
                 ticketReplyList.add(ticketReply1);
-                ticket.setTicketReplies(ticketReplyList);
+                ticket.setReplies(ticketReplyList);
 
                 ticketRepository.save(ticket);
-
-                User user = userRepository.getReferenceById(1L);
-                user.setTickets(Collections.singletonList(ticket));
             }
         };
     }

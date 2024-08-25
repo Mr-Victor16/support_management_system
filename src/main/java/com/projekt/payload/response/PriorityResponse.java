@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PriorityResponse {
-    private Long priorityId;
-    private String priorityName;
+    private Long priorityID;
+    private String name;
     private Long useNumber;
 }

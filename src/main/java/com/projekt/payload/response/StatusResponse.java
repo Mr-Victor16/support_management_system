@@ -10,8 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StatusResponse {
-    private Long statusId;
-    private String statusName;
+    private Long statusID;
+    private String name;
     private boolean closeTicket;
     private Long useNumber;
 }
