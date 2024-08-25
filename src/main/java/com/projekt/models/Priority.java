@@ -1,5 +1,6 @@
 package com.projekt.models;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,7 @@ public class Priority {
     private String name;
 
     @Min(1)
+    @NotNull
     @Column(name = "max_time", nullable = false)
     private Integer maxTime;
 

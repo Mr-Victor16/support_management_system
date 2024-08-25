@@ -1,9 +1,7 @@
 package com.projekt.payload.request.edit;
 
 import com.projekt.models.Image;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +19,7 @@ import java.util.List;
 @Setter
 public class EditTicketRequest {
     @NotNull
+    @Positive
     private Long ticketID;
 
     @Size(min = 5, max = 100)
@@ -31,19 +30,28 @@ public class EditTicketRequest {
     @NotBlank
     private String description;
 
+    @NotNull
+    @NotEmpty
     private List<MultipartFile> multipartFiles = new ArrayList<>();
+
+    @NotNull
+    @NotEmpty
     private List<Image> images = new ArrayList<>();
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @NotNull
     private LocalDate date;
 
     @NotNull
+    @Positive
     private Long categoryID;
 
     @NotNull
+    @Positive
     private Long priorityID;
 
     @NotNull
+    @Positive
     private Long statusID;
 
     @Size(min = 1, max = 10)
@@ -51,6 +59,6 @@ public class EditTicketRequest {
     private String version;
 
     @NotNull
+    @Positive
     private Long softwareID;
 }
-

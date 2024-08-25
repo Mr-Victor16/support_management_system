@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SoftwareResponse {
-    private Long id;
+    private Long softwareID;
     private String name;
     private String description;
     private Long useNumberTicket;

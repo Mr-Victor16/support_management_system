@@ -1,6 +1,7 @@
 package com.projekt.payload.request.add;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,5 +17,6 @@ public class AddStatusRequest {
     @NotBlank
     private String name;
 
-    private boolean closeTicket;
+    @NotNull
+    private Boolean closeTicket;
 }

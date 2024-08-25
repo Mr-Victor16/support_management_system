@@ -1,8 +1,6 @@
 package com.projekt.payload.request.edit;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EditPriorityRequest {
+    @NotNull
+    @Positive
     private Long priorityID;
 
     @Size(min = 3, max = 20)
@@ -20,5 +20,6 @@ public class EditPriorityRequest {
     private String Name;
 
     @Min(1)
+    @NotNull
     private Integer maxTime;
 }

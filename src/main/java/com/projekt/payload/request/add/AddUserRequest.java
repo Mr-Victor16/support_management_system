@@ -1,10 +1,7 @@
 package com.projekt.payload.request.add;
 
 import com.projekt.validators.FirstCharacterConstraint;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,25 +18,24 @@ public class AddUserRequest {
     @NotBlank
     private String username;
 
-    @NotEmpty
     @NotBlank
     private String password;
 
     @Email
-    @NotEmpty
+    @NotBlank
     private String email;
 
-    @NotEmpty
     @Size(min = 2, max = 30)
     @NotBlank
     @FirstCharacterConstraint
     private String name;
 
-    @NotEmpty
     @Size(min = 2, max = 60)
     @NotBlank
     @FirstCharacterConstraint
     private String surname;
 
+    @NotNull
+    @NotEmpty
     private List<String> roles;
 }

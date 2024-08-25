@@ -9,7 +9,6 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
@@ -35,25 +34,22 @@ public class User {
     @Column(name = "username", nullable = false)
     private String username;
 
-    @NotEmpty
     @NotBlank
     @JsonIgnore
     @Column(name = "password", nullable = false)
     private String password;
 
     @Email
-    @NotEmpty
+    @NotBlank
     @Column(name = "email", nullable = false)
     private String email;
 
-    @NotEmpty
     @Size(min = 2, max = 30)
     @NotBlank
     @FirstCharacterConstraint
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotEmpty
     @Size(min = 2, max = 60)
     @NotBlank
     @FirstCharacterConstraint

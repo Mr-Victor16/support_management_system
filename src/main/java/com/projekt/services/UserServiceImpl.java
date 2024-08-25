@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService{
                 .collect(Collectors.toSet());
 
         user.setRoles(roles);
-        user.setEnabled(request.isEnabled());
+        user.setEnabled(request.getEnabled());
 
         userRepository.save(user);
     }

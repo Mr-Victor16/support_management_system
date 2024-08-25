@@ -1,8 +1,6 @@
 package com.projekt.payload.request.add;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,15 +23,20 @@ public class AddTicketRequest {
     @NotBlank
     private String description;
 
+    @NotNull
+    @NotEmpty
     private List<MultipartFile> multipartFiles = new ArrayList<>();
 
     @NotNull
+    @Positive
     private Long categoryID;
 
     @NotNull
+    @Positive
     private Long priorityID;
 
     @NotNull
+    @Positive
     private Long statusID;
 
     @Size(min = 1, max = 10)
@@ -41,6 +44,6 @@ public class AddTicketRequest {
     private String version;
 
     @NotNull
+    @Positive
     private Long softwareID;
 }
-

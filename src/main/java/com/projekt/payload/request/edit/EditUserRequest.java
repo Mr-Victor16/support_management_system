@@ -15,25 +15,27 @@ import java.util.List;
 @Setter
 public class EditUserRequest {
     @NotNull
+    @Positive
     private Long id;
 
     @Email
-    @NotEmpty
+    @NotBlank
     private String email;
 
-    @NotEmpty
     @Size(min = 2, max = 30)
     @NotBlank
     @FirstCharacterConstraint
     private String name;
 
-    @NotEmpty
     @Size(min = 2, max = 60)
     @NotBlank
     @FirstCharacterConstraint
     private String surname;
 
-    private boolean enabled;
+    @NotNull
+    private Boolean enabled;
 
+    @NotNull
+    @NotEmpty
     private List<String> roles;
 }

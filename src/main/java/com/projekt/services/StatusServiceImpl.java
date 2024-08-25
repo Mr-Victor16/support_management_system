@@ -33,7 +33,7 @@ public class StatusServiceImpl implements StatusService{
 
     @Override
     public void save(AddStatusRequest request) {
-        statusRepository.save(new Status(request.getName(), request.isCloseTicket()));
+        statusRepository.save(new Status(request.getName(), request.getCloseTicket()));
     }
 
     @Override
@@ -57,7 +57,7 @@ public class StatusServiceImpl implements StatusService{
     public void update(EditStatusRequest request) {
         Status status = statusRepository.getReferenceById(request.getStatusID());
         status.setName(request.getName());
-        status.setCloseTicket(request.isCloseTicket());
+        status.setCloseTicket(request.getCloseTicket());
 
         statusRepository.save(status);
     }
