@@ -76,24 +76,24 @@ public class KnowledgeBaseServiceTests {
     //void update(EditKnowledgeRequest knowledgeRequest);
     //Tests the update method to ensure the knowledge is correctly updated based on the data from the EditKnowledgeRequest object.
     @Test
-    void shouldUpdateKnowledge() {
-        Long knowledgeId = 1L;
-        Long softwareId = 2L;
+    void testUpdateKnowledge() {
+        Long knowledgeID = 1L;
+        Long softwareID = 2L;
 
-        EditKnowledgeRequest request = new EditKnowledgeRequest(knowledgeId, "Updated Title", "Updated Content", LocalDate.now(), softwareId);
+        EditKnowledgeRequest request = new EditKnowledgeRequest(knowledgeID, "Updated Title", "Updated Content", LocalDate.now(), softwareID);
 
         Software software = new Software(2L, "SoftwareName", "SoftwareDescription");
-        Knowledge knowledge = new Knowledge(knowledgeId, "Title", "Content", LocalDate.of(2022,10,1), new Software());
+        Knowledge knowledge = new Knowledge(knowledgeID, "Title", "Content", LocalDate.of(2022,10,1), new Software());
 
-        when(knowledgeRepository.getReferenceById(knowledgeId)).thenReturn(knowledge);
-        when(softwareRepository.getReferenceById(softwareId)).thenReturn(software);
+        when(knowledgeRepository.getReferenceById(knowledgeID)).thenReturn(knowledge);
+        when(softwareRepository.getReferenceById(softwareID)).thenReturn(software);
 
         knowledgeBaseService.update(request);
 
         assertEquals("Updated Title", knowledge.getTitle());
         assertEquals("Updated Content", knowledge.getContent());
         assertEquals(request.getDate(), knowledge.getDate());
-        assertEquals(softwareId, knowledge.getSoftware().getId());
+        assertEquals(softwareID, knowledge.getSoftware().getId());
 
         verify(knowledgeRepository).save(knowledge);
     }
