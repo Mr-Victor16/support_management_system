@@ -8,7 +8,6 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service("categoryDetailsService")
 public class CategoryServiceImpl implements CategoryService{
@@ -65,6 +64,6 @@ public class CategoryServiceImpl implements CategoryService{
                         category.getName(),
                         ticketRepository.countByCategoryId(category.getId())
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

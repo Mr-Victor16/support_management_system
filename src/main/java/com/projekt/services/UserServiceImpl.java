@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService{
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+                .toList();
 
         return new LoginResponse(
                 userDetails.getId(),
@@ -197,7 +197,7 @@ public class UserServiceImpl implements UserService{
     public List<UserDetailsResponse> loadAll() {
         return userRepository.findAll().stream()
                 .map(user -> convertToUserDetailsResponse(user))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

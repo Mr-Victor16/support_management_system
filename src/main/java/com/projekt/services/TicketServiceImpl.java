@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service("ticketDetailsService")
 public class TicketServiceImpl implements TicketService{
@@ -117,7 +116,7 @@ public class TicketServiceImpl implements TicketService{
                         throw new RuntimeException("Failed to process file", e);
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
         ticket.setImages(images);
 
         ticket.setDate(LocalDate.now());

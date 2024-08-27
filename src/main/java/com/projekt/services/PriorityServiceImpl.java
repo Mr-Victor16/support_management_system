@@ -9,7 +9,6 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service("priorityDetailsService")
 public class PriorityServiceImpl implements PriorityService{
@@ -67,6 +66,6 @@ public class PriorityServiceImpl implements PriorityService{
                         priority.getName(),
                         ticketRepository.countByPriorityId(priority.getId())
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

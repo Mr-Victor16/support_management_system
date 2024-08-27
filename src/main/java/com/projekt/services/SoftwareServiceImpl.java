@@ -10,7 +10,6 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service("softwareDetailsService")
 public class SoftwareServiceImpl implements SoftwareService {
@@ -72,6 +71,6 @@ public class SoftwareServiceImpl implements SoftwareService {
                         ticketRepository.countBySoftwareId(software.getId()),
                         knowledgeRepository.countBySoftwareId(software.getId())
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

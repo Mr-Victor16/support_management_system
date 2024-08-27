@@ -9,7 +9,6 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service("statusDetailsService")
 public class StatusServiceImpl implements StatusService{
@@ -50,7 +49,7 @@ public class StatusServiceImpl implements StatusService{
                         status.isCloseTicket(),
                         ticketRepository.countByStatusId(status.getId())
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

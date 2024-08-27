@@ -22,7 +22,7 @@ public class TicketReply {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(nullable = false)
     private User user;
 

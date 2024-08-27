@@ -38,7 +38,7 @@ public class Knowledge {
     @Column(nullable = false)
     private LocalDate date;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(nullable = false)
     private Software software;
 }
