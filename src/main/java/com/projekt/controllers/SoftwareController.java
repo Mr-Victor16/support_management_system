@@ -2,9 +2,9 @@ package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddSoftwareRequest;
 import com.projekt.payload.request.edit.EditSoftwareRequest;
-import com.projekt.repositories.KnowledgeRepository;
-import com.projekt.repositories.TicketRepository;
+import com.projekt.services.KnowledgeBaseService;
 import com.projekt.services.SoftwareService;
+import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,13 +17,13 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/software")
 public class SoftwareController {
     private final SoftwareService softwareService;
-    private final KnowledgeRepository knowledgeRepository;
-    private final TicketRepository ticketRepository;
+    private final TicketService ticketService;
+    private final KnowledgeBaseService knowledgeBaseService;
 
-    public SoftwareController(SoftwareService softwareService, KnowledgeRepository knowledgeRepository, TicketRepository ticketRepository) {
+    public SoftwareController(SoftwareService softwareService, TicketService ticketService, KnowledgeBaseService knowledgeBaseService) {
         this.softwareService = softwareService;
-        this.knowledgeRepository = knowledgeRepository;
-        this.ticketRepository = ticketRepository;
+        this.ticketService = ticketService;
+        this.knowledgeBaseService = knowledgeBaseService;
     }
 
     @GetMapping
@@ -83,7 +83,7 @@ public class SoftwareController {
             return new ResponseEntity<>("No software found", HttpStatus.NOT_FOUND);
         }
 
-        if(!ticketRepository.existsBySoftwareId(softwareID) && !knowledgeRepository.existsBySoftwareId(softwareID)){
+        if(!ticketService.existsBySoftwareId(softwareID) && !knowledgeBaseService.existsBySoftwareId(softwareID)){
             softwareService.delete(softwareID);
             return new ResponseEntity<>("Software removed successfully", HttpStatus.OK);
         }

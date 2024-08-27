@@ -22,7 +22,7 @@ public class Category {
 
     @Size(min = 2, max = 20)
     @NotBlank
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
     public Category(String name) {

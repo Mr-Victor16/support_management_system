@@ -22,4 +22,6 @@ public interface KnowledgeBaseService{
     boolean findDuplicate(String knowledgeTitle, Long softwareID);
 
     void update(EditKnowledgeRequest knowledgeRequest);
+
+    boolean existsBySoftwareId(Long softwareID);
 }

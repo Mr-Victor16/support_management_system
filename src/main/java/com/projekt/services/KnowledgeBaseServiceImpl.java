@@ -67,4 +67,9 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
         knowledge.setSoftware(softwareRepository.getReferenceById(request.getSoftwareID()));
         knowledgeRepository.save(knowledge);
     }
+
+    @Override
+    public boolean existsBySoftwareId(Long softwareID) {
+        return knowledgeRepository.existsBySoftwareId(softwareID);
+    }
 }

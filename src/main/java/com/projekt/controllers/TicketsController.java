@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
-import com.projekt.repositories.UserRepository;
 import com.projekt.services.TicketService;
+import com.projekt.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,12 +13,11 @@ import java.security.Principal;
 @RequestMapping("/api/tickets")
 public class TicketsController {
     private final TicketService ticketService;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public TicketsController(TicketService ticketService,
-                             UserRepository userRepository) {
+    public TicketsController(TicketService ticketService, UserService userService) {
         this.ticketService = ticketService;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -30,6 +29,6 @@ public class TicketsController {
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> getUserTickets(Principal principal){
-        return ResponseEntity.ok(userRepository.findByUsernameIgnoreCase(principal.getName()).getTickets());
+        return ResponseEntity.ok(userService.findUserByUsername(principal.getName()).getTickets());
     }
 }

@@ -12,6 +12,7 @@ import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service("ticketDetailsService")
@@ -57,7 +58,7 @@ public class TicketServiceImpl implements TicketService{
     public boolean isAuthorized(Long ticketID, String username){
         if(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)) return true;
 
-        return (userService.findUserByUsername(username).getId() == ticketRepository.getReferenceById(ticketID).getUser().getId());
+        return (Objects.equals(userService.findUserByUsername(username).getId(), ticketRepository.getReferenceById(ticketID).getUser().getId()));
     }
 
     @Override
@@ -77,7 +78,7 @@ public class TicketServiceImpl implements TicketService{
 
         User user = ticketRepository.getReferenceById(request.getTicketID()).getUser();
 
-        if(user.getId() != request.getUserID()){
+        if(!Objects.equals(user.getId(), request.getUserID())){
             mailService.sendTicketReplyMessage(user.getEmail(), ticket.getTitle());
         }
 
@@ -154,6 +155,21 @@ public class TicketServiceImpl implements TicketService{
     @Override
     public boolean existsByCategoryId(Long categoryID) {
         return ticketRepository.existsByCategoryId(categoryID);
+    }
+
+    @Override
+    public boolean existsByPriorityId(Long priorityID) {
+        return ticketRepository.existsByPriorityId(priorityID);
+    }
+
+    @Override
+    public boolean existsBySoftwareId(Long softwareID) {
+        return ticketRepository.existsBySoftwareId(softwareID);
+    }
+
+    @Override
+    public boolean existsByStatusId(Long statusID) {
+        return ticketRepository.existsByStatusId(statusID);
     }
 
     @Override

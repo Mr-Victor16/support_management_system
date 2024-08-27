@@ -22,12 +22,12 @@ public class Software {
 
     @Size(min = 2, max = 30)
     @NotBlank
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Size(min = 10, max = 200)
     @NotBlank
-    @Column(name = "description", nullable = false)
+    @Column(nullable = false)
     private String description;
 
     public Software(String name, String description){

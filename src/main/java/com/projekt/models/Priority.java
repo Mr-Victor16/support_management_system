@@ -24,7 +24,7 @@ public class Priority {
 
     @NotBlank
     @Size(min = 3, max = 20)
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Min(1)

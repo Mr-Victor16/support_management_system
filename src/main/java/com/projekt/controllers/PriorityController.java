@@ -2,8 +2,8 @@ package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddPriorityRequest;
 import com.projekt.payload.request.edit.EditPriorityRequest;
-import com.projekt.repositories.TicketRepository;
 import com.projekt.services.PriorityService;
+import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,11 +16,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/priority")
 public class PriorityController {
     private final PriorityService priorityService;
-    private final TicketRepository ticketRepository;
+    private final TicketService ticketService;
 
-    public PriorityController(PriorityService priorityService, TicketRepository ticketRepository) {
+    public PriorityController(PriorityService priorityService, TicketService ticketService) {
         this.priorityService = priorityService;
-        this.ticketRepository = ticketRepository;
+        this.ticketService = ticketService;
     }
 
     @GetMapping
@@ -82,7 +82,7 @@ public class PriorityController {
             return new ResponseEntity<>("No priority found", HttpStatus.NOT_FOUND);
         }
 
-        if(!ticketRepository.existsByPriorityId(priorityID)){
+        if(!ticketService.existsByPriorityId(priorityID)){
             priorityService.delete(priorityID);
             return new ResponseEntity<>("Priority removed successfully", HttpStatus.OK);
         }

@@ -23,15 +23,15 @@ public class TicketReply {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(nullable = false)
     private User user;
 
     @Size(min = 5, max = 500)
     @NotBlank
-    @Column(name = "content", nullable = false)
+    @Column(nullable = false)
     private String content;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "date", nullable = false)
+    @Column(nullable = false)
     private LocalDate date;
 }

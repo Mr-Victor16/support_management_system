@@ -19,12 +19,12 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     @NotBlank
     private String name;
 
     @Lob
-    @Column(name = "content", columnDefinition="MEDIUMBLOB", nullable = false)
+    @Column(columnDefinition="MEDIUMBLOB", nullable = false)
     private byte[] content;
 
     public Image(String name, byte[] content) {

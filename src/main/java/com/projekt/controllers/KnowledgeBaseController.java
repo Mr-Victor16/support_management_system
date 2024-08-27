@@ -41,7 +41,7 @@ public class KnowledgeBaseController {
             return new ResponseEntity<>("No knowledge found", HttpStatus.NOT_FOUND);
         }
 
-        if(knowledgeBaseService.loadById(request.getKnowledgeID()).getTitle() != request.getTitle()){
+        if(!knowledgeBaseService.loadById(request.getKnowledgeID()).getTitle().equalsIgnoreCase(request.getTitle())){
             if(knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareID())){
                 return new ResponseEntity<>("Knowledge already exists", HttpStatus.CONFLICT);
             }

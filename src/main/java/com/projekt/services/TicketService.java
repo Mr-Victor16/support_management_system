@@ -38,5 +38,11 @@ public interface TicketService {
 
     boolean existsByCategoryId(Long categoryID);
 
+    boolean existsByPriorityId(Long priorityID);
+
+    boolean existsBySoftwareId(Long softwareID);
+
+    boolean existsByStatusId(Long statusID);
+
     boolean entitiesExist(Long categoryID, Long statusID, Long priorityID, Long softwareID);
 }

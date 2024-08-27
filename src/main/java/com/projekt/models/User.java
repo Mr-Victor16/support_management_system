@@ -31,32 +31,32 @@ public class User {
 
     @Size(min = 2, max = 36)
     @NotBlank
-    @Column(name = "username", nullable = false)
+    @Column(nullable = false)
     private String username;
 
     @NotBlank
     @JsonIgnore
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     private String password;
 
     @Email
     @NotBlank
-    @Column(name = "email", nullable = false)
+    @Column(nullable = false)
     private String email;
 
     @Size(min = 2, max = 30)
     @NotBlank
     @FirstCharacterConstraint
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Size(min = 2, max = 60)
     @NotBlank
     @FirstCharacterConstraint
-    @Column(name = "surname", nullable = false)
+    @Column(nullable = false)
     private String surname;
 
-    @Column(name = "enabled", nullable = false)
+    @Column(nullable = false)
     private boolean enabled = false;
 
     @ManyToMany

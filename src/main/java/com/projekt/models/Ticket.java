@@ -26,12 +26,12 @@ public class Ticket {
 
     @Size(min = 5, max = 100)
     @NotBlank
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
     private String title;
 
     @Size(min = 5, max = 500)
     @NotBlank
-    @Column(name = "description", nullable = false)
+    @Column(nullable = false)
     private String description;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
@@ -39,28 +39,28 @@ public class Ticket {
     private List<Image> images = new ArrayList<>();
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "date", nullable = false)
+    @Column(nullable = false)
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "priority_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Priority priority;
 
     @ManyToOne
-    @JoinColumn(name = "status_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Status status;
 
     @Size(min = 1, max = 10)
     @NotBlank
-    @Column(name = "version", nullable = false)
+    @Column(nullable = false)
     private String version;
 
     @ManyToOne
-    @JoinColumn(name = "software_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Software software;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
@@ -68,6 +68,6 @@ public class Ticket {
     private List<TicketReply> replies = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(nullable = false)
     private User user;
 }

@@ -2,8 +2,8 @@ package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddStatusRequest;
 import com.projekt.payload.request.edit.EditStatusRequest;
-import com.projekt.repositories.TicketRepository;
 import com.projekt.services.StatusService;
+import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,11 +16,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/status")
 public class StatusController {
     private final StatusService statusService;
-    private final TicketRepository ticketRepository;
+    private final TicketService ticketService;
 
-    public StatusController(StatusService statusService, TicketRepository ticketRepository) {
+    public StatusController(StatusService statusService, TicketService ticketService) {
         this.statusService = statusService;
-        this.ticketRepository = ticketRepository;
+        this.ticketService = ticketService;
     }
 
     @GetMapping
@@ -82,7 +82,7 @@ public class StatusController {
             return new ResponseEntity<>("No status found", HttpStatus.NOT_FOUND);
         }
 
-        if(!ticketRepository.existsByStatusId(statusID)){
+        if(!ticketService.existsByStatusId(statusID)){
             statusService.delete(statusID);
             return new ResponseEntity<>("Status removed successfully", HttpStatus.OK);
         }

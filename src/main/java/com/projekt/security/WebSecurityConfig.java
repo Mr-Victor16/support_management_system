@@ -2,6 +2,7 @@ package com.projekt.security;
 
 import com.projekt.security.jwt.AuthEntryPointJWT;
 import com.projekt.security.jwt.AuthTokenFilter;
+import com.projekt.security.jwt.JWTUtils;
 import com.projekt.security.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,15 +24,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJWT unauthorizedHandler;
+    private final JWTUtils jwtUtils;
 
-    public WebSecurityConfig(@Lazy UserDetailsServiceImpl userDetailsService, AuthEntryPointJWT unauthorizedHandler) {
+    public WebSecurityConfig(@Lazy UserDetailsServiceImpl userDetailsService, AuthEntryPointJWT unauthorizedHandler, JWTUtils jwtUtils) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
+        this.jwtUtils = jwtUtils;
     }
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
+        return new AuthTokenFilter(jwtUtils, userDetailsService);
     }
 
     @Bean
