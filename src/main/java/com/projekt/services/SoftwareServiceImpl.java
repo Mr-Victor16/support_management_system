@@ -2,7 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Software;
 import com.projekt.payload.request.add.AddSoftwareRequest;
-import com.projekt.payload.request.edit.EditSoftwareRequest;
+import com.projekt.payload.request.update.UpdateSoftwareRequest;
 import com.projekt.payload.response.SoftwareResponse;
 import com.projekt.repositories.KnowledgeRepository;
 import com.projekt.repositories.SoftwareRepository;
@@ -45,10 +45,10 @@ public class SoftwareServiceImpl implements SoftwareService {
     }
 
     @Override
-    public void update(EditSoftwareRequest request) {
-        Software software = softwareRepository.getReferenceById(request.getSoftwareID());
-        software.setName(request.getName());
-        software.setDescription(request.getDescription());
+    public void update(UpdateSoftwareRequest request) {
+        Software software = softwareRepository.getReferenceById(request.softwareID());
+        software.setName(request.name());
+        software.setDescription(request.description());
         softwareRepository.save(software);
     }
 
@@ -59,7 +59,7 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public void save(AddSoftwareRequest request) {
-        softwareRepository.save(new Software(request.getName(), request.getDescription()));
+        softwareRepository.save(new Software(request.name(), request.description()));
     }
 
     @Override

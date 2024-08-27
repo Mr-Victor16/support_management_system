@@ -8,20 +8,20 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-public record AddKnowledgeRequest(
-        @Size(min = 2, max = 50)
-        @NotBlank
-        String title,
+public record AddTicketReply(
+        @NotNull
+        @Positive
+        Long ticketID,
 
-        @Size(min = 20, max = 360)
+        @NotNull
+        @Positive
+        Long userID,
+
+        @Size(min = 5, max = 500)
         @NotBlank
         String content,
 
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         @NotNull
-        LocalDate date,
-
-        @NotNull
-        @Positive
-        Long softwareID
+        LocalDate date
 ) { }

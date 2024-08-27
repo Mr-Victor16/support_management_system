@@ -2,7 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Priority;
 import com.projekt.payload.request.add.AddPriorityRequest;
-import com.projekt.payload.request.edit.EditPriorityRequest;
+import com.projekt.payload.request.update.UpdatePriorityRequest;
 import com.projekt.payload.response.PriorityResponse;
 import com.projekt.repositories.PriorityRepository;
 import com.projekt.repositories.TicketRepository;
@@ -37,16 +37,16 @@ public class PriorityServiceImpl implements PriorityService{
     }
 
     @Override
-    public void update(EditPriorityRequest request) {
-        Priority priority = priorityRepository.getReferenceById(request.getPriorityID());
-        priority.setName(request.getName());
-        priority.setMaxTime(request.getMaxTime());
+    public void update(UpdatePriorityRequest request) {
+        Priority priority = priorityRepository.getReferenceById(request.priorityID());
+        priority.setName(request.name());
+        priority.setMaxTime(request.maxTime());
         priorityRepository.save(priority);
     }
 
     @Override
     public void save(AddPriorityRequest request) {
-        priorityRepository.save(new Priority(request.getName(), request.getMaxTime()));
+        priorityRepository.save(new Priority(request.name(), request.maxTime()));
     }
 
     @Override

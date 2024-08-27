@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddKnowledgeRequest;
-import com.projekt.payload.request.edit.EditKnowledgeRequest;
+import com.projekt.payload.request.update.UpdateKnowledgeRequest;
 import com.projekt.services.KnowledgeBaseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/knowledge-base")
+@RequestMapping("/api/knowledge-bases")
 public class KnowledgeBaseController {
     private final KnowledgeBaseService knowledgeBaseService;
 
@@ -36,25 +36,25 @@ public class KnowledgeBaseController {
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> editKnowledge(@RequestBody @Valid EditKnowledgeRequest request){
-        if(!knowledgeBaseService.existsById(request.getKnowledgeID())) {
+    public ResponseEntity<?> updateKnowledge(@RequestBody @Valid UpdateKnowledgeRequest request){
+        if(!knowledgeBaseService.existsById(request.knowledgeID())) {
             return new ResponseEntity<>("No knowledge found", HttpStatus.NOT_FOUND);
         }
 
-        if(!knowledgeBaseService.loadById(request.getKnowledgeID()).getTitle().equalsIgnoreCase(request.getTitle())){
-            if(knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareID())){
+        if(!knowledgeBaseService.loadById(request.knowledgeID()).getTitle().equalsIgnoreCase(request.title())){
+            if(knowledgeBaseService.findDuplicate(request.title(), request.softwareID())){
                 return new ResponseEntity<>("Knowledge already exists", HttpStatus.CONFLICT);
             }
         }
 
         knowledgeBaseService.update(request);
-        return new ResponseEntity<>("Knowledge edited", HttpStatus.OK);
+        return new ResponseEntity<>("Knowledge updated", HttpStatus.OK);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addKnowledge(@RequestBody @Valid AddKnowledgeRequest request){
-        if(!knowledgeBaseService.findDuplicate(request.getTitle(), request.getSoftwareID())){
+        if(!knowledgeBaseService.findDuplicate(request.title(), request.softwareID())){
             knowledgeBaseService.save(request);
             return new ResponseEntity<>("Knowledge added", HttpStatus.OK);
         }

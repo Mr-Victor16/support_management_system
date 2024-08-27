@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddCategoryRequest;
-import com.projekt.payload.request.edit.EditCategoryRequest;
+import com.projekt.payload.request.update.UpdateCategoryRequest;
 import com.projekt.services.CategoryService;
 import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/category")
+@RequestMapping("/api/categories")
 public class CategoryController {
     private final CategoryService categoryService;
     private final TicketService ticketService;
@@ -47,18 +47,18 @@ public class CategoryController {
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> editCategory(@RequestBody @Valid EditCategoryRequest request){
-        if(!categoryService.existsById(request.getCategoryID())){
+    public ResponseEntity<?> updateCategory(@RequestBody @Valid UpdateCategoryRequest request){
+        if(!categoryService.existsById(request.categoryID())){
             return new ResponseEntity<>("No category found", HttpStatus.NOT_FOUND);
         }
 
-        if(categoryService.loadById(request.getCategoryID()).getName().equals(request.getName())){
+        if(categoryService.loadById(request.categoryID()).getName().equals(request.name())){
             return new ResponseEntity<>("Category name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!categoryService.existsByName(request.getName())){
+        if(!categoryService.existsByName(request.name())){
             categoryService.update(request);
-            return new ResponseEntity<>("Category name edited", HttpStatus.OK);
+            return new ResponseEntity<>("Category name updated", HttpStatus.OK);
         }
 
         return new ResponseEntity<>("Category already exists", HttpStatus.CONFLICT);
@@ -67,8 +67,8 @@ public class CategoryController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addCategory(@RequestBody @Valid AddCategoryRequest request){
-        if(!categoryService.existsByName(request.getName())){
-            categoryService.save(request.getName());
+        if(!categoryService.existsByName(request.name())){
+            categoryService.save(request.name());
             return new ResponseEntity<>("Category added", HttpStatus.OK);
         }
 

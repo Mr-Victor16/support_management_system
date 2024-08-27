@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddSoftwareRequest;
-import com.projekt.payload.request.edit.EditSoftwareRequest;
+import com.projekt.payload.request.update.UpdateSoftwareRequest;
 import com.projekt.services.KnowledgeBaseService;
 import com.projekt.services.SoftwareService;
 import com.projekt.services.TicketService;
@@ -48,18 +48,18 @@ public class SoftwareController {
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> editSoftware(@RequestBody @Valid EditSoftwareRequest request){
-        if(!softwareService.existsById(request.getSoftwareID())){
+    public ResponseEntity<?> updateSoftware(@RequestBody @Valid UpdateSoftwareRequest request){
+        if(!softwareService.existsById(request.softwareID())){
             return new ResponseEntity<>("No software found", HttpStatus.NOT_FOUND);
         }
 
-        if(softwareService.loadById(request.getSoftwareID()).getName().equals(request.getName())){
+        if(softwareService.loadById(request.softwareID()).getName().equals(request.name())){
             return new ResponseEntity<>("Software name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!softwareService.existsByName(request.getName())){
+        if(!softwareService.existsByName(request.name())){
             softwareService.update(request);
-            return new ResponseEntity<>("Software details edited", HttpStatus.OK);
+            return new ResponseEntity<>("Software details updated", HttpStatus.OK);
         }
 
         return new ResponseEntity<>("Software already exists", HttpStatus.CONFLICT);
@@ -68,7 +68,7 @@ public class SoftwareController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addSoftware(@RequestBody @Valid AddSoftwareRequest request){
-        if(!softwareService.existsByName(request.getName())){
+        if(!softwareService.existsByName(request.name())){
             softwareService.save(request);
             return new ResponseEntity<>("Software added", HttpStatus.OK);
         }

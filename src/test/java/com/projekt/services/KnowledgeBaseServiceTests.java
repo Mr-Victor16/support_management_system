@@ -2,7 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Knowledge;
 import com.projekt.models.Software;
-import com.projekt.payload.request.edit.EditKnowledgeRequest;
+import com.projekt.payload.request.update.UpdateKnowledgeRequest;
 import com.projekt.repositories.KnowledgeRepository;
 import com.projekt.repositories.SoftwareRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +80,7 @@ public class KnowledgeBaseServiceTests {
         Long knowledgeID = 1L;
         Long softwareID = 2L;
 
-        EditKnowledgeRequest request = new EditKnowledgeRequest(knowledgeID, "Updated Title", "Updated Content", LocalDate.now(), softwareID);
+        UpdateKnowledgeRequest request = new UpdateKnowledgeRequest(knowledgeID, "Updated Title", "Updated Content", LocalDate.now(), softwareID);
 
         Software software = new Software(2L, "SoftwareName", "SoftwareDescription");
         Knowledge knowledge = new Knowledge(knowledgeID, "Title", "Content", LocalDate.of(2022,10,1), new Software());
@@ -92,7 +92,7 @@ public class KnowledgeBaseServiceTests {
 
         assertEquals("Updated Title", knowledge.getTitle());
         assertEquals("Updated Content", knowledge.getContent());
-        assertEquals(request.getDate(), knowledge.getDate());
+        assertEquals(request.date(), knowledge.getDate());
         assertEquals(softwareID, knowledge.getSoftware().getId());
 
         verify(knowledgeRepository).save(knowledge);

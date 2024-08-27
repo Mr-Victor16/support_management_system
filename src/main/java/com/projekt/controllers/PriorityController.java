@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddPriorityRequest;
-import com.projekt.payload.request.edit.EditPriorityRequest;
+import com.projekt.payload.request.update.UpdatePriorityRequest;
 import com.projekt.services.PriorityService;
 import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/priority")
+@RequestMapping("/api/priorities")
 public class PriorityController {
     private final PriorityService priorityService;
     private final TicketService ticketService;
@@ -47,18 +47,18 @@ public class PriorityController {
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> editPriority(@RequestBody @Valid EditPriorityRequest request){
-        if(!priorityService.existsById(request.getPriorityID())){
+    public ResponseEntity<?> updatePriority(@RequestBody @Valid UpdatePriorityRequest request){
+        if(!priorityService.existsById(request.priorityID())){
             return new ResponseEntity<>("No priority found", HttpStatus.NOT_FOUND);
         }
 
-        if(priorityService.loadById(request.getPriorityID()).getName().equals(request.getName())){
+        if(priorityService.loadById(request.priorityID()).getName().equals(request.name())){
             return new ResponseEntity<>("Priority name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!priorityService.existsByName(request.getName())){
+        if(!priorityService.existsByName(request.name())){
             priorityService.update(request);
-            return new ResponseEntity<>("Priority name edited", HttpStatus.OK);
+            return new ResponseEntity<>("Priority name updated", HttpStatus.OK);
         }
 
         return new ResponseEntity<>("Priority already exists", HttpStatus.CONFLICT);
@@ -67,7 +67,7 @@ public class PriorityController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addPriority(@RequestBody @Valid AddPriorityRequest request){
-        if(!priorityService.existsByName(request.getName())){
+        if(!priorityService.existsByName(request.name())){
             priorityService.save(request);
             return new ResponseEntity<>("Priority added", HttpStatus.OK);
         }

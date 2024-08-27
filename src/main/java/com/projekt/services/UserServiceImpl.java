@@ -4,8 +4,8 @@ import com.projekt.models.Role;
 import com.projekt.models.User;
 import com.projekt.payload.request.*;
 import com.projekt.payload.request.add.AddUserRequest;
-import com.projekt.payload.request.edit.EditProfileDetailsRequest;
-import com.projekt.payload.request.edit.EditUserRequest;
+import com.projekt.payload.request.update.UpdateProfileDetailsRequest;
+import com.projekt.payload.request.update.UpdateUserRequest;
 import com.projekt.payload.response.LoginResponse;
 import com.projekt.payload.response.UserDetailsResponse;
 import com.projekt.repositories.RoleRepository;
@@ -61,23 +61,23 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void editUser(EditUserRequest request) throws Exception {
-        User user = userRepository.getReferenceById(request.getId());
+    public void editUser(UpdateUserRequest request) throws Exception {
+        User user = userRepository.getReferenceById(request.userID());
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new Exception("Email is already in use");
         }
 
-        user.setEmail(request.getEmail());
-        user.setName(request.getName());
-        user.setSurname(request.getSurname());
-        Set<Role> roles = request.getRoles().stream()
+        user.setEmail(request.email());
+        user.setName(request.name());
+        user.setSurname(request.surname());
+        Set<Role> roles = request.roles().stream()
                 .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
                         .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
                 .collect(Collectors.toSet());
 
         user.setRoles(roles);
-        user.setEnabled(request.getEnabled());
+        user.setEnabled(request.enabled());
 
         userRepository.save(user);
     }
@@ -108,12 +108,12 @@ public class UserServiceImpl implements UserService{
     @Override
     public void register(RegisterRequest request) throws MessagingException {
         User newUser = new User();
-        newUser.setUsername(request.getUsername());
-        newUser.setEmail(request.getEmail());
+        newUser.setUsername(request.username());
+        newUser.setEmail(request.email());
 
-        newUser.setPassword(encoder.encode(request.getPassword()));
-        newUser.setName(request.getName());
-        newUser.setSurname(request.getSurname());
+        newUser.setPassword(encoder.encode(request.password()));
+        newUser.setName(request.name());
+        newUser.setSurname(request.surname());
 
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepository.findByType(Role.Types.ROLE_USER));
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public LoginResponse authenticate(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -154,11 +154,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void updateProfile(String username, EditProfileDetailsRequest request) {
+    public void updateProfile(String username, UpdateProfileDetailsRequest request) {
         User user = userRepository.findByUsernameIgnoreCase(username);
-        user.setName(request.getName());
-        user.setSurname(request.getSurname());
-        user.setPassword(encoder.encode(request.getPassword()));
+        user.setName(request.name());
+        user.setSurname(request.surname());
+        user.setPassword(encoder.encode(request.password()));
 
         userRepository.save(user);
     }
@@ -172,12 +172,12 @@ public class UserServiceImpl implements UserService{
     public void addUser(AddUserRequest request) {
         User user = new User();
 
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(encoder.encode(request.getPassword()));
-        user.setName(request.getName());
-        user.setSurname(request.getSurname());
-        Set<Role> roles = request.getRoles().stream()
+        user.setUsername(request.username());
+        user.setEmail(request.email());
+        user.setPassword(encoder.encode(request.password()));
+        user.setName(request.name());
+        user.setSurname(request.surname());
+        Set<Role> roles = request.roles().stream()
                 .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
                         .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
                 .collect(Collectors.toSet());

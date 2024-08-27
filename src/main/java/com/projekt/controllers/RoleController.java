@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/role")
+@RequestMapping("/api/roles")
 public class RoleController {
     private final RoleService roleService;
 

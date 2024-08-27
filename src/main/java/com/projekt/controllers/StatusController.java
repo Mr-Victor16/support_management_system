@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddStatusRequest;
-import com.projekt.payload.request.edit.EditStatusRequest;
+import com.projekt.payload.request.update.UpdateStatusRequest;
 import com.projekt.services.StatusService;
 import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/status")
+@RequestMapping("/api/statuses")
 public class StatusController {
     private final StatusService statusService;
     private final TicketService ticketService;
@@ -47,16 +47,16 @@ public class StatusController {
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> editStatus(@RequestBody @Valid EditStatusRequest request){
-        if(!statusService.existsById(request.getStatusID())){
+    public ResponseEntity<?> updateStatus(@RequestBody @Valid UpdateStatusRequest request){
+        if(!statusService.existsById(request.statusID())){
             return new ResponseEntity<>("No status found", HttpStatus.NOT_FOUND);
         }
 
-        if(statusService.loadById(request.getStatusID()).getName().equals(request.getName())){
+        if(statusService.loadById(request.statusID()).getName().equals(request.name())){
             return new ResponseEntity<>("Status name is the same as the current name", HttpStatus.OK);
         }
 
-        if(!statusService.existsByName(request.getName())){
+        if(!statusService.existsByName(request.name())){
             statusService.update(request);
             return new ResponseEntity<>("Status name edited", HttpStatus.OK);
         }
@@ -67,7 +67,7 @@ public class StatusController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addStatus(@RequestBody @Valid AddStatusRequest request){
-        if(!statusService.existsByName(request.getName())){
+        if(!statusService.existsByName(request.name())){
             statusService.save(request);
             return new ResponseEntity<>("Status added", HttpStatus.OK);
         }

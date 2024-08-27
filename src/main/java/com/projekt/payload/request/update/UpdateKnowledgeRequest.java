@@ -1,4 +1,4 @@
-package com.projekt.payload.request.add;
+package com.projekt.payload.request.update;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +8,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-public record AddKnowledgeRequest(
+public record UpdateKnowledgeRequest(
+        @NotNull
+        @Positive
+        Long knowledgeID,
+
         @Size(min = 2, max = 50)
         @NotBlank
         String title,

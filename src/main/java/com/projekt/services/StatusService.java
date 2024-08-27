@@ -2,7 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Status;
 import com.projekt.payload.request.add.AddStatusRequest;
-import com.projekt.payload.request.edit.EditStatusRequest;
+import com.projekt.payload.request.update.UpdateStatusRequest;
 import com.projekt.payload.response.StatusResponse;
 import org.springframework.stereotype.Service;
 
@@ -24,5 +24,5 @@ public interface StatusService {
 
     boolean existsByName(String statusName);
 
-    void update(EditStatusRequest statusRequest);
+    void update(UpdateStatusRequest statusRequest);
 }

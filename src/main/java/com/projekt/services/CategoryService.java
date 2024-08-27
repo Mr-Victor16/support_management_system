@@ -1,7 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.Category;
-import com.projekt.payload.request.edit.EditCategoryRequest;
+import com.projekt.payload.request.update.UpdateCategoryRequest;
 import com.projekt.payload.response.CategoryResponse;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public interface CategoryService {
 
     boolean existsByName(String name);
 
-    void update(EditCategoryRequest request);
+    void update(UpdateCategoryRequest request);
 
     List<CategoryResponse> getAllWithUseNumber();
 }

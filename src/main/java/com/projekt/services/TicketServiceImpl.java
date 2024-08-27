@@ -1,9 +1,9 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
-import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.add.AddTicketRequest;
-import com.projekt.payload.request.edit.EditTicketRequest;
+import com.projekt.payload.request.add.AddTicketReply;
+import com.projekt.payload.request.update.UpdateTicketRequest;
 import com.projekt.repositories.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -67,18 +67,18 @@ public class TicketServiceImpl implements TicketService{
     }
 
     @Override
-    public void addReply(AddTicketReplyRequest request) throws MessagingException {
+    public void addReply(AddTicketReply request) throws MessagingException {
         TicketReply ticketReply = new TicketReply();
         ticketReply.setDate(LocalDate.now());
-        ticketReply.setUser(userRepository.getReferenceById(request.getUserID()));
+        ticketReply.setUser(userRepository.getReferenceById(request.userID()));
         ticketReplyRepository.save(ticketReply);
 
-        Ticket ticket = ticketRepository.getReferenceById(request.getTicketID());
+        Ticket ticket = ticketRepository.getReferenceById(request.ticketID());
         ticket.getReplies().add(ticketReply);
 
-        User user = ticketRepository.getReferenceById(request.getTicketID()).getUser();
+        User user = ticketRepository.getReferenceById(request.ticketID()).getUser();
 
-        if(!Objects.equals(user.getId(), request.getUserID())){
+        if(!Objects.equals(user.getId(), request.userID())){
             mailService.sendTicketReplyMessage(user.getEmail(), ticket.getTitle());
         }
 
@@ -106,10 +106,10 @@ public class TicketServiceImpl implements TicketService{
     @Override
     public void add(AddTicketRequest request, String username) {
         Ticket ticket = new Ticket();
-        ticket.setTitle(request.getTitle());
-        ticket.setDescription(request.getDescription());
+        ticket.setTitle(request.title());
+        ticket.setDescription(request.description());
 
-        List<Image> images = request.getMultipartFiles().stream()
+        List<Image> images = request.multipartFiles().stream()
                 .map(file -> {
                     try {
                         return new Image(file.getOriginalFilename(), file.getBytes());
@@ -121,25 +121,25 @@ public class TicketServiceImpl implements TicketService{
         ticket.setImages(images);
 
         ticket.setDate(LocalDate.now());
-        ticket.setCategory(categoryRepository.getReferenceById(request.getCategoryID()));
-        ticket.setPriority(priorityRepository.getReferenceById(request.getPriorityID()));
-        ticket.setStatus(statusRepository.getReferenceById(request.getStatusID()));
-        ticket.setVersion(request.getVersion());
-        ticket.setSoftware(softwareRepository.getReferenceById(request.getSoftwareID()));
+        ticket.setCategory(categoryRepository.getReferenceById(request.categoryID()));
+        ticket.setPriority(priorityRepository.getReferenceById(request.priorityID()));
+        ticket.setStatus(statusRepository.getReferenceById(request.statusID()));
+        ticket.setVersion(request.version());
+        ticket.setSoftware(softwareRepository.getReferenceById(request.softwareID()));
         ticket.setUser(userRepository.findByUsernameIgnoreCase(username));
 
         ticketRepository.save(ticket);
     }
 
     @Override
-    public void update(EditTicketRequest request) {
-        Ticket ticket = ticketRepository.getReferenceById(request.getTicketID());
-        ticket.setTitle(request.getTitle());
-        ticket.setDescription(request.getDescription());
-        ticket.setCategory(categoryRepository.getReferenceById(request.getCategoryID()));
-        ticket.setPriority(priorityRepository.getReferenceById(request.getPriorityID()));
-        ticket.setVersion(request.getVersion());
-        ticket.setSoftware(softwareRepository.getReferenceById(request.getSoftwareID()));
+    public void update(UpdateTicketRequest request) {
+        Ticket ticket = ticketRepository.getReferenceById(request.ticketID());
+        ticket.setTitle(request.title());
+        ticket.setDescription(request.description());
+        ticket.setCategory(categoryRepository.getReferenceById(request.categoryID()));
+        ticket.setPriority(priorityRepository.getReferenceById(request.priorityID()));
+        ticket.setVersion(request.version());
+        ticket.setSoftware(softwareRepository.getReferenceById(request.softwareID()));
 
         ticketRepository.save(ticket);
     }

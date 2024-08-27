@@ -2,7 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Knowledge;
 import com.projekt.payload.request.add.AddKnowledgeRequest;
-import com.projekt.payload.request.edit.EditKnowledgeRequest;
+import com.projekt.payload.request.update.UpdateKnowledgeRequest;
 import com.projekt.repositories.KnowledgeRepository;
 import com.projekt.repositories.SoftwareRepository;
 import org.springframework.stereotype.Service;
@@ -33,9 +33,9 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
     @Override
     public void save(AddKnowledgeRequest request) {
         Knowledge knowledge = new Knowledge();
-        knowledge.setTitle(request.getTitle());
-        knowledge.setContent(request.getContent());
-        knowledge.setDate(request.getDate());
+        knowledge.setTitle(request.title());
+        knowledge.setContent(request.content());
+        knowledge.setDate(request.date());
         knowledge.setSoftware(softwareRepository.getReferenceById(knowledge.getSoftware().getId()));
 
         knowledgeRepository.save(knowledge);
@@ -59,12 +59,12 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
     }
 
     @Override
-    public void update(EditKnowledgeRequest request) {
-        Knowledge knowledge = knowledgeRepository.getReferenceById(request.getKnowledgeID());
-        knowledge.setTitle(request.getTitle());
-        knowledge.setContent(request.getContent());
-        knowledge.setDate(request.getDate());
-        knowledge.setSoftware(softwareRepository.getReferenceById(request.getSoftwareID()));
+    public void update(UpdateKnowledgeRequest request) {
+        Knowledge knowledge = knowledgeRepository.getReferenceById(request.knowledgeID());
+        knowledge.setTitle(request.title());
+        knowledge.setContent(request.content());
+        knowledge.setDate(request.date());
+        knowledge.setSoftware(softwareRepository.getReferenceById(request.softwareID()));
         knowledgeRepository.save(knowledge);
     }
 

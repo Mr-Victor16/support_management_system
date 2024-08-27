@@ -1,17 +1,14 @@
-package com.projekt.payload.request.add;
+package com.projekt.payload.request.update;
 
 import com.projekt.validators.FirstCharacterConstraint;
 import jakarta.validation.constraints.*;
 
 import java.util.List;
 
-public record AddUserRequest(
-        @Size(min = 2, max = 36)
-        @NotBlank
-        String username,
-
-        @NotBlank
-        String password,
+public record UpdateUserRequest(
+        @NotNull
+        @Positive
+        Long userID,
 
         @Email
         @NotBlank
@@ -26,6 +23,9 @@ public record AddUserRequest(
         @NotBlank
         @FirstCharacterConstraint
         String surname,
+
+        @NotNull
+        Boolean enabled,
 
         @NotNull
         @NotEmpty

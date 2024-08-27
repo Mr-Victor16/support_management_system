@@ -2,7 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Priority;
 import com.projekt.payload.request.add.AddPriorityRequest;
-import com.projekt.payload.request.edit.EditPriorityRequest;
+import com.projekt.payload.request.update.UpdatePriorityRequest;
 import com.projekt.payload.response.PriorityResponse;
 import org.springframework.stereotype.Service;
 
@@ -24,5 +24,5 @@ public interface PriorityService {
 
     boolean existsByName(String priorityName);
 
-    void update(EditPriorityRequest priorityRequest);
+    void update(UpdatePriorityRequest priorityRequest);
 }

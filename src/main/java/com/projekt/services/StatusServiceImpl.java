@@ -2,7 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.Status;
 import com.projekt.payload.request.add.AddStatusRequest;
-import com.projekt.payload.request.edit.EditStatusRequest;
+import com.projekt.payload.request.update.UpdateStatusRequest;
 import com.projekt.payload.response.StatusResponse;
 import com.projekt.repositories.StatusRepository;
 import com.projekt.repositories.TicketRepository;
@@ -33,7 +33,7 @@ public class StatusServiceImpl implements StatusService{
 
     @Override
     public void save(AddStatusRequest request) {
-        statusRepository.save(new Status(request.getName(), request.getCloseTicket()));
+        statusRepository.save(new Status(request.name(), request.closeTicket()));
     }
 
     @Override
@@ -54,10 +54,10 @@ public class StatusServiceImpl implements StatusService{
     }
 
     @Override
-    public void update(EditStatusRequest request) {
-        Status status = statusRepository.getReferenceById(request.getStatusID());
-        status.setName(request.getName());
-        status.setCloseTicket(request.getCloseTicket());
+    public void update(UpdateStatusRequest request) {
+        Status status = statusRepository.getReferenceById(request.statusID());
+        status.setName(request.name());
+        status.setCloseTicket(request.closeTicket());
 
         statusRepository.save(status);
     }

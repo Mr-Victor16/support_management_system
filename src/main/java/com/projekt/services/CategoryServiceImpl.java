@@ -1,7 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.Category;
-import com.projekt.payload.request.edit.EditCategoryRequest;
+import com.projekt.payload.request.update.UpdateCategoryRequest;
 import com.projekt.payload.response.CategoryResponse;
 import com.projekt.repositories.CategoryRepository;
 import com.projekt.repositories.TicketRepository;
@@ -51,9 +51,9 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public void update(EditCategoryRequest request) {
-        Category category = categoryRepository.getReferenceById(request.getCategoryID());
-        category.setName(request.getName());
+    public void update(UpdateCategoryRequest request) {
+        Category category = categoryRepository.getReferenceById(request.categoryID());
+        category.setName(request.name());
         categoryRepository.save(category);
     }
 

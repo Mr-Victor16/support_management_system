@@ -1,18 +1,9 @@
 package com.projekt.payload.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-public class SoftwareResponse {
-    private Long softwareID;
-    private String name;
-    private String description;
-    private Long useNumberTicket;
-    private Long useNumberKnowledge;
-}
+public record SoftwareResponse(
+        Long softwareID,
+        String name,
+        String description,
+        Long useNumberTicket,
+        Long useNumberKnowledge
+) { }

@@ -1,7 +1,7 @@
 package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddUserRequest;
-import com.projekt.payload.request.edit.EditUserRequest;
+import com.projekt.payload.request.update.UpdateUserRequest;
 import com.projekt.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
 
@@ -33,7 +33,7 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public ResponseEntity<?> addUser(@RequestBody @Valid AddUserRequest request){
-        if (userService.existsByUsername(request.getUsername()) || userService.existsByEmail(request.getEmail())){
+        if (userService.existsByUsername(request.username()) || userService.existsByEmail(request.email())){
             return new ResponseEntity<>("Username or Email already exists", HttpStatus.CONFLICT);
         }
 
@@ -43,8 +43,8 @@ public class UserController {
 
     @PutMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> editUser(@RequestBody @Valid EditUserRequest request){
-        if (!userService.existsById(request.getId())) {
+    public ResponseEntity<?> updateUser(@RequestBody @Valid UpdateUserRequest request){
+        if (!userService.existsById(request.userID())) {
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }
 

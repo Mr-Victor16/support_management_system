@@ -63,16 +63,15 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/category/**").permitAll()
-                                .requestMatchers("/api/knowledge-base/**").permitAll()
-                                .requestMatchers("/api/priority/**").permitAll()
-                                .requestMatchers("/api/role").permitAll()
+                                .requestMatchers("/api/categories/**").permitAll()
+                                .requestMatchers("/api/knowledge-bases/**").permitAll()
+                                .requestMatchers("/api/priorities/**").permitAll()
+                                .requestMatchers("/api/roles").permitAll()
                                 .requestMatchers("/api/software/**").permitAll()
-                                .requestMatchers("/api/status/**").permitAll()
-                                .requestMatchers("/api/ticket/**").permitAll()
+                                .requestMatchers("/api/statuses/**").permitAll()
                                 .requestMatchers("/api/tickets/**").permitAll()
-                                .requestMatchers("/api/user/**").permitAll()
-                                .requestMatchers("/api/profile/**").permitAll()
+                                .requestMatchers("/api/users/**").permitAll()
+                                .requestMatchers("/api/profiles/**").permitAll()
                                 .anyRequest().authenticated()
                 );
 

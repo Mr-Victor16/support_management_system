@@ -1,9 +1,9 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.add.AddTicketRequest;
-import com.projekt.payload.request.edit.EditTicketStatusRequest;
-import com.projekt.payload.request.edit.EditTicketRequest;
+import com.projekt.payload.request.add.AddTicketReply;
+import com.projekt.payload.request.update.UpdateTicketStatusRequest;
+import com.projekt.payload.request.update.UpdateTicketRequest;
 import com.projekt.services.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,18 +20,32 @@ import java.security.Principal;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/ticket")
+@RequestMapping("/api/tickets")
 public class TicketController {
     private final TicketService ticketService;
     private final TicketReplyService ticketReplyService;
     private final ImageService imageService;
     private final StatusService statusService;
+    private final UserService userService;
 
-    public TicketController(TicketService ticketService, TicketReplyService ticketReplyService, ImageService imageService, StatusService statusService) {
+    public TicketController(TicketService ticketService, TicketReplyService ticketReplyService, ImageService imageService, StatusService statusService, UserService userService) {
         this.ticketService = ticketService;
         this.ticketReplyService = ticketReplyService;
         this.imageService = imageService;
         this.statusService = statusService;
+        this.userService = userService;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    public ResponseEntity<?> getAllTickets(){
+        return ResponseEntity.ok(ticketService.getAll());
+    }
+
+    @GetMapping("/user")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    public ResponseEntity<?> getUserTickets(Principal principal){
+        return ResponseEntity.ok(userService.findUserByUsername(principal.getName()).getTickets());
     }
 
     @GetMapping("{ticketID}")
@@ -51,7 +65,7 @@ public class TicketController {
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public ResponseEntity<?> addTicket(@RequestBody @Valid AddTicketRequest request, Principal principal){
-        if(!ticketService.entitiesExist(request.getCategoryID(), request.getStatusID(), request.getPriorityID(), request.getSoftwareID())){
+        if(!ticketService.entitiesExist(request.categoryID(), request.statusID(), request.priorityID(), request.softwareID())){
             return new ResponseEntity<>("One or more entities do not exist", HttpStatus.NOT_FOUND);
         }
 
@@ -61,12 +75,12 @@ public class TicketController {
 
     @PutMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> updateTicket(@RequestBody @Valid EditTicketRequest request, Principal principal) {
-        if(!ticketService.existsById(request.getTicketID())){
+    public ResponseEntity<?> updateTicket(@RequestBody @Valid UpdateTicketRequest request, Principal principal) {
+        if(!ticketService.existsById(request.ticketID())){
             return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
         }
 
-        if(ticketService.isAuthorized(request.getTicketID(), principal.getName())){
+        if(ticketService.isAuthorized(request.ticketID(), principal.getName())){
             ticketService.update(request);
             return ResponseEntity.ok("Ticket details changed successfully");
         }
@@ -110,13 +124,13 @@ public class TicketController {
 
     @PostMapping("/reply")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> addTicketReply(@RequestBody @Valid AddTicketReplyRequest request, Principal principal) {
+    public ResponseEntity<?> addTicketReply(@RequestBody @Valid AddTicketReply request, Principal principal) {
         try {
-            if(!ticketService.existsById(request.getTicketID())){
+            if(!ticketService.existsById(request.ticketID())){
                 return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
             }
 
-            if(ticketService.isAuthorized(request.getTicketID(), principal.getName())){
+            if(ticketService.isAuthorized(request.ticketID(), principal.getName())){
                 ticketService.addReply(request);
                 return ResponseEntity.ok("Ticket reply added successfully");
             }
@@ -129,17 +143,17 @@ public class TicketController {
 
     @PostMapping("/status")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> changeTicketStatus(@RequestBody @Valid EditTicketStatusRequest request) {
+    public ResponseEntity<?> changeTicketStatus(@RequestBody @Valid UpdateTicketStatusRequest request) {
         try {
-            if (!ticketService.existsById(request.getTicketID())) {
+            if (!ticketService.existsById(request.ticketID())) {
                 return new ResponseEntity<>("Ticket not found", HttpStatus.NOT_FOUND);
             }
 
-            if (!statusService.existsById(request.getStatusID())) {
+            if (!statusService.existsById(request.statusID())) {
                 return new ResponseEntity<>("Status not found", HttpStatus.NOT_FOUND);
             }
 
-            ticketService.changeStatus(request.getTicketID(), request.getStatusID());
+            ticketService.changeStatus(request.ticketID(), request.statusID());
             return ResponseEntity.ok("Ticket status changed successfully");
         } catch (MessagingException e) {
             return new ResponseEntity<>("Error occurred while sending notification", HttpStatus.INTERNAL_SERVER_ERROR);

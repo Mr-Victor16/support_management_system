@@ -1,6 +1,6 @@
 package com.projekt.controllers;
 
-import com.projekt.payload.request.edit.EditProfileDetailsRequest;
+import com.projekt.payload.request.update.UpdateProfileDetailsRequest;
 import com.projekt.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,7 @@ import java.security.Principal;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping("/api/profiles")
 public class ProfileController {
     private final UserService userService;
 
@@ -32,7 +32,7 @@ public class ProfileController {
 
     @PutMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody @Valid EditProfileDetailsRequest request) {
+    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody @Valid UpdateProfileDetailsRequest request) {
         if (!userService.existsByUsername(principal.getName())){
             return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
         }

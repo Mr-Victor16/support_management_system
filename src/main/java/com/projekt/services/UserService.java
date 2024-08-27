@@ -3,8 +3,8 @@ package com.projekt.services;
 import com.projekt.models.User;
 import com.projekt.payload.request.*;
 import com.projekt.payload.request.add.AddUserRequest;
-import com.projekt.payload.request.edit.EditProfileDetailsRequest;
-import com.projekt.payload.request.edit.EditUserRequest;
+import com.projekt.payload.request.update.UpdateProfileDetailsRequest;
+import com.projekt.payload.request.update.UpdateUserRequest;
 import com.projekt.payload.response.LoginResponse;
 import com.projekt.payload.response.UserDetailsResponse;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,7 +24,7 @@ public interface UserService extends UserDetailsService {
 
     UserDetailsResponse loadById(Long id);
 
-    void editUser(EditUserRequest request) throws Exception;
+    void editUser(UpdateUserRequest request) throws Exception;
 
     void delete(Long id);
 
@@ -40,7 +40,7 @@ public interface UserService extends UserDetailsService {
 
     UserDetailsResponse getUserDetails(String name);
 
-    void updateProfile(String username, EditProfileDetailsRequest request);
+    void updateProfile(String username, UpdateProfileDetailsRequest request);
 
     boolean isActive(Long userID);
 

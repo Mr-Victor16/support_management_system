@@ -1,9 +1,9 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
-import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.add.AddTicketRequest;
-import com.projekt.payload.request.edit.EditTicketRequest;
+import com.projekt.payload.request.add.AddTicketReply;
+import com.projekt.payload.request.update.UpdateTicketRequest;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
@@ -24,7 +24,7 @@ public interface TicketService {
 
     Ticket getById(Long id);
 
-    void addReply(AddTicketReplyRequest ticketReply) throws MessagingException;
+    void addReply(AddTicketReply ticketReply) throws MessagingException;
 
     void changeStatus(Long ticketID, Long statusID) throws MessagingException;
 
@@ -32,7 +32,7 @@ public interface TicketService {
 
     void add(AddTicketRequest request, String username);
 
-    void update(EditTicketRequest request);
+    void update(UpdateTicketRequest request);
 
     void addImage(Long ticketID, MultipartFile file) throws IOException;
 

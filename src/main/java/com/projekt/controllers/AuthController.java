@@ -24,7 +24,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest request) {
-        if(userService.existsByUsername(request.getUsername())) {
+        if(userService.existsByUsername(request.username())) {
             return ResponseEntity.ok(userService.authenticate(request));
         }
 
@@ -33,11 +33,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
-        if(userService.existsByUsername(request.getUsername())) {
+        if(userService.existsByUsername(request.username())) {
             return new ResponseEntity<>("Username already in use", HttpStatus.CONFLICT);
         }
 
-        if(userService.existsByEmail(request.getEmail())) {
+        if(userService.existsByEmail(request.email())) {
             return new ResponseEntity<>("Email address already in use", HttpStatus.CONFLICT);
         }
 

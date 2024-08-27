@@ -1,7 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.*;
-import com.projekt.payload.request.add.AddTicketReplyRequest;
+import com.projekt.payload.request.add.AddTicketReply;
 import com.projekt.repositories.*;
 import com.projekt.security.jwt.JWTUtils;
 import jakarta.mail.MessagingException;
@@ -13,6 +13,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -117,9 +119,7 @@ public class TicketServiceTests {
         Long ticketID = 1L;
         Long userID = 2L;
 
-        AddTicketReplyRequest request = new AddTicketReplyRequest();
-        request.setTicketID(ticketID);
-        request.setUserID(userID);
+        AddTicketReply request = new AddTicketReply(ticketID, userID, "content", LocalDate.now());
 
         User user = new User();
         user.setId(userID);
