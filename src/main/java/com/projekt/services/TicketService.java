@@ -4,7 +4,6 @@ import com.projekt.models.*;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.add.AddTicketReply;
 import com.projekt.payload.request.update.UpdateTicketRequest;
-import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-@Service
 public interface TicketService {
     List<Ticket> getAll();
 

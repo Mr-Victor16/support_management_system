@@ -1,6 +1,5 @@
 package com.projekt.models;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "knowledge_bases")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class Knowledge {

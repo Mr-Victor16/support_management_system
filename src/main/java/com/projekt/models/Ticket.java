@@ -1,6 +1,5 @@
 package com.projekt.models;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +15,6 @@ import java.util.List;
 @Entity
 @Table(name = "tickets")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class Ticket {
