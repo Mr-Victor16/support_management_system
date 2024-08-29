@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.*;
 import com.projekt.models.Status;
 import com.projekt.payload.request.add.AddStatusRequest;
 import com.projekt.payload.request.update.UpdateStatusRequest;
@@ -22,7 +23,8 @@ public class StatusServiceImpl implements StatusService{
 
     @Override
     public Status loadById(Long id) {
-        return statusRepository.getReferenceById(id);
+        return statusRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Status", id));
     }
 
     @Override
@@ -31,7 +33,11 @@ public class StatusServiceImpl implements StatusService{
     }
 
     @Override
-    public void save(AddStatusRequest request) {
+    public void add(AddStatusRequest request) {
+        if(statusRepository.existsByNameIgnoreCase(request.name())) {
+            throw new NameConflictException("Status", request.name());
+        }
+
         statusRepository.save(new Status(request.name(), request.closeTicket()));
     }
 
@@ -54,20 +60,31 @@ public class StatusServiceImpl implements StatusService{
 
     @Override
     public void update(UpdateStatusRequest request) {
-        Status status = statusRepository.getReferenceById(request.statusID());
+        Status status = statusRepository.findById(request.statusID())
+                .orElseThrow(() -> new NotFoundException("Status", request.statusID()));
+
+        if(status.getName().equals(request.name())) {
+            throw new NameUnchangedException("Status", request.name());
+        }
+
+        if(statusRepository.existsByNameIgnoreCase(request.name())) {
+            throw new NameConflictException("Status", request.name());
+        }
+
         status.setName(request.name());
         status.setCloseTicket(request.closeTicket());
-
         statusRepository.save(status);
     }
 
     @Override
-    public boolean existsByName(String statusName) {
-        return statusRepository.existsByNameIgnoreCase(statusName);
-    }
-
-    @Override
     public void delete(Long id) {
-        statusRepository.deleteById(id);
+        Status status = statusRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Status", id));
+
+        if(ticketRepository.existsByStatusId(status.getId())) {
+            throw new ResourceHasAssignedItemsException("status", "ticket");
+        }
+
+        statusRepository.deleteById(status.getId());
     }
 }

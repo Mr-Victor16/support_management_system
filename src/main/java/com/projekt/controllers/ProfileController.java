@@ -1,6 +1,7 @@
 package com.projekt.controllers;
 
 import com.projekt.payload.request.update.UpdateProfileDetailsRequest;
+import com.projekt.payload.response.UserDetailsResponse;
 import com.projekt.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,35 +22,19 @@ public class ProfileController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> getProfile(Principal principal) {
-        if(!userService.existsByUsername(principal.getName())){
-            return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
-        }
-
+    public ResponseEntity<UserDetailsResponse> getProfile(Principal principal) {
         return ResponseEntity.ok(userService.getUserDetails(principal.getName()));
     }
 
     @PutMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody @Valid UpdateProfileDetailsRequest request) {
-        if (!userService.existsByUsername(principal.getName())){
-            return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
-        }
-
+    public ResponseEntity<String> updateProfile(Principal principal, @RequestBody @Valid UpdateProfileDetailsRequest request) {
         userService.updateProfile(principal.getName(), request);
         return new ResponseEntity<>("Profile updated", HttpStatus.OK);
     }
 
     @GetMapping("/activate/{userID}")
-    public ResponseEntity<?> activateProfile(@PathVariable Long userID) {
-        if(!userService.existsById(userID)){
-            return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
-        }
-
-        if(userService.isActive(userID)){
-            return new ResponseEntity<>("User already activated", HttpStatus.CONFLICT);
-        }
-
+    public ResponseEntity<String> activateProfile(@PathVariable Long userID) {
         userService.activate(userID);
         return new ResponseEntity<>("User activated", HttpStatus.OK);
     }

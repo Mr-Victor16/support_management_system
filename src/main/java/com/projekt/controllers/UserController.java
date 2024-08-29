@@ -2,6 +2,7 @@ package com.projekt.controllers;
 
 import com.projekt.payload.request.add.AddUserRequest;
 import com.projekt.payload.request.update.UpdateUserRequest;
+import com.projekt.payload.response.UserDetailsResponse;
 import com.projekt.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -21,58 +24,34 @@ public class UserController {
 
     @GetMapping("{userID}")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> getUser(@PathVariable(name = "userID", required = false) Long userID){
-        if (!userService.existsById(userID)) {
-            return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
-        }
-
+    public ResponseEntity<UserDetailsResponse> getUser(@PathVariable(name = "userID", required = false) Long userID){
         return ResponseEntity.ok(userService.loadById(userID));
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> addUser(@RequestBody @Valid AddUserRequest request){
-        if (userService.existsByUsername(request.username()) || userService.existsByEmail(request.email())){
-            return new ResponseEntity<>("Username or Email already exists", HttpStatus.CONFLICT);
-        }
-
-        userService.addUser(request);
+    public ResponseEntity<String> addUser(@RequestBody @Valid AddUserRequest request){
+        userService.add(request);
         return new ResponseEntity<>("User added", HttpStatus.OK);
     }
 
     @PutMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> updateUser(@RequestBody @Valid UpdateUserRequest request){
-        if (!userService.existsById(request.userID())) {
-            return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
-        }
-
-        try {
-            userService.editUser(request);
-            return new ResponseEntity<>("User edited", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Username or Email already exists", HttpStatus.CONFLICT);
-        }
+    public ResponseEntity<String> updateUser(@RequestBody @Valid UpdateUserRequest request){
+        userService.updateUser(request);
+        return new ResponseEntity<>("User edited", HttpStatus.OK);
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> getAllUsers(){
+    public ResponseEntity<List<UserDetailsResponse>> getAllUsers(){
         return ResponseEntity.ok(userService.loadAll());
     }
 
     @DeleteMapping("{userID}")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> deleteUser(@PathVariable("userID") Long userID){
-        if(userID != 1) {
-            if (userService.existsById(userID)) {
-                userService.delete(userID);
-                return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
-            }
-        } else {
-            return new ResponseEntity<>("Default administrator account cannot be deleted", HttpStatus.FORBIDDEN);
-        }
-
-        return new ResponseEntity<>("No user found", HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> deleteUser(@PathVariable("userID") Long userID){
+        userService.delete(userID);
+        return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
     }
 }

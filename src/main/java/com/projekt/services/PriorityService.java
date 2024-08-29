@@ -10,7 +10,7 @@ import java.util.List;
 public interface PriorityService {
     Priority loadById(Long id);
 
-    void save(AddPriorityRequest priorityRequest);
+    void add(AddPriorityRequest request);
 
     void delete(Long id);
 
@@ -18,9 +18,7 @@ public interface PriorityService {
 
     List<PriorityResponse> getAllWithUseNumber();
 
-    boolean existsById(Long priorityID);
+    boolean existsById(Long id);
 
-    boolean existsByName(String priorityName);
-
-    void update(UpdatePriorityRequest priorityRequest);
+    void update(UpdatePriorityRequest request);
 }

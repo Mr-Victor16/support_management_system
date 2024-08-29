@@ -1,5 +1,7 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.KnowledgeConflictException;
+import com.projekt.exceptions.NotFoundException;
 import com.projekt.models.Knowledge;
 import com.projekt.payload.request.add.AddKnowledgeRequest;
 import com.projekt.payload.request.update.UpdateKnowledgeRequest;
@@ -27,23 +29,32 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
 
     @Override
     public Knowledge loadById(Long id) {
-        return knowledgeRepository.getReferenceById(id);
+        return knowledgeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Knowledge", id));
     }
 
     @Override
-    public void save(AddKnowledgeRequest request) {
-        Knowledge knowledge = new Knowledge();
-        knowledge.setTitle(request.title());
-        knowledge.setContent(request.content());
-        knowledge.setDate(request.date());
-        knowledge.setSoftware(softwareRepository.getReferenceById(knowledge.getSoftware().getId()));
+    public void add(AddKnowledgeRequest request) {
+        if(findDuplicate(request.title(), request.softwareID())) {
+            throw new KnowledgeConflictException(request.title(), request.softwareID());
+        }
+
+        Knowledge knowledge = new Knowledge(
+                request.title(),
+                request.content(),
+                softwareRepository.findById(request.softwareID())
+                        .orElseThrow(() -> new NotFoundException("Software", request.softwareID()))
+        );
 
         knowledgeRepository.save(knowledge);
     }
 
     @Override
     public void delete(Long id) {
-        knowledgeRepository.deleteById(id);
+        Knowledge knowledge = knowledgeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Knowledge", id));
+
+        knowledgeRepository.deleteById(knowledge.getId());
     }
 
     @Override
@@ -60,16 +71,17 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
 
     @Override
     public void update(UpdateKnowledgeRequest request) {
-        Knowledge knowledge = knowledgeRepository.getReferenceById(request.knowledgeID());
+        Knowledge knowledge = knowledgeRepository.findById(request.knowledgeID())
+                .orElseThrow(() -> new NotFoundException("Knowledge", request.knowledgeID()));
+
+        if(findDuplicate(request.title(), request.softwareID())) {
+            throw new KnowledgeConflictException(request.title(), request.softwareID());
+        }
+
         knowledge.setTitle(request.title());
         knowledge.setContent(request.content());
-        knowledge.setDate(request.date());
-        knowledge.setSoftware(softwareRepository.getReferenceById(request.softwareID()));
+        knowledge.setSoftware(softwareRepository.findById(request.softwareID())
+                .orElseThrow(() -> new NotFoundException("Software", request.softwareID())));
         knowledgeRepository.save(knowledge);
-    }
-
-    @Override
-    public boolean existsBySoftwareId(Long softwareID) {
-        return knowledgeRepository.existsBySoftwareId(softwareID);
     }
 }

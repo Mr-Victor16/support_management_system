@@ -104,7 +104,6 @@ public class RepositoryInitializer {
                 knowledge.setId(1L);
                 knowledge.setTitle("What is Steam?");
                 knowledge.setContent(software.getDescription());
-                knowledge.setDate(LocalDate.now());
                 knowledge.setSoftware(softwareRepository.getReferenceById(1L));
                 knowledgeRepository.save(knowledge);
 
@@ -112,7 +111,6 @@ public class RepositoryInitializer {
                 knowledge1.setId(2L);
                 knowledge1.setTitle("What is Origin?");
                 knowledge1.setContent(software2.getDescription());
-                knowledge1.setDate(LocalDate.of(2022,1,15));
                 knowledge1.setSoftware(softwareRepository.getReferenceById(2L));
                 knowledgeRepository.save(knowledge1);
 
@@ -120,7 +118,6 @@ public class RepositoryInitializer {
                 knowledge2.setId(3L);
                 knowledge2.setTitle("When was Steam created?");
                 knowledge2.setContent("The platform began development in 2002. The final version of the Steam client was released on 12 September 2003.");
-                knowledge2.setDate(LocalDate.of(2022,1,10));
                 knowledge2.setSoftware(softwareRepository.getReferenceById(1L));
                 knowledgeRepository.save(knowledge2);
             }

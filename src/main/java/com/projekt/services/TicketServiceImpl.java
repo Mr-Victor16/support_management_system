@@ -1,8 +1,8 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.*;
 import com.projekt.models.*;
 import com.projekt.payload.request.add.AddTicketRequest;
-import com.projekt.payload.request.add.AddTicketReply;
 import com.projekt.payload.request.update.UpdateTicketRequest;
 import com.projekt.repositories.*;
 import org.springframework.stereotype.Service;
@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.mail.MessagingException;
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -17,20 +18,16 @@ import java.util.Objects;
 @Service("ticketDetailsService")
 public class TicketServiceImpl implements TicketService{
     private final TicketRepository ticketRepository;
-    private final UserService userService;
     private final MailService mailService;
-    private final TicketReplyRepository ticketReplyRepository;
     private final UserRepository userRepository;
     private final StatusRepository statusRepository;
     private final CategoryRepository categoryRepository;
     private final PriorityRepository priorityRepository;
     private final SoftwareRepository softwareRepository;
 
-    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, MailService mailService, TicketReplyRepository ticketReplyRepository, UserRepository userRepository, StatusRepository statusRepository, CategoryRepository categoryRepository, PriorityRepository priorityRepository, SoftwareRepository softwareRepository) {
+    public TicketServiceImpl(TicketRepository ticketRepository, MailService mailService, UserRepository userRepository, StatusRepository statusRepository, CategoryRepository categoryRepository, PriorityRepository priorityRepository, SoftwareRepository softwareRepository) {
         this.ticketRepository = ticketRepository;
-        this.userService = userService;
         this.mailService = mailService;
-        this.ticketReplyRepository = ticketReplyRepository;
         this.userRepository = userRepository;
         this.statusRepository = statusRepository;
         this.categoryRepository = categoryRepository;
@@ -49,57 +46,66 @@ public class TicketServiceImpl implements TicketService{
     }
 
     @Override
-    public void delete(Long id) {
-        ticketRepository.deleteById(id);
+    public void delete(Long id, Principal principal) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Ticket", id));
+
+        if(!isAuthorized(ticket.getId(), principal.getName())){
+            throw UnauthorizedActionException.forActionOnResource("delete", "ticket");
+        }
+
+        ticketRepository.deleteById(ticket.getId());
     }
 
     @Override
     public boolean isAuthorized(Long ticketID, String username){
         if(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)) return true;
 
-        return (Objects.equals(userService.findUserByUsername(username).getId(), ticketRepository.getReferenceById(ticketID).getUser().getId()));
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new NotFoundException("User", username));
+
+        Ticket ticket = ticketRepository.findById(ticketID)
+                .orElseThrow(() -> new NotFoundException("Ticket", ticketID));
+
+        return Objects.equals(user.getId(), ticket.getUser().getId());
     }
 
     @Override
-    public Ticket getById(Long id) {
-        return ticketRepository.getReferenceById(id);
+    public List<Ticket> findUserTickets(Principal principal) {
+        User user = userRepository.findByUsernameIgnoreCase(principal.getName())
+                .orElseThrow(() -> new NotFoundException("User", principal.getName()));
+
+        return user.getTickets();
     }
 
     @Override
-    public void addReply(AddTicketReply request) throws MessagingException {
-        TicketReply ticketReply = new TicketReply();
-        ticketReply.setDate(LocalDate.now());
-        ticketReply.setUser(userRepository.getReferenceById(request.userID()));
-        ticketReplyRepository.save(ticketReply);
+    public Ticket getById(Long id, Principal principal) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Ticket", id));
 
-        Ticket ticket = ticketRepository.getReferenceById(request.ticketID());
-        ticket.getReplies().add(ticketReply);
-
-        User user = ticketRepository.getReferenceById(request.ticketID()).getUser();
-
-        if(!Objects.equals(user.getId(), request.userID())){
-            mailService.sendTicketReplyMessage(user.getEmail(), ticket.getTitle());
+        if(!isAuthorized(ticket.getId(), principal.getName())){
+            throw UnauthorizedActionException.forActionToResource("access", "ticket");
         }
 
-        ticketRepository.save(ticket);
+        return ticket;
     }
 
     @Override
-    public void changeStatus(Long ticketID, Long statusID) throws MessagingException {
-        Status status = statusRepository.getReferenceById(statusID);
+    public void changeStatus(Long ticketID, Long statusID) {
+        Ticket ticket = ticketRepository.findById(ticketID)
+                .orElseThrow(() -> new NotFoundException("Ticket", ticketID));
 
-        Ticket ticket = ticketRepository.getReferenceById(ticketID);
+        Status status = statusRepository.findById(statusID)
+                .orElseThrow(() -> new NotFoundException("Status", statusID));
+
         ticket.setStatus(status);
-
-        User user = ticketRepository.getReferenceById(ticketID).getUser();
-        mailService.sendChangeStatusMessage(user.getId(), ticket.getTitle(), status.getName());
-
         ticketRepository.save(ticket);
-    }
 
-    @Override
-    public Ticket findByImageId(Long imageID) {
-        return ticketRepository.findByImagesId(imageID);
+        try {
+            mailService.sendChangeStatusMessage(ticket.getUser().getId(), ticket.getTitle(), status.getName());
+        } catch (MessagingException ex) {
+            throw new NotificationFailedException("Error occurred while sending notification", ex);
+        }
     }
 
     @Override
@@ -108,76 +114,66 @@ public class TicketServiceImpl implements TicketService{
         ticket.setTitle(request.title());
         ticket.setDescription(request.description());
 
-        List<Image> images = request.multipartFiles().stream()
-                .map(file -> {
-                    try {
-                        return new Image(file.getOriginalFilename(), file.getBytes());
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to process file", e);
-                    }
-                })
-                .toList();
+        List<Image> images = processFiles(request.multipartFiles());
         ticket.setImages(images);
 
         ticket.setDate(LocalDate.now());
-        ticket.setCategory(categoryRepository.getReferenceById(request.categoryID()));
-        ticket.setPriority(priorityRepository.getReferenceById(request.priorityID()));
-        ticket.setStatus(statusRepository.getReferenceById(request.statusID()));
+
+        ticket.setCategory(categoryRepository.findById(request.categoryID())
+                .orElseThrow(() -> new NotFoundException("Category", request.categoryID())));
+
+        ticket.setPriority(priorityRepository.findById(request.priorityID())
+                .orElseThrow(() -> new NotFoundException("Priority", request.priorityID())));
+
+        ticket.setStatus(statusRepository.findById(request.statusID())
+                .orElseThrow(() -> new NotFoundException("Status", request.statusID())));
+
         ticket.setVersion(request.version());
-        ticket.setSoftware(softwareRepository.getReferenceById(request.softwareID()));
-        ticket.setUser(userRepository.findByUsernameIgnoreCase(username));
+
+        ticket.setSoftware(softwareRepository.findById(request.softwareID())
+                .orElseThrow(() -> new NotFoundException("Software", request.softwareID())));
+
+        ticket.setUser(userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new NotFoundException("User", username))
+        );
 
         ticketRepository.save(ticket);
     }
 
     @Override
-    public void update(UpdateTicketRequest request) {
-        Ticket ticket = ticketRepository.getReferenceById(request.ticketID());
+    public List<Image> processFiles(List<MultipartFile> files) {
+        return files.stream()
+                .map(file -> {
+                    try {
+                        return new Image(file.getOriginalFilename(), file.getBytes());
+                    } catch (IOException ex) {
+                        throw new FileProcessingException(file.getOriginalFilename(), ex.getCause());
+                    }
+                })
+                .toList();
+    }
+
+    @Override
+    public void update(UpdateTicketRequest request, Principal principal) {
+        Ticket ticket = ticketRepository.findById(request.ticketID())
+                .orElseThrow(() -> new NotFoundException("Ticket", request.ticketID()));
+
+        if(!isAuthorized(ticket.getId(), principal.getName())){
+            throw UnauthorizedActionException.forActionOnResource("update", "ticket");
+        }
+
         ticket.setTitle(request.title());
         ticket.setDescription(request.description());
-        ticket.setCategory(categoryRepository.getReferenceById(request.categoryID()));
-        ticket.setPriority(priorityRepository.getReferenceById(request.priorityID()));
+
+        ticket.setCategory(categoryRepository.findById(request.categoryID())
+                .orElseThrow(() -> new NotFoundException("Category", request.categoryID())));
+        ticket.setPriority(priorityRepository.findById(request.priorityID())
+                .orElseThrow(() -> new NotFoundException("Priority", request.priorityID())));
+        ticket.setSoftware(softwareRepository.findById(request.softwareID())
+                .orElseThrow(() -> new NotFoundException("Software", request.softwareID())));
+
         ticket.setVersion(request.version());
-        ticket.setSoftware(softwareRepository.getReferenceById(request.softwareID()));
 
         ticketRepository.save(ticket);
-    }
-
-    @Override
-    public void addImage(Long ticketID, MultipartFile file) throws IOException {
-        Ticket ticket = ticketRepository.getReferenceById(ticketID);
-        ticket.getImages().add(new Image(file.getOriginalFilename(), file.getBytes()));
-
-        ticketRepository.save(ticket);
-    }
-
-    @Override
-    public boolean existsByCategoryId(Long categoryID) {
-        return ticketRepository.existsByCategoryId(categoryID);
-    }
-
-    @Override
-    public boolean existsByPriorityId(Long priorityID) {
-        return ticketRepository.existsByPriorityId(priorityID);
-    }
-
-    @Override
-    public boolean existsBySoftwareId(Long softwareID) {
-        return ticketRepository.existsBySoftwareId(softwareID);
-    }
-
-    @Override
-    public boolean existsByStatusId(Long statusID) {
-        return ticketRepository.existsByStatusId(statusID);
-    }
-
-    @Override
-    public boolean entitiesExist(Long categoryID, Long statusID, Long priorityID, Long softwareID) {
-        boolean categoryExists = categoryRepository.existsById(categoryID);
-        boolean statusExists = statusRepository.existsById(statusID);
-        boolean priorityExists = priorityRepository.existsById(priorityID);
-        boolean softwareExists = softwareRepository.existsById(softwareID);
-
-        return categoryExists && priorityExists && statusExists && softwareExists;
     }
 }

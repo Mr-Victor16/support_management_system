@@ -1,23 +1,58 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.NotFoundException;
+import com.projekt.exceptions.UnauthorizedActionException;
+import com.projekt.models.Image;
+import com.projekt.models.Ticket;
 import com.projekt.repositories.ImageRepository;
+import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.security.Principal;
+import java.util.List;
 
 @Service("imageService")
 public class ImageServiceImpl implements ImageService{
     private final ImageRepository imageRepository;
+    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
 
-    public ImageServiceImpl(ImageRepository imageRepository) {
+    public ImageServiceImpl(ImageRepository imageRepository, TicketService ticketService, TicketRepository ticketRepository) {
         this.imageRepository = imageRepository;
+        this.ticketService = ticketService;
+        this.ticketRepository = ticketRepository;
     }
 
     @Override
-    public void deleteById(Long id) {
-        imageRepository.deleteById(id);
+    public void deleteById(Long id, Principal principal) {
+        Image image = imageRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Image", id));
+
+        if(!ticketService.isAuthorized(ticketRepository.findByImagesId(id).getId(), principal.getName())){
+            throw UnauthorizedActionException.forActionOnResource("delete", "image");
+        }
+
+        imageRepository.deleteById(image.getId());
     }
 
     @Override
-    public boolean existsById(Long imageID) {
-        return imageRepository.existsById(imageID);
+    public boolean existsById(Long id) {
+        return imageRepository.existsById(id);
+    }
+
+    @Override
+    public void add(Long ticketID, List<MultipartFile> files, Principal principal){
+        Ticket ticket = ticketRepository.findById(ticketID)
+                .orElseThrow(() -> new NotFoundException("Ticket", ticketID));
+
+        if(!ticketService.isAuthorized(ticket.getId(), principal.getName())){
+            throw UnauthorizedActionException.forActionToResource("add image", "ticket");
+        }
+
+        List<Image> images = ticketService.processFiles(files);
+        ticket.getImages().addAll(images);
+
+        ticketRepository.save(ticket);
     }
 }

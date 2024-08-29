@@ -1,9 +1,10 @@
 package com.projekt.controllers;
 
+import com.projekt.models.Status;
 import com.projekt.payload.request.add.AddStatusRequest;
 import com.projekt.payload.request.update.UpdateStatusRequest;
+import com.projekt.payload.response.StatusResponse;
 import com.projekt.services.StatusService;
-import com.projekt.services.TicketService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,81 +12,53 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/statuses")
 public class StatusController {
     private final StatusService statusService;
-    private final TicketService ticketService;
 
-    public StatusController(StatusService statusService, TicketService ticketService) {
+    public StatusController(StatusService statusService) {
         this.statusService = statusService;
-        this.ticketService = ticketService;
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> getAllStatuses(){
+    public ResponseEntity<List<Status>> getAllStatuses(){
         return ResponseEntity.ok(statusService.getAll());
     }
 
     @GetMapping("/use")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<?> getAllStatusesWithUseNumber(){
+    public ResponseEntity<List<StatusResponse>> getAllStatusesWithUseNumber(){
         return ResponseEntity.ok(statusService.getAllWithUseNumber());
     }
 
     @GetMapping("{statusID}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getStatusById(@PathVariable(name = "statusID") Long statusID){
-        if(statusService.existsById(statusID)){
-            return ResponseEntity.ok(statusService.loadById(statusID));
-        }
-
-        return new ResponseEntity<>("No status found", HttpStatus.NOT_FOUND);
+    public ResponseEntity<Status> getStatusById(@PathVariable(name = "statusID") Long statusID){
+        return ResponseEntity.ok(statusService.loadById(statusID));
     }
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateStatus(@RequestBody @Valid UpdateStatusRequest request){
-        if(!statusService.existsById(request.statusID())){
-            return new ResponseEntity<>("No status found", HttpStatus.NOT_FOUND);
-        }
-
-        if(statusService.loadById(request.statusID()).getName().equals(request.name())){
-            return new ResponseEntity<>("Status name is the same as the current name", HttpStatus.OK);
-        }
-
-        if(!statusService.existsByName(request.name())){
-            statusService.update(request);
-            return new ResponseEntity<>("Status name edited", HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>("Status already exists", HttpStatus.CONFLICT);
+    public ResponseEntity<String> updateStatus(@RequestBody @Valid UpdateStatusRequest request){
+        statusService.update(request);
+        return new ResponseEntity<>("Status edited", HttpStatus.OK);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> addStatus(@RequestBody @Valid AddStatusRequest request){
-        if(!statusService.existsByName(request.name())){
-            statusService.save(request);
-            return new ResponseEntity<>("Status added", HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>("Status already exists", HttpStatus.CONFLICT);
+    public ResponseEntity<String> addStatus(@RequestBody @Valid AddStatusRequest request){
+        statusService.add(request);
+        return new ResponseEntity<>("Status added", HttpStatus.OK);
     }
 
     @DeleteMapping("{statusID}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteStatus(@PathVariable(name = "statusID") Long statusID){
-        if(!statusService.existsById(statusID)){
-            return new ResponseEntity<>("No status found", HttpStatus.NOT_FOUND);
-        }
-
-        if(!ticketService.existsByStatusId(statusID)){
-            statusService.delete(statusID);
-            return new ResponseEntity<>("Status removed successfully", HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>("You cannot remove a status if it has a ticket assigned to it", HttpStatus.CONFLICT);
+    public ResponseEntity<String> deleteStatus(@PathVariable(name = "statusID") Long statusID){
+        statusService.delete(statusID);
+        return new ResponseEntity<>("Status removed successfully", HttpStatus.OK);
     }
 }

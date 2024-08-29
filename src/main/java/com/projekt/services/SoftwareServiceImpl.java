@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.*;
 import com.projekt.models.Software;
 import com.projekt.payload.request.add.AddSoftwareRequest;
 import com.projekt.payload.request.update.UpdateSoftwareRequest;
@@ -30,7 +31,8 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public Software loadById(Long id) {
-        return softwareRepository.getReferenceById(id);
+        return softwareRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Software", id));
     }
 
     @Override
@@ -40,24 +42,40 @@ public class SoftwareServiceImpl implements SoftwareService {
 
     @Override
     public void delete(Long id) {
-        softwareRepository.deleteById(id);
+        Software software = softwareRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Software", id));
+
+        if(ticketRepository.existsBySoftwareId(software.getId()) || knowledgeRepository.existsBySoftwareId(software.getId())) {
+            throw new ResourceHasAssignedItemsException("software", "ticket or knowledge");
+        }
+
+        softwareRepository.deleteById(software.getId());
     }
 
     @Override
     public void update(UpdateSoftwareRequest request) {
-        Software software = softwareRepository.getReferenceById(request.softwareID());
+        Software software = softwareRepository.findById(request.softwareID())
+                .orElseThrow(() -> new NotFoundException("Software", request.softwareID()));
+
+        if(software.getName().equals(request.name())) {
+            throw new NameUnchangedException("Software", request.name());
+        }
+
+        if(softwareRepository.existsByNameIgnoreCase(request.name())) {
+            throw new NameConflictException("Software", request.name());
+        }
+
         software.setName(request.name());
         software.setDescription(request.description());
         softwareRepository.save(software);
     }
 
     @Override
-    public boolean existsByName(String softwareName) {
-        return softwareRepository.existsByNameIgnoreCase(softwareName);
-    }
+    public void add(AddSoftwareRequest request) {
+        if(softwareRepository.existsByNameIgnoreCase(request.name())) {
+            throw new NameConflictException("Software", request.name());
+        }
 
-    @Override
-    public void save(AddSoftwareRequest request) {
         softwareRepository.save(new Software(request.name(), request.description()));
     }
 

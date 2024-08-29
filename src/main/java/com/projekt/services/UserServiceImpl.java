@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.*;
 import com.projekt.models.Role;
 import com.projekt.models.User;
 import com.projekt.payload.request.*;
@@ -54,26 +55,28 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findByUsernameIgnoreCase(username);
-        if (user == null) throw new UsernameNotFoundException(username);
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new NotFoundException("User", username));
 
         return convertToUserDetails(user);
     }
 
     @Override
-    public void editUser(UpdateUserRequest request) throws Exception {
-        User user = userRepository.getReferenceById(request.userID());
+    public void updateUser(UpdateUserRequest request) {
+        User user = userRepository.findById(request.userID())
+                .orElseThrow(() -> new NotFoundException("User", request.userID()));
 
-        if (userRepository.existsByEmail(request.email())) {
-            throw new Exception("Email is already in use");
+        if (userRepository.existsByUsernameIgnoreCase(request.username()) || userRepository.existsByEmail(request.email())) {
+            throw new UsernameOrEmailAlreadyExistsException(request.username(), request.email());
         }
 
+        user.setUsername(request.username());
         user.setEmail(request.email());
         user.setName(request.name());
         user.setSurname(request.surname());
         Set<Role> roles = request.roles().stream()
                 .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
-                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
+                        .orElseThrow(() -> new NotFoundException("Role", roleName)))
                 .collect(Collectors.toSet());
 
         user.setRoles(roles);
@@ -84,47 +87,56 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void delete(Long id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
+
+        if(user.getId() == 1) throw new DefaultAdminAccountDeletionException();
+
+        userRepository.deleteById(user.getId());
     }
 
     @Override
-    public void activate(Long userID) {
-        User user = userRepository.getReferenceById(userID);
-        user.setEnabled(true);
+    public void activate(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
 
+        if(user.isEnabled()){
+            throw new UserAlreadyActivatedException(user.getId());
+        }
+
+        user.setEnabled(true);
         userRepository.save(user);
     }
 
     @Override
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsernameIgnoreCase(username.toLowerCase());
-    }
+    public void register(RegisterRequest request) {
+        if (userRepository.existsByUsernameIgnoreCase(request.username()) || userRepository.existsByEmail(request.email())) {
+            throw new UsernameOrEmailAlreadyExistsException(request.username(), request.email());
+        }
 
-    @Override
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email.toLowerCase());
-    }
+        User user = new User(
+                request.username(),
+                request.email(),
+                encoder.encode(request.password()),
+                request.name(),
+                request.surname()
+        );
 
-    @Override
-    public void register(RegisterRequest request) throws MessagingException {
-        User newUser = new User();
-        newUser.setUsername(request.username());
-        newUser.setEmail(request.email());
+        user.setRoles(Set.of(roleRepository.findByType(Role.Types.ROLE_USER)));
 
-        newUser.setPassword(encoder.encode(request.password()));
-        newUser.setName(request.name());
-        newUser.setSurname(request.surname());
-
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByType(Role.Types.ROLE_USER));
-        newUser.setRoles(roles);
-
-        User user = userRepository.save(newUser);
-        mailService.sendRegisterMessage(user.getId(), user.isEnabled());
+        try {
+            User savedUser = userRepository.save(user);
+            mailService.sendRegisterMessage(savedUser.getId(), savedUser.isEnabled());
+        } catch (MessagingException ex) {
+            throw new NotificationFailedException("Error occurred while sending registration notification", ex);
+        }
     }
 
     @Override
     public LoginResponse authenticate(LoginRequest request) {
+        userRepository.findByUsernameIgnoreCase(request.username())
+                .orElseThrow(() -> new NotFoundException("User", request.username()));
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
@@ -149,13 +161,18 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDetailsResponse getUserDetails(String name) {
-        return convertToUserDetailsResponse(userRepository.findByUsernameIgnoreCase(name));
+    public UserDetailsResponse getUserDetails(String username) {
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new NotFoundException("User", username));
+
+        return convertToUserDetailsResponse(user);
     }
 
     @Override
     public void updateProfile(String username, UpdateProfileDetailsRequest request) {
-        User user = userRepository.findByUsernameIgnoreCase(username);
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new NotFoundException("User", username));
+
         user.setName(request.name());
         user.setSurname(request.surname());
         user.setPassword(encoder.encode(request.password()));
@@ -164,33 +181,27 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public boolean isActive(Long userID) {
-        return userRepository.getReferenceById(userID).isEnabled();
-    }
+    public void add(AddUserRequest request) {
+        if (userRepository.existsByUsernameIgnoreCase(request.username()) || userRepository.existsByEmail(request.email())) {
+            throw new UsernameOrEmailAlreadyExistsException(request.username(), request.email());
+        }
 
-    @Override
-    public void addUser(AddUserRequest request) {
-        User user = new User();
+        User user = new User(
+                request.username(),
+                encoder.encode(request.password()),
+                request.email(),
+                request.name(),
+                request.surname()
+        );
 
-        user.setUsername(request.username());
-        user.setEmail(request.email());
-        user.setPassword(encoder.encode(request.password()));
-        user.setName(request.name());
-        user.setSurname(request.surname());
         Set<Role> roles = request.roles().stream()
                 .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
-                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
+                        .orElseThrow(() -> new NotFoundException("Role", roleName)))
                 .collect(Collectors.toSet());
-
         user.setRoles(roles);
         user.setEnabled(true);
 
         userRepository.save(user);
-    }
-
-    @Override
-    public User findUserByUsername(String name) {
-        return userRepository.findByUsernameIgnoreCase(name);
     }
 
     @Override
@@ -207,7 +218,10 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserDetailsResponse loadById(Long id) {
-        return convertToUserDetailsResponse(userRepository.getReferenceById(id));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", id));
+
+        return convertToUserDetailsResponse(user);
     }
 
     private UserDetails convertToUserDetails(User user) {

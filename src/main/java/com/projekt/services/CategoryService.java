@@ -1,6 +1,7 @@
 package com.projekt.services;
 
 import com.projekt.models.Category;
+import com.projekt.payload.request.add.AddCategoryRequest;
 import com.projekt.payload.request.update.UpdateCategoryRequest;
 import com.projekt.payload.response.CategoryResponse;
 
@@ -11,13 +12,11 @@ public interface CategoryService {
 
     boolean existsById(Long id);
 
-    void save(String categoryName);
+    void add(AddCategoryRequest request);
 
     void delete(Long id);
 
     List<Category> getAll();
-
-    boolean existsByName(String name);
 
     void update(UpdateCategoryRequest request);
 

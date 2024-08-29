@@ -1,7 +1,13 @@
 package com.projekt.services;
 
-public interface TicketReplyService {
-    void deleteById(Long replyID);
+import com.projekt.payload.request.add.AddTicketReplyRequest;
 
-    boolean existsById(Long replyID);
+import java.security.Principal;
+
+public interface TicketReplyService {
+    void deleteById(Long id);
+
+    boolean existsById(Long id);
+
+    void add(AddTicketReplyRequest request, Principal principal);
 }

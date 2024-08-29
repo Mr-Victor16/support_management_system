@@ -16,11 +16,9 @@ public interface SoftwareService {
 
     void delete(Long id);
 
-    void save(AddSoftwareRequest software);
+    void add(AddSoftwareRequest request);
 
     List<SoftwareResponse> getAllWithUseNumber();
 
     void update(UpdateSoftwareRequest request);
-
-    boolean existsByName(String softwareName);
 }

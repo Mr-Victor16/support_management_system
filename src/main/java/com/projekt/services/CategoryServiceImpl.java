@@ -1,6 +1,8 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.*;
 import com.projekt.models.Category;
+import com.projekt.payload.request.add.AddCategoryRequest;
 import com.projekt.payload.request.update.UpdateCategoryRequest;
 import com.projekt.payload.response.CategoryResponse;
 import com.projekt.repositories.CategoryRepository;
@@ -21,7 +23,8 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public Category loadById(Long id) {
-        return categoryRepository.getReferenceById(id);
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Category", id));
     }
 
     @Override
@@ -30,13 +33,24 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public void save(String categoryName) {
-        categoryRepository.save(new Category(categoryName));
+    public void add(AddCategoryRequest request) {
+        if(categoryRepository.existsByNameIgnoreCase(request.name())) {
+            throw new NameConflictException("Category", request.name());
+        }
+
+        categoryRepository.save(new Category(request.name()));
     }
 
     @Override
     public void delete(Long id) {
-        categoryRepository.deleteById(id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Category", id));
+
+        if(ticketRepository.existsByCategoryId(category.getId())){
+            throw new ResourceHasAssignedItemsException("category", "ticket");
+        }
+
+        categoryRepository.deleteById(category.getId());
     }
 
     @Override
@@ -45,13 +59,18 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public boolean existsByName(String categoryName) {
-        return categoryRepository.existsByNameIgnoreCase(categoryName);
-    }
-
-    @Override
     public void update(UpdateCategoryRequest request) {
-        Category category = categoryRepository.getReferenceById(request.categoryID());
+        Category category = categoryRepository.findById(request.categoryID())
+                .orElseThrow(() -> new NotFoundException("Category", request.categoryID()));
+
+        if(category.getName().equals(request.name())) {
+            throw new NameUnchangedException("Category", request.name());
+        }
+
+        if (categoryRepository.existsByNameIgnoreCase(request.name())) {
+            throw new NameConflictException("Category", request.name());
+        }
+
         category.setName(request.name());
         categoryRepository.save(category);
     }

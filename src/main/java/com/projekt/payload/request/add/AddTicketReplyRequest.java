@@ -8,7 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-public record AddTicketReply(
+public record AddTicketReplyRequest(
         @NotNull
         @Positive
         Long ticketID,

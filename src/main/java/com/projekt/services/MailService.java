@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.NotFoundException;
 import com.projekt.models.User;
 import com.projekt.repositories.UserRepository;
 import jakarta.mail.internet.MimeMessage;
@@ -27,7 +28,8 @@ public class MailService {
     }
 
     public void sendRegisterMessage(Long userID, boolean enabled) throws MessagingException {
-        User user = userRepository.getReferenceById(userID);
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new NotFoundException("User", userID));
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
@@ -65,7 +67,10 @@ public class MailService {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
-        helper.setTo(userRepository.getReferenceById(userID).getEmail());
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new NotFoundException("User", userID));
+
+        helper.setTo(user.getEmail());
         helper.setSubject("Support System - Ticket status changed");
 
         Context context = new Context();

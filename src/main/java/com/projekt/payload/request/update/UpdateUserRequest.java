@@ -10,6 +10,10 @@ public record UpdateUserRequest(
         @Positive
         Long userID,
 
+        @Size(min = 2, max = 36)
+        @NotBlank
+        String username,
+
         @Email
         @NotBlank
         String email,

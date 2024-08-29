@@ -14,13 +14,11 @@ public interface StatusService {
 
     void delete(Long id);
 
-    void save(AddStatusRequest statusRequest);
+    void add(AddStatusRequest request);
 
     List<Status> getAll();
 
     List<StatusResponse> getAllWithUseNumber();
 
-    boolean existsByName(String statusName);
-
-    void update(UpdateStatusRequest statusRequest);
+    void update(UpdateStatusRequest request);
 }

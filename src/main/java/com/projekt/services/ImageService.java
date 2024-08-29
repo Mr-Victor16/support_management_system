@@ -1,7 +1,14 @@
 package com.projekt.services;
 
-public interface ImageService {
-    void deleteById(Long id);
+import org.springframework.web.multipart.MultipartFile;
 
-    boolean existsById(Long imageID);
+import java.security.Principal;
+import java.util.List;
+
+public interface ImageService {
+    void deleteById(Long id, Principal principal);
+
+    boolean existsById(Long id);
+
+    void add(Long ticketID, List<MultipartFile> files, Principal principal);
 }

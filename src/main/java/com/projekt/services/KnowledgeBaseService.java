@@ -11,15 +11,13 @@ public interface KnowledgeBaseService{
 
     Knowledge loadById(Long id);
 
-    void save(AddKnowledgeRequest knowledgeRequest);
+    void add(AddKnowledgeRequest request);
 
     void delete(Long id);
 
     boolean existsById(Long id);
 
-    boolean findDuplicate(String knowledgeTitle, Long softwareID);
+    boolean findDuplicate(String title, Long softwareID);
 
-    void update(UpdateKnowledgeRequest knowledgeRequest);
-
-    boolean existsBySoftwareId(Long softwareID);
+    void update(UpdateKnowledgeRequest request);
 }

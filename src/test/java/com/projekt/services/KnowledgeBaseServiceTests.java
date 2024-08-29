@@ -26,7 +26,7 @@ public class KnowledgeBaseServiceTests {
         knowledgeBaseService = new KnowledgeBaseServiceImpl(knowledgeRepository, softwareRepository);
     }
 
-    //boolean findDuplicate(String knowledgeTitle, Long softwareID);
+    //boolean findDuplicate(String title, Long softwareID);
     //Tests that the method returns true when a knowledge entry with the same title and software ID exists
     @Test
     void shouldReturnTrue_whenKnowledgeWithSameTitleAndSoftwareIdExists() {
@@ -43,7 +43,7 @@ public class KnowledgeBaseServiceTests {
         assertTrue(knowledgeBaseService.findDuplicate(knowledgeTitle, softwareID));
     }
 
-    //boolean findDuplicate(String knowledgeTitle, Long softwareID);
+    //boolean findDuplicate(String title, Long softwareID);
     //Tests that the method returns false when no knowledge entry with the given title exists
     @Test
     void shouldReturnFalse_whenKnowledgeWithTitleDoesNotExist() {
@@ -55,7 +55,7 @@ public class KnowledgeBaseServiceTests {
         assertFalse(knowledgeBaseService.findDuplicate(knowledgeTitle, softwareID));
     }
 
-    //boolean findDuplicate(String knowledgeTitle, Long softwareID);
+    //boolean findDuplicate(String title, Long softwareID);
     //Tests that the method returns false when a knowledge entry with the same title but different software ID exists
     @Test
     void shouldReturnFalse_whenKnowledgeWithSameTitleButDifferentSoftwareIdExists() {
@@ -73,8 +73,8 @@ public class KnowledgeBaseServiceTests {
         assertFalse(knowledgeBaseService.findDuplicate(knowledgeTitle, softwareID));
     }
 
-    //void update(EditKnowledgeRequest knowledgeRequest);
-    //Tests the update method to ensure the knowledge is correctly updated based on the data from the EditKnowledgeRequest object.
+    //void update(UpdateKnowledgeRequest request);
+    //Tests the update method to ensure the knowledge is correctly updated based on the data from the UpdateKnowledgeRequest object.
     @Test
     void testUpdateKnowledge() {
         Long knowledgeID = 1L;
@@ -83,7 +83,7 @@ public class KnowledgeBaseServiceTests {
         UpdateKnowledgeRequest request = new UpdateKnowledgeRequest(knowledgeID, "Updated Title", "Updated Content", LocalDate.now(), softwareID);
 
         Software software = new Software(2L, "SoftwareName", "SoftwareDescription");
-        Knowledge knowledge = new Knowledge(knowledgeID, "Title", "Content", LocalDate.of(2022,10,1), new Software());
+        Knowledge knowledge = new Knowledge(knowledgeID, "Title", "Content", new Software());
 
         when(knowledgeRepository.getReferenceById(knowledgeID)).thenReturn(knowledge);
         when(softwareRepository.getReferenceById(softwareID)).thenReturn(software);
@@ -92,7 +92,6 @@ public class KnowledgeBaseServiceTests {
 
         assertEquals("Updated Title", knowledge.getTitle());
         assertEquals("Updated Content", knowledge.getContent());
-        assertEquals(request.date(), knowledge.getDate());
         assertEquals(softwareID, knowledge.getSoftware().getId());
 
         verify(knowledgeRepository).save(knowledge);
