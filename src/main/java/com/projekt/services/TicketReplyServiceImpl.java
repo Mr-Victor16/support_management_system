@@ -11,7 +11,6 @@ import jakarta.mail.MessagingException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.Objects;
 
 @Service("ticketReplyDetailsService")
@@ -53,7 +52,6 @@ public class TicketReplyServiceImpl implements TicketReplyService{
         }
 
         TicketReply ticketReply = new TicketReply();
-        ticketReply.setDate(LocalDate.now());
         ticketReply.setUser(userRepository.findByUsernameIgnoreCase(principal.getName())
                 .orElseThrow(() -> new NotFoundException("User", principal.getName())));
         ticketReplyRepository.save(ticketReply);

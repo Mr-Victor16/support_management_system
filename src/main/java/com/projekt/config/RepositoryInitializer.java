@@ -144,7 +144,6 @@ public class RepositoryInitializer {
             if(ticketReplyRepository.findAll().isEmpty() && ticketRepository.findAll().isEmpty() && imageRepository.findAll().isEmpty()){
                 Ticket ticket = new Ticket();
                 ticket.setId(1L);
-                ticket.setDate(LocalDate.of(2021,12,10));
                 ticket.setTitle("The website is unreachable");
                 ticket.setStatus(statusRepository.getReferenceById(1L));
                 ticket.setPriority(priorityRepository.getReferenceById(2L));

@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "knowledge_bases")
+@Table(name = "knowledgebases")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

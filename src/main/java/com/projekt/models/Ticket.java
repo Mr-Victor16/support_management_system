@@ -3,7 +3,8 @@ package com.projekt.models;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -17,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,9 +38,9 @@ public class Ticket {
     @JoinColumn(name = "ticket_id")
     private List<Image> images = new ArrayList<>();
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Column(nullable = false)
-    private LocalDate date;
+    @CreatedDate
+    @Column(name = "created_date", nullable = false, updatable = false)
+    private LocalDate createdDate;
 
     @ManyToOne
     @JoinColumn(nullable = false)

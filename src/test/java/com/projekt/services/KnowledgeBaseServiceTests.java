@@ -8,8 +8,6 @@ import com.projekt.repositories.SoftwareRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,7 +78,7 @@ public class KnowledgeBaseServiceTests {
         Long knowledgeID = 1L;
         Long softwareID = 2L;
 
-        UpdateKnowledgeRequest request = new UpdateKnowledgeRequest(knowledgeID, "Updated Title", "Updated Content", LocalDate.now(), softwareID);
+        UpdateKnowledgeRequest request = new UpdateKnowledgeRequest(knowledgeID, "Updated Title", "Updated Content", softwareID);
 
         Software software = new Software(2L, "SoftwareName", "SoftwareDescription");
         Knowledge knowledge = new Knowledge(knowledgeID, "Title", "Content", new Software());

@@ -2,10 +2,8 @@ package com.projekt.payload.request.update;
 
 import com.projekt.models.Image;
 import jakarta.validation.constraints.*;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public record UpdateTicketRequest(
@@ -28,10 +26,6 @@ public record UpdateTicketRequest(
         @NotNull
         @NotEmpty
         List<Image> images,
-
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        @NotNull
-        LocalDate date,
 
         @NotNull
         @Positive

@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -116,8 +115,6 @@ public class TicketServiceImpl implements TicketService{
 
         List<Image> images = processFiles(request.multipartFiles());
         ticket.setImages(images);
-
-        ticket.setDate(LocalDate.now());
 
         ticket.setCategory(categoryRepository.findById(request.categoryID())
                 .orElseThrow(() -> new NotFoundException("Category", request.categoryID())));

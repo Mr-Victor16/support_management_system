@@ -13,7 +13,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.security.Principal;
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,7 +56,7 @@ public class TicketReplyServiceTests {
         Long userID = 2L;
         String username = "nickname";
 
-        AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, userID, "content", LocalDate.now());
+        AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, userID, "content");
 
         User user = new User();
         user.setId(userID);
