@@ -136,7 +136,7 @@ public class RepositoryInitializer {
             }
 
             if(statusRepository.findAll().isEmpty()){
-                statusRepository.save(new Status(1L,"New",false));
+                statusRepository.save(new Status(1L,"New",false, true));
                 statusRepository.save(new Status(2L, "In progress", false));
                 statusRepository.save(new Status(3L,"Closed", true));
             }

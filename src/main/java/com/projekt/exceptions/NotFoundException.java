@@ -8,4 +8,8 @@ public class NotFoundException extends RuntimeException {
   public NotFoundException(String resource, String name) {
     super(resource + " with name '" + name + "' not found.");
   }
+
+  public NotFoundException(String resource) {
+    super("Not found " + resource);
+  }
 }

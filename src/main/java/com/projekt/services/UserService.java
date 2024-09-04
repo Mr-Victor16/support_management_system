@@ -7,9 +7,11 @@ import com.projekt.payload.request.update.UpdateUserRequest;
 import com.projekt.payload.response.LoginResponse;
 import com.projekt.payload.response.UserDetailsResponse;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public interface UserService extends UserDetailsService {
     List<UserDetailsResponse> loadAll();
 

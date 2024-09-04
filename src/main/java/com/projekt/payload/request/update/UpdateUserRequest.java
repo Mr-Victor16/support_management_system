@@ -6,7 +6,6 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 
 public record UpdateUserRequest(
-        @NotNull
         @Positive
         Long userID,
 
@@ -28,10 +27,8 @@ public record UpdateUserRequest(
         @FirstCharacterConstraint
         String surname,
 
-        @NotNull
         Boolean enabled,
 
-        @NotNull
         @NotEmpty
         List<String> roles
 ) { }

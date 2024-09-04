@@ -1,12 +1,10 @@
 package com.projekt.payload.request.update;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record UpdateKnowledgeRequest(
-        @NotNull
         @Positive
         Long knowledgeID,
 
@@ -18,7 +16,6 @@ public record UpdateKnowledgeRequest(
         @NotBlank
         String content,
 
-        @NotNull
         @Positive
         Long softwareID
 ) { }

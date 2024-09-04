@@ -3,6 +3,7 @@ package com.projekt.services;
 import com.projekt.exceptions.*;
 import com.projekt.models.Ticket;
 import com.projekt.models.TicketReply;
+import com.projekt.models.User;
 import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.repositories.TicketReplyRepository;
 import com.projekt.repositories.TicketRepository;
@@ -51,15 +52,18 @@ public class TicketReplyServiceImpl implements TicketReplyService{
             throw UnauthorizedActionException.forActionToResource("add reply", "ticket");
         }
 
+        User user = userRepository.findByUsernameIgnoreCase(principal.getName())
+                .orElseThrow(() -> new NotFoundException("User", principal.getName()));
+
         TicketReply ticketReply = new TicketReply();
-        ticketReply.setUser(userRepository.findByUsernameIgnoreCase(principal.getName())
-                .orElseThrow(() -> new NotFoundException("User", principal.getName())));
+        ticketReply.setUser(user);
+        ticketReply.setContent(request.content());
         ticketReplyRepository.save(ticketReply);
 
         ticket.getReplies().add(ticketReply);
 
         try {
-            if(!Objects.equals(ticket.getUser().getId(), request.userID())){
+            if(!Objects.equals(ticket.getUser().getId(), user.getId())){
                 mailService.sendTicketReplyMessage(ticket.getUser().getEmail(), ticket.getTitle());
             }
         } catch (MessagingException ex) {

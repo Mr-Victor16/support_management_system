@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.exceptions.FileProcessingException;
 import com.projekt.exceptions.NotFoundException;
 import com.projekt.exceptions.UnauthorizedActionException;
 import com.projekt.models.Image;
@@ -9,7 +10,9 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service("imageService")
@@ -50,9 +53,23 @@ public class ImageServiceImpl implements ImageService{
             throw UnauthorizedActionException.forActionToResource("add image", "ticket");
         }
 
-        List<Image> images = ticketService.processFiles(files);
+        List<Image> images = processFiles(files);
         ticket.getImages().addAll(images);
 
         ticketRepository.save(ticket);
+    }
+
+    private List<Image> processFiles(List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) return new ArrayList<>();
+
+        return files.stream()
+                .map(file -> {
+                    try {
+                        return new Image(file.getOriginalFilename(), file.getBytes());
+                    } catch (IOException ex) {
+                        throw new FileProcessingException(file.getOriginalFilename(), ex.getCause());
+                    }
+                })
+                .toList();
     }
 }

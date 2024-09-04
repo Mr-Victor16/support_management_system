@@ -38,7 +38,12 @@ public class StatusServiceImpl implements StatusService{
             throw new NameConflictException("Status", request.name());
         }
 
-        statusRepository.save(new Status(request.name(), request.closeTicket()));
+        // If the new status is marked as default, reset the default flag on all other statuses.
+        if(request.defaultStatus()) {
+            statusRepository.clearDefaultStatus();
+        }
+
+        statusRepository.save(new Status(request.name(), request.closeTicket(), request.defaultStatus()));
     }
 
     @Override
@@ -53,6 +58,7 @@ public class StatusServiceImpl implements StatusService{
                         status.getId(),
                         status.getName(),
                         status.isCloseTicket(),
+                        status.isDefaultStatus(),
                         ticketRepository.countByStatusId(status.getId())
                 ))
                 .toList();
@@ -71,6 +77,12 @@ public class StatusServiceImpl implements StatusService{
             throw new NameConflictException("Status", request.name());
         }
 
+        // If the new status is marked as default, reset the default flag on all other statuses.
+        if(request.defaultStatus()) {
+            statusRepository.clearDefaultStatus();
+        }
+
+        status.setDefaultStatus(request.defaultStatus());
         status.setName(request.name());
         status.setCloseTicket(request.closeTicket());
         statusRepository.save(status);
@@ -83,6 +95,10 @@ public class StatusServiceImpl implements StatusService{
 
         if(ticketRepository.existsByStatusId(status.getId())) {
             throw new ResourceHasAssignedItemsException("status", "ticket");
+        }
+
+        if(status.isDefaultStatus()){
+            throw DefaultEntityDeletionException.forDefaultStatus();
         }
 
         statusRepository.deleteById(status.getId());

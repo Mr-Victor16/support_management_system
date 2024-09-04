@@ -23,8 +23,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    @ExceptionHandler(DefaultAdminAccountDeletionException.class)
-    public ResponseEntity<String> handleDefaultAdminAccountDeletionException(DefaultAdminAccountDeletionException ex) {
+    @ExceptionHandler(DefaultEntityDeletionException.class)
+    public ResponseEntity<String> handleDefaultAdminAccountDeletionException(DefaultEntityDeletionException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 

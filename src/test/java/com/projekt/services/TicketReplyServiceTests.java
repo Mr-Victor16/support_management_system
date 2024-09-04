@@ -56,7 +56,7 @@ public class TicketReplyServiceTests {
         Long userID = 2L;
         String username = "nickname";
 
-        AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, userID, "content");
+        AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, "content");
 
         User user = new User();
         user.setId(userID);

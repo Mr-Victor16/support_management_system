@@ -1,10 +1,10 @@
 package com.projekt.controllers;
 
-import com.projekt.models.Ticket;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.update.UpdateTicketStatusRequest;
 import com.projekt.payload.request.update.UpdateTicketRequest;
+import com.projekt.payload.response.TicketResponse;
 import com.projekt.services.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,19 +33,19 @@ public class TicketController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<Ticket>> getAllTickets(){
+    public ResponseEntity<List<TicketResponse>> getAllTickets(){
         return ResponseEntity.ok(ticketService.getAll());
     }
 
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<Ticket>> getUserTickets(Principal principal){
-        return ResponseEntity.ok(ticketService.findUserTickets(principal));
+    public ResponseEntity<List<TicketResponse>> getUserTickets(Principal principal){
+        return ResponseEntity.ok(ticketService.getUserTickets(principal));
     }
 
     @GetMapping("{ticketID}")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<Ticket> getTicketById(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
+    public ResponseEntity<TicketResponse> getTicketById(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
         return ResponseEntity.ok(ticketService.getById(ticketID, principal));
     }
 
@@ -101,7 +101,7 @@ public class TicketController {
 
     @DeleteMapping("/reply/{replyID}")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> deleteReply(@PathVariable(name = "replyID", required = false) Long replyID) {
+    public ResponseEntity<String> deleteTicketReply(@PathVariable(name = "replyID", required = false) Long replyID) {
         ticketReplyService.deleteById(replyID);
         return new ResponseEntity<>("Ticket reply removed successfully", HttpStatus.OK);
     }

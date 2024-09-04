@@ -27,7 +27,6 @@ public record AddUserRequest(
         @FirstCharacterConstraint
         String surname,
 
-        @NotNull
         @NotEmpty
         List<String> roles
 ) { }

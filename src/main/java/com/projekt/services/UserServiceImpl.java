@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
 
-        if(user.getId() == 1) throw new DefaultAdminAccountDeletionException();
+        if(user.getId() == 1) throw DefaultEntityDeletionException.forDefaultAdmin();
 
         userRepository.deleteById(user.getId());
     }

@@ -4,12 +4,13 @@ import com.projekt.exceptions.*;
 import com.projekt.models.*;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.update.UpdateTicketRequest;
+import com.projekt.payload.response.TicketReplyResponse;
+import com.projekt.payload.response.TicketResponse;
+import com.projekt.payload.response.UserDetailsResponse;
 import com.projekt.repositories.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.mail.MessagingException;
-import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
@@ -34,9 +35,56 @@ public class TicketServiceImpl implements TicketService{
         this.softwareRepository = softwareRepository;
     }
 
+    private UserDetailsResponse convertToUserDetailsResponse(User user) {
+        List<String> roles = user.getRoles().stream()
+                .map(role -> role.getType().name())
+                .toList();
+
+        return new UserDetailsResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                roles
+        );
+    }
+
+    private TicketReplyResponse convertToTicketReplyResponse(TicketReply reply) {
+        return new TicketReplyResponse(
+                reply.getId(),
+                convertToUserDetailsResponse(reply.getUser()),
+                reply.getContent(),
+                reply.getCreatedDate()
+        );
+    }
+
+    private TicketResponse convertToTicketResponse(Ticket ticket){
+        List<TicketReplyResponse> replies = ticket.getReplies().stream()
+                .map(reply -> convertToTicketReplyResponse(reply))
+                .toList();
+
+        return new TicketResponse(
+                ticket.getId(),
+                ticket.getTitle(),
+                ticket.getDescription(),
+                ticket.getImages(),
+                ticket.getCreatedDate(),
+                ticket.getCategory(),
+                ticket.getPriority(),
+                ticket.getStatus(),
+                ticket.getVersion(),
+                ticket.getSoftware(),
+                replies,
+                convertToUserDetailsResponse(ticket.getUser())
+        );
+    }
+
     @Override
-    public List<Ticket> getAll() {
-        return ticketRepository.findAll();
+    public List<TicketResponse> getAll() {
+        return ticketRepository.findAll().stream()
+                .map(ticket -> convertToTicketResponse(ticket))
+                .toList();
     }
 
     @Override
@@ -70,15 +118,17 @@ public class TicketServiceImpl implements TicketService{
     }
 
     @Override
-    public List<Ticket> findUserTickets(Principal principal) {
+    public List<TicketResponse> getUserTickets(Principal principal) {
         User user = userRepository.findByUsernameIgnoreCase(principal.getName())
                 .orElseThrow(() -> new NotFoundException("User", principal.getName()));
 
-        return user.getTickets();
+        return user.getTickets().stream()
+                .map(ticket -> convertToTicketResponse(ticket))
+                .toList();
     }
 
     @Override
-    public Ticket getById(Long id, Principal principal) {
+    public TicketResponse getById(Long id, Principal principal) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ticket", id));
 
@@ -86,7 +136,7 @@ public class TicketServiceImpl implements TicketService{
             throw UnauthorizedActionException.forActionToResource("access", "ticket");
         }
 
-        return ticket;
+        return convertToTicketResponse(ticket);
     }
 
     @Override
@@ -96,6 +146,9 @@ public class TicketServiceImpl implements TicketService{
 
         Status status = statusRepository.findById(statusID)
                 .orElseThrow(() -> new NotFoundException("Status", statusID));
+
+        // Skip updating the status and sending a notification if the new status is the same as the current one.
+        if(ticket.getStatus().equals(status)) return;
 
         ticket.setStatus(status);
         ticketRepository.save(ticket);
@@ -113,17 +166,15 @@ public class TicketServiceImpl implements TicketService{
         ticket.setTitle(request.title());
         ticket.setDescription(request.description());
 
-        List<Image> images = processFiles(request.multipartFiles());
-        ticket.setImages(images);
-
         ticket.setCategory(categoryRepository.findById(request.categoryID())
                 .orElseThrow(() -> new NotFoundException("Category", request.categoryID())));
 
         ticket.setPriority(priorityRepository.findById(request.priorityID())
                 .orElseThrow(() -> new NotFoundException("Priority", request.priorityID())));
 
-        ticket.setStatus(statusRepository.findById(request.statusID())
-                .orElseThrow(() -> new NotFoundException("Status", request.statusID())));
+        Status status = statusRepository.findByDefaultStatusTrue()
+                .orElseThrow(() -> new NotFoundException("default ticket status"));
+        ticket.setStatus(status);
 
         ticket.setVersion(request.version());
 
@@ -135,19 +186,6 @@ public class TicketServiceImpl implements TicketService{
         );
 
         ticketRepository.save(ticket);
-    }
-
-    @Override
-    public List<Image> processFiles(List<MultipartFile> files) {
-        return files.stream()
-                .map(file -> {
-                    try {
-                        return new Image(file.getOriginalFilename(), file.getBytes());
-                    } catch (IOException ex) {
-                        throw new FileProcessingException(file.getOriginalFilename(), ex.getCause());
-                    }
-                })
-                .toList();
     }
 
     @Override

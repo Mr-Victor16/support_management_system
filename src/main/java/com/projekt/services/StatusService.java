@@ -4,9 +4,11 @@ import com.projekt.models.Status;
 import com.projekt.payload.request.add.AddStatusRequest;
 import com.projekt.payload.request.update.UpdateStatusRequest;
 import com.projekt.payload.response.StatusResponse;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public interface StatusService {
     Status loadById(Long id);
 

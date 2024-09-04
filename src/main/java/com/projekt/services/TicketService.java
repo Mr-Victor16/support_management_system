@@ -1,22 +1,23 @@
 package com.projekt.services;
 
-import com.projekt.models.*;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.update.UpdateTicketRequest;
 
-import org.springframework.web.multipart.MultipartFile;
+import com.projekt.payload.response.TicketResponse;
+import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
 
+@Service
 public interface TicketService {
-    List<Ticket> getAll();
+    List<TicketResponse> getAll();
 
     boolean existsById(Long id);
 
     void delete(Long id, Principal principal);
 
-    Ticket getById(Long id, Principal principal);
+    TicketResponse getById(Long id, Principal principal);
 
     void changeStatus(Long ticketID, Long statusID);
 
@@ -26,7 +27,5 @@ public interface TicketService {
 
     boolean isAuthorized(Long ticketID, String username);
 
-    List<Ticket> findUserTickets(Principal principal);
-
-    List<Image> processFiles(List<MultipartFile> files);
+    List<TicketResponse> getUserTickets(Principal principal);
 }

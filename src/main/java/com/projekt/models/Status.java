@@ -28,8 +28,18 @@ public class Status {
     @Column(name = "close_ticket", nullable = false)
     private boolean closeTicket;
 
-    public Status(String name, boolean closeTicket) {
+    @Column(name = "is_default", nullable = false)
+    private boolean defaultStatus = false;
+
+    public Status(Long id, String name, boolean closeTicket) {
+        this.id = id;
         this.name = name;
         this.closeTicket = closeTicket;
+    }
+
+    public Status(String name, boolean closeTicket, boolean defaultStatus) {
+        this.name = name;
+        this.closeTicket = closeTicket;
+        this.defaultStatus = defaultStatus;
     }
 }

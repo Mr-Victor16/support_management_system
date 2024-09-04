@@ -34,7 +34,7 @@ public class Ticket {
     @Column(nullable = false)
     private String description;
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "ticket_id")
     private List<Image> images = new ArrayList<>();
 
