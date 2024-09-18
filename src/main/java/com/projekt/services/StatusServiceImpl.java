@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.converter.StatusConverter;
 import com.projekt.exceptions.*;
 import com.projekt.models.Status;
 import com.projekt.payload.request.add.AddStatusRequest;
@@ -15,10 +16,12 @@ import java.util.List;
 public class StatusServiceImpl implements StatusService{
     private final StatusRepository statusRepository;
     private final TicketRepository ticketRepository;
+    private final StatusConverter statusConverter;
 
-    public StatusServiceImpl(StatusRepository statusRepository, TicketRepository ticketRepository) {
+    public StatusServiceImpl(StatusRepository statusRepository, TicketRepository ticketRepository, StatusConverter statusConverter) {
         this.statusRepository = statusRepository;
         this.ticketRepository = ticketRepository;
+        this.statusConverter = statusConverter;
     }
 
     @Override
@@ -54,13 +57,7 @@ public class StatusServiceImpl implements StatusService{
     @Override
     public List<StatusResponse> getAllWithUseNumber() {
         return statusRepository.findAll().stream()
-                .map(status -> new StatusResponse(
-                        status.getId(),
-                        status.getName(),
-                        status.isCloseTicket(),
-                        status.isDefaultStatus(),
-                        ticketRepository.countByStatusId(status.getId())
-                ))
+                .map(status -> statusConverter.toStatusResponse(status))
                 .toList();
     }
 

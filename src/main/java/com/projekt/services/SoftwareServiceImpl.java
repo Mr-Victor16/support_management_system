@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.converter.SoftwareConverter;
 import com.projekt.exceptions.*;
 import com.projekt.models.Software;
 import com.projekt.payload.request.add.AddSoftwareRequest;
@@ -17,11 +18,13 @@ public class SoftwareServiceImpl implements SoftwareService {
     private final SoftwareRepository softwareRepository;
     private final KnowledgeRepository knowledgeRepository;
     private final TicketRepository ticketRepository;
+    private final SoftwareConverter softwareConverter;
 
-    public SoftwareServiceImpl(SoftwareRepository softwareRepository, KnowledgeRepository knowledgeRepository, TicketRepository ticketRepository) {
+    public SoftwareServiceImpl(SoftwareRepository softwareRepository, KnowledgeRepository knowledgeRepository, TicketRepository ticketRepository, SoftwareConverter softwareConverter) {
         this.softwareRepository = softwareRepository;
         this.knowledgeRepository = knowledgeRepository;
         this.ticketRepository = ticketRepository;
+        this.softwareConverter = softwareConverter;
     }
 
     @Override
@@ -82,13 +85,7 @@ public class SoftwareServiceImpl implements SoftwareService {
     @Override
     public List<SoftwareResponse> getAllWithUseNumber() {
         return softwareRepository.findAll().stream()
-                .map(software -> new SoftwareResponse(
-                        software.getId(),
-                        software.getName(),
-                        software.getDescription(),
-                        ticketRepository.countBySoftwareId(software.getId()),
-                        knowledgeRepository.countBySoftwareId(software.getId())
-                ))
+                .map(software -> softwareConverter.toSoftwareResponse(software))
                 .toList();
     }
 }

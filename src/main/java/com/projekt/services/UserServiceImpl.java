@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.converter.UserConverter;
 import com.projekt.exceptions.*;
 import com.projekt.models.Role;
 import com.projekt.models.User;
@@ -17,8 +18,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,9 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.mail.MessagingException;
 
 import java.util.List;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service("userDetailsService")
 public class UserServiceImpl implements UserService{
@@ -41,15 +38,17 @@ public class UserServiceImpl implements UserService{
     private final PasswordEncoder encoder;
     private final JWTUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
+    private final UserConverter userConverter;
 
     public UserServiceImpl(UserRepository userRepository, MailService mailService, RoleRepository roleRepository,
-                           PasswordEncoder encoder, JWTUtils jwtUtils, @Lazy AuthenticationManager authenticationManager) {
+                           PasswordEncoder encoder, JWTUtils jwtUtils, @Lazy AuthenticationManager authenticationManager, UserConverter userConverter) {
         this.userRepository = userRepository;
         this.mailService = mailService;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.authenticationManager = authenticationManager;
+        this.userConverter = userConverter;
     }
 
     @Override
@@ -58,7 +57,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new NotFoundException("User", username));
 
-        return convertToUserDetails(user);
+        return UserConverter.toUserDetails(user);
     }
 
     @Override
@@ -74,11 +73,8 @@ public class UserServiceImpl implements UserService{
         user.setEmail(request.email());
         user.setName(request.name());
         user.setSurname(request.surname());
-        Set<Role> roles = request.roles().stream()
-                .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
-                        .orElseThrow(() -> new NotFoundException("Role", roleName)))
-                .collect(Collectors.toSet());
 
+        Set<Role> roles = userConverter.fromRoleNames(request.roles());
         user.setRoles(roles);
         user.setEnabled(request.enabled());
 
@@ -116,8 +112,8 @@ public class UserServiceImpl implements UserService{
 
         User user = new User(
                 request.username(),
-                request.email(),
                 encoder.encode(request.password()),
+                request.email(),
                 request.name(),
                 request.surname()
         );
@@ -145,19 +141,8 @@ public class UserServiceImpl implements UserService{
         String token = jwtUtils.generateJwtToken(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
 
-        return new LoginResponse(
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getName(),
-                userDetails.getSurname(),
-                userDetails.getEmail(),
-                token,
-                roles
-        );
+        return UserConverter.toLoginResponse(userDetails, token);
     }
 
     @Override
@@ -165,7 +150,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new NotFoundException("User", username));
 
-        return convertToUserDetailsResponse(user);
+        return UserConverter.toUserDetailsResponse(user);
     }
 
     @Override
@@ -194,10 +179,7 @@ public class UserServiceImpl implements UserService{
                 request.surname()
         );
 
-        Set<Role> roles = request.roles().stream()
-                .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
-                        .orElseThrow(() -> new NotFoundException("Role", roleName)))
-                .collect(Collectors.toSet());
+        Set<Role> roles = userConverter.fromRoleNames(request.roles());
         user.setRoles(roles);
         user.setEnabled(true);
 
@@ -207,7 +189,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<UserDetailsResponse> loadAll() {
         return userRepository.findAll().stream()
-                .map(user -> convertToUserDetailsResponse(user))
+                .map(user -> UserConverter.toUserDetailsResponse(user))
                 .toList();
     }
 
@@ -221,38 +203,6 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
 
-        return convertToUserDetailsResponse(user);
-    }
-
-    private UserDetails convertToUserDetails(User user) {
-        Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-        for (Role role : user.getRoles()){
-            grantedAuthorities.add(new SimpleGrantedAuthority(role.getType().toString()));
-        }
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.isEnabled(),
-                true,
-                true,
-                true,
-                grantedAuthorities
-        );
-    }
-
-    private UserDetailsResponse convertToUserDetailsResponse(User user){
-        List<String> roles = user.getRoles().stream()
-                .map(role -> role.getType().name())
-                .toList();
-
-        return new UserDetailsResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getName(),
-                user.getSurname(),
-                user.getEmail(),
-                roles
-        );
+        return UserConverter.toUserDetailsResponse(user);
     }
 }

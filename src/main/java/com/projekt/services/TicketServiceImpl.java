@@ -1,12 +1,11 @@
 package com.projekt.services;
 
+import com.projekt.converter.TicketConverter;
 import com.projekt.exceptions.*;
 import com.projekt.models.*;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.update.UpdateTicketRequest;
-import com.projekt.payload.response.TicketReplyResponse;
 import com.projekt.payload.response.TicketResponse;
-import com.projekt.payload.response.UserDetailsResponse;
 import com.projekt.repositories.*;
 import org.springframework.stereotype.Service;
 
@@ -35,55 +34,10 @@ public class TicketServiceImpl implements TicketService{
         this.softwareRepository = softwareRepository;
     }
 
-    private UserDetailsResponse convertToUserDetailsResponse(User user) {
-        List<String> roles = user.getRoles().stream()
-                .map(role -> role.getType().name())
-                .toList();
-
-        return new UserDetailsResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getName(),
-                user.getSurname(),
-                user.getEmail(),
-                roles
-        );
-    }
-
-    private TicketReplyResponse convertToTicketReplyResponse(TicketReply reply) {
-        return new TicketReplyResponse(
-                reply.getId(),
-                convertToUserDetailsResponse(reply.getUser()),
-                reply.getContent(),
-                reply.getCreatedDate()
-        );
-    }
-
-    private TicketResponse convertToTicketResponse(Ticket ticket){
-        List<TicketReplyResponse> replies = ticket.getReplies().stream()
-                .map(reply -> convertToTicketReplyResponse(reply))
-                .toList();
-
-        return new TicketResponse(
-                ticket.getId(),
-                ticket.getTitle(),
-                ticket.getDescription(),
-                ticket.getImages(),
-                ticket.getCreatedDate(),
-                ticket.getCategory(),
-                ticket.getPriority(),
-                ticket.getStatus(),
-                ticket.getVersion(),
-                ticket.getSoftware(),
-                replies,
-                convertToUserDetailsResponse(ticket.getUser())
-        );
-    }
-
     @Override
     public List<TicketResponse> getAll() {
         return ticketRepository.findAll().stream()
-                .map(ticket -> convertToTicketResponse(ticket))
+                .map(ticket -> TicketConverter.toTicketResponse(ticket))
                 .toList();
     }
 
@@ -123,7 +77,7 @@ public class TicketServiceImpl implements TicketService{
                 .orElseThrow(() -> new NotFoundException("User", principal.getName()));
 
         return user.getTickets().stream()
-                .map(ticket -> convertToTicketResponse(ticket))
+                .map(ticket -> TicketConverter.toTicketResponse(ticket))
                 .toList();
     }
 
@@ -136,7 +90,7 @@ public class TicketServiceImpl implements TicketService{
             throw UnauthorizedActionException.forActionToResource("access", "ticket");
         }
 
-        return convertToTicketResponse(ticket);
+        return TicketConverter.toTicketResponse(ticket);
     }
 
     @Override

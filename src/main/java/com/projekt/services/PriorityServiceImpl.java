@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.converter.PriorityConverter;
 import com.projekt.exceptions.*;
 import com.projekt.models.Priority;
 import com.projekt.payload.request.add.AddPriorityRequest;
@@ -15,10 +16,12 @@ import java.util.List;
 public class PriorityServiceImpl implements PriorityService{
     private final PriorityRepository priorityRepository;
     private final TicketRepository ticketRepository;
+    private final PriorityConverter priorityConverter;
 
-    public PriorityServiceImpl(PriorityRepository priorityRepository, TicketRepository ticketRepository) {
+    public PriorityServiceImpl(PriorityRepository priorityRepository, TicketRepository ticketRepository, PriorityConverter priorityConverter) {
         this.priorityRepository = priorityRepository;
         this.ticketRepository = ticketRepository;
+        this.priorityConverter = priorityConverter;
     }
 
     @Override
@@ -79,11 +82,7 @@ public class PriorityServiceImpl implements PriorityService{
     @Override
     public List<PriorityResponse> getAllWithUseNumber(){
         return priorityRepository.findAll().stream()
-                .map(priority -> new PriorityResponse(
-                        priority.getId(),
-                        priority.getName(),
-                        ticketRepository.countByPriorityId(priority.getId())
-                ))
+                .map(priority -> priorityConverter.toPriorityResponse(priority))
                 .toList();
     }
 }

@@ -1,5 +1,6 @@
 package com.projekt.services;
 
+import com.projekt.converter.CategoryConverter;
 import com.projekt.exceptions.*;
 import com.projekt.models.Category;
 import com.projekt.payload.request.add.AddCategoryRequest;
@@ -15,10 +16,12 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService{
     private final CategoryRepository categoryRepository;
     private final TicketRepository ticketRepository;
+    private final CategoryConverter categoryConverter;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, TicketRepository ticketRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, TicketRepository ticketRepository, CategoryConverter categoryConverter) {
         this.categoryRepository = categoryRepository;
         this.ticketRepository = ticketRepository;
+        this.categoryConverter = categoryConverter;
     }
 
     @Override
@@ -78,11 +81,7 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public List<CategoryResponse> getAllWithUseNumber() {
         return categoryRepository.findAll().stream()
-                .map(category -> new CategoryResponse(
-                        category.getId(),
-                        category.getName(),
-                        ticketRepository.countByCategoryId(category.getId())
-                ))
+                .map(category -> categoryConverter.toCategoryResponse(category))
                 .toList();
     }
 }
