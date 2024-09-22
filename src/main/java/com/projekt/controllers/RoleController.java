@@ -2,7 +2,6 @@ package com.projekt.controllers;
 
 import com.projekt.models.Role;
 import com.projekt.services.RoleService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +20,7 @@ public class RoleController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<Role>> getAllRoles() {
-        return ResponseEntity.ok(roleService.getAll());
+    public List<Role> getAllRoles() {
+        return roleService.getAll();
     }
 }

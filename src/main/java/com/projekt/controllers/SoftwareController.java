@@ -5,8 +5,6 @@ import com.projekt.payload.request.add.AddSoftwareRequest;
 import com.projekt.payload.request.update.UpdateSoftwareRequest;
 import com.projekt.payload.response.SoftwareResponse;
 import com.projekt.services.SoftwareService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,39 +22,39 @@ public class SoftwareController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Software>> getAllSoftware() {
-        return ResponseEntity.ok(softwareService.getAll());
+    public List<Software> getAllSoftware() {
+        return softwareService.getAll();
     }
 
     @GetMapping("/use")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<SoftwareResponse>> getAllSoftwareWithUseNumbers(){
-        return ResponseEntity.ok(softwareService.getAllWithUseNumber());
+    public List<SoftwareResponse> getAllSoftwareWithUseNumbers(){
+        return softwareService.getAllWithUseNumber();
     }
 
     @GetMapping("{softwareID}")
-    public ResponseEntity<Software> getSoftwareById(@PathVariable(name = "softwareID") Long softwareID){
-        return ResponseEntity.ok(softwareService.loadById(softwareID));
+    public Software getSoftwareById(@PathVariable(name = "softwareID") Long softwareID){
+        return softwareService.loadById(softwareID);
     }
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> updateSoftware(@RequestBody @Valid UpdateSoftwareRequest request){
+    public String updateSoftware(@RequestBody @Valid UpdateSoftwareRequest request){
         softwareService.update(request);
-        return new ResponseEntity<>("Software details updated", HttpStatus.OK);
+        return "Software details updated";
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> addSoftware(@RequestBody @Valid AddSoftwareRequest request){
+    public String addSoftware(@RequestBody @Valid AddSoftwareRequest request){
         softwareService.add(request);
-        return new ResponseEntity<>("Software added", HttpStatus.OK);
+        return "Software added";
     }
 
     @DeleteMapping("{softwareID}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deleteSoftware(@PathVariable(name = "softwareID") Long softwareID){
+    public String deleteSoftware(@PathVariable(name = "softwareID") Long softwareID){
         softwareService.delete(softwareID);
-        return new ResponseEntity<>("Software removed successfully", HttpStatus.OK);
+        return "Software removed successfully";
     }
 }

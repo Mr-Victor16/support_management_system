@@ -2,69 +2,94 @@ package com.projekt.config;
 
 import com.projekt.exceptions.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(KnowledgeConflictException.class)
-    public ResponseEntity<String> handleKnowledgeConflictException(KnowledgeConflictException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    @ResponseBody
+    public String handleKnowledgeConflictException(KnowledgeConflictException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UserAlreadyActivatedException.class)
-    public ResponseEntity<String> handleUserAlreadyActivatedException(UserAlreadyActivatedException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    @ResponseBody
+    public String handleUserAlreadyActivatedException(UserAlreadyActivatedException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UsernameOrEmailAlreadyExistsException.class)
-    public ResponseEntity<String> handleUsernameOrEmailAlreadyExistsException(UsernameOrEmailAlreadyExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    @ResponseBody
+    public String handleUsernameOrEmailAlreadyExistsException(UsernameOrEmailAlreadyExistsException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(DefaultEntityDeletionException.class)
-    public ResponseEntity<String> handleDefaultAdminAccountDeletionException(DefaultEntityDeletionException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    @ResponseBody
+    public String handleDefaultAdminAccountDeletionException(DefaultEntityDeletionException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(InvalidLoginException.class)
-    public ResponseEntity<String> handleInvalidLoginException(InvalidLoginException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    @ResponseBody
+    public String handleInvalidLoginException(InvalidLoginException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(NotificationFailedException.class)
-    public ResponseEntity<String> handleNotificationFailedException(NotificationFailedException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    @ResponseBody
+    public String handleNotificationFailedException(NotificationFailedException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(UnauthorizedActionException.class)
-    public ResponseEntity<String> handleUnauthorizedActionException(UnauthorizedActionException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    @ResponseBody
+    public String handleUnauthorizedActionException(UnauthorizedActionException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(FileProcessingException.class)
-    public ResponseEntity<String> handleFileProcessingException(FileProcessingException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    @ResponseBody
+    public String handleFileProcessingException(FileProcessingException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(NameConflictException.class)
-    public ResponseEntity<String> handleNameConflictException(NameConflictException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    @ResponseBody
+    public String handleNameConflictException(NameConflictException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @ExceptionHandler(NameUnchangedException.class)
-    public ResponseEntity<String> handleNameUnchangedException(NameUnchangedException ex) {
-        return ResponseEntity.ok(ex.getMessage());
+    @ResponseBody
+    public String handleNameUnchangedException(NameUnchangedException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    @ResponseBody
+    public String handleNotFoundException(NotFoundException ex) {
+        return ex.getMessage();
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(ResourceHasAssignedItemsException.class)
-    public ResponseEntity<String> handleResourceHasAssignedItemsException(ResourceHasAssignedItemsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    @ResponseBody
+    public String handleResourceHasAssignedItemsException(ResourceHasAssignedItemsException ex) {
+        return ex.getMessage();
     }
 }

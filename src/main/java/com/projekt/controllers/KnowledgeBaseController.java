@@ -4,8 +4,6 @@ import com.projekt.models.Knowledge;
 import com.projekt.payload.request.add.AddKnowledgeRequest;
 import com.projekt.payload.request.update.UpdateKnowledgeRequest;
 import com.projekt.services.KnowledgeBaseService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,33 +21,33 @@ public class KnowledgeBaseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Knowledge>> getAllKnowledgeItems(){
-        return ResponseEntity.ok(knowledgeBaseService.getAll());
+    public List<Knowledge> getAllKnowledgeItems(){
+        return knowledgeBaseService.getAll();
     }
 
     @GetMapping("{knowledgeID}")
-    public ResponseEntity<Knowledge> getKnowledgeById(@PathVariable(name = "knowledgeID") Long knowledgeID){
-        return ResponseEntity.ok(knowledgeBaseService.loadById(knowledgeID));
+    public Knowledge getKnowledgeById(@PathVariable(name = "knowledgeID") Long knowledgeID){
+        return knowledgeBaseService.loadById(knowledgeID);
     }
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> updateKnowledge(@RequestBody @Valid UpdateKnowledgeRequest request){
+    public String updateKnowledge(@RequestBody @Valid UpdateKnowledgeRequest request){
         knowledgeBaseService.update(request);
-        return new ResponseEntity<>("Knowledge updated", HttpStatus.OK);
+        return "Knowledge updated";
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> addKnowledge(@RequestBody @Valid AddKnowledgeRequest request){
+    public String addKnowledge(@RequestBody @Valid AddKnowledgeRequest request){
         knowledgeBaseService.add(request);
-        return new ResponseEntity<>("Knowledge added", HttpStatus.OK);
+        return "Knowledge added";
     }
 
     @DeleteMapping("{knowledgeID}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deleteKnowledge(@PathVariable(name = "knowledgeID") Long knowledgeID){
+    public String deleteKnowledge(@PathVariable(name = "knowledgeID") Long knowledgeID){
         knowledgeBaseService.delete(knowledgeID);
-        return new ResponseEntity<>("Knowledge removed successfully", HttpStatus.OK);
+        return "Knowledge removed successfully";
     }
 }

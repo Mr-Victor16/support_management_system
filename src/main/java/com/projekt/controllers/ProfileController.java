@@ -4,8 +4,6 @@ import com.projekt.payload.request.update.UpdateProfileDetailsRequest;
 import com.projekt.payload.response.UserDetailsResponse;
 import com.projekt.services.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,20 +20,20 @@ public class ProfileController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<UserDetailsResponse> getProfile(Principal principal) {
-        return ResponseEntity.ok(userService.getUserDetails(principal.getName()));
+    public UserDetailsResponse getProfile(Principal principal) {
+        return userService.getUserDetails(principal.getName());
     }
 
     @PutMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> updateProfile(Principal principal, @RequestBody @Valid UpdateProfileDetailsRequest request) {
+    public String updateProfile(Principal principal, @RequestBody @Valid UpdateProfileDetailsRequest request) {
         userService.updateProfile(principal.getName(), request);
-        return new ResponseEntity<>("Profile updated", HttpStatus.OK);
+        return "Profile updated";
     }
 
     @GetMapping("/activate/{userID}")
-    public ResponseEntity<String> activateProfile(@PathVariable Long userID) {
+    public String activateProfile(@PathVariable Long userID) {
         userService.activate(userID);
-        return new ResponseEntity<>("User activated", HttpStatus.OK);
+        return "User activated";
     }
 }

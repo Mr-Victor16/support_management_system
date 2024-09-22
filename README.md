@@ -50,7 +50,7 @@ Project was then refactored to a REST API backend to provide a more modern solut
 
 ##  Database schema
 ![db_schema](https://github.com/user-attachments/assets/c075a487-595d-49e0-a915-09c12feee1e7)  
-_The schema was created using Apache Workbench._
+_Entity-relationship diagram (ERD) generated using Apache Workbench._
 
 ## Running the project with Docker Compose
 1. Clone this repository

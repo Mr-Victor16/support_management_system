@@ -6,8 +6,6 @@ import com.projekt.payload.request.update.UpdateTicketStatusRequest;
 import com.projekt.payload.request.update.UpdateTicketRequest;
 import com.projekt.payload.response.TicketResponse;
 import com.projekt.services.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -33,76 +31,76 @@ public class TicketController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<TicketResponse>> getAllTickets(){
-        return ResponseEntity.ok(ticketService.getAll());
+    public List<TicketResponse> getAllTickets(){
+        return ticketService.getAll();
     }
 
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<TicketResponse>> getUserTickets(Principal principal){
-        return ResponseEntity.ok(ticketService.getUserTickets(principal));
+    public List<TicketResponse> getUserTickets(Principal principal){
+        return ticketService.getUserTickets(principal);
     }
 
     @GetMapping("{ticketID}")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<TicketResponse> getTicketById(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
-        return ResponseEntity.ok(ticketService.getById(ticketID, principal));
+    public TicketResponse getTicketById(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
+        return ticketService.getById(ticketID, principal);
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> addTicket(@RequestBody @Valid AddTicketRequest request, Principal principal){
+    public String addTicket(@RequestBody @Valid AddTicketRequest request, Principal principal){
         ticketService.add(request, principal.getName());
-        return new ResponseEntity<>("Ticket added", HttpStatus.OK);
+        return "Ticket added";
     }
 
     @PutMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> updateTicket(@RequestBody @Valid UpdateTicketRequest request, Principal principal) {
+    public String updateTicket(@RequestBody @Valid UpdateTicketRequest request, Principal principal) {
         ticketService.update(request, principal);
-        return ResponseEntity.ok("Ticket details changed successfully");
+        return "Ticket details changed successfully";
     }
 
     @PostMapping("{ticketID}/image")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> addImages(@PathVariable("ticketID") Long ticketID, @RequestBody List<MultipartFile> files, Principal principal) {
+    public String addImages(@PathVariable("ticketID") Long ticketID, @RequestBody List<MultipartFile> files, Principal principal) {
         imageService.add(ticketID, files, principal);
-        return ResponseEntity.ok("Image added successfully");
+        return "Image added successfully";
     }
 
     @DeleteMapping("/image/{imageID}")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> deleteImage(@PathVariable(name = "imageID", required = false) Long imageID, Principal principal) {
+    public String deleteImage(@PathVariable(name = "imageID", required = false) Long imageID, Principal principal) {
         imageService.deleteById(imageID, principal);
-        return new ResponseEntity<>("Image removed successfully", HttpStatus.OK);
+        return "Image removed successfully";
     }
 
     @PostMapping("/reply")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> addTicketReply(@RequestBody @Valid AddTicketReplyRequest request, Principal principal) {
+    public String addTicketReply(@RequestBody @Valid AddTicketReplyRequest request, Principal principal) {
         ticketReplyService.add(request, principal);
-        return ResponseEntity.ok("Ticket reply added successfully");
+        return "Ticket reply added successfully";
     }
 
     @PostMapping("/status")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> changeTicketStatus(@RequestBody @Valid UpdateTicketStatusRequest request) {
+    public String changeTicketStatus(@RequestBody @Valid UpdateTicketStatusRequest request) {
         ticketService.changeStatus(request.ticketID(), request.statusID());
-        return ResponseEntity.ok("Ticket status changed successfully");
+        return "Ticket status changed successfully";
     }
 
     @Transactional
     @DeleteMapping("{ticketID}")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> deleteTicket(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
+    public String deleteTicket(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
         ticketService.delete(ticketID, principal);
-        return new ResponseEntity<>("Ticket removed successfully", HttpStatus.OK);
+        return "Ticket removed successfully";
     }
 
     @DeleteMapping("/reply/{replyID}")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> deleteTicketReply(@PathVariable(name = "replyID", required = false) Long replyID) {
+    public String deleteTicketReply(@PathVariable(name = "replyID", required = false) Long replyID) {
         ticketReplyService.deleteById(replyID);
-        return new ResponseEntity<>("Ticket reply removed successfully", HttpStatus.OK);
+        return "Ticket reply removed successfully";
     }
 }

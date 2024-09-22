@@ -4,8 +4,6 @@ import com.projekt.payload.request.add.AddUserRequest;
 import com.projekt.payload.request.update.UpdateUserRequest;
 import com.projekt.payload.response.UserDetailsResponse;
 import com.projekt.services.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,34 +22,34 @@ public class UserController {
 
     @GetMapping("{userID}")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<UserDetailsResponse> getUser(@PathVariable(name = "userID", required = false) Long userID){
-        return ResponseEntity.ok(userService.loadById(userID));
+    public UserDetailsResponse getUser(@PathVariable(name = "userID", required = false) Long userID){
+        return userService.loadById(userID);
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> addUser(@RequestBody @Valid AddUserRequest request){
+    public String addUser(@RequestBody @Valid AddUserRequest request){
         userService.add(request);
-        return new ResponseEntity<>("User added", HttpStatus.OK);
+        return "User added";
     }
 
     @PutMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> updateUser(@RequestBody @Valid UpdateUserRequest request){
+    public String updateUser(@RequestBody @Valid UpdateUserRequest request){
         userService.updateUser(request);
-        return new ResponseEntity<>("User edited", HttpStatus.OK);
+        return "User edited";
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<UserDetailsResponse>> getAllUsers(){
-        return ResponseEntity.ok(userService.loadAll());
+    public List<UserDetailsResponse> getAllUsers(){
+        return userService.loadAll();
     }
 
     @DeleteMapping("{userID}")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<String> deleteUser(@PathVariable("userID") Long userID){
+    public String deleteUser(@PathVariable("userID") Long userID){
         userService.delete(userID);
-        return new ResponseEntity<>("User removed successfully", HttpStatus.OK);
+        return "User removed successfully";
     }
 }

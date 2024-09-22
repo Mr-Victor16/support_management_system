@@ -5,8 +5,6 @@ import com.projekt.payload.request.add.AddPriorityRequest;
 import com.projekt.payload.request.update.UpdatePriorityRequest;
 import com.projekt.payload.response.PriorityResponse;
 import com.projekt.services.PriorityService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,40 +23,40 @@ public class PriorityController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<Priority>> getAllPriorities(){
-        return ResponseEntity.ok(priorityService.getAll());
+    public List<Priority> getAllPriorities(){
+        return priorityService.getAll();
     }
 
     @GetMapping("/use")
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
-    public ResponseEntity<List<PriorityResponse>> getAllPrioritiesWithUseNumber(){
-        return ResponseEntity.ok(priorityService.getAllWithUseNumber());
+    public List<PriorityResponse> getAllPrioritiesWithUseNumber(){
+        return priorityService.getAllWithUseNumber();
     }
 
     @GetMapping("{priorityID}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Priority> getPriorityById(@PathVariable(name = "priorityID") Long priorityID){
-        return ResponseEntity.ok(priorityService.loadById(priorityID));
+    public Priority getPriorityById(@PathVariable(name = "priorityID") Long priorityID){
+        return priorityService.loadById(priorityID);
     }
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> updatePriority(@RequestBody @Valid UpdatePriorityRequest request){
+    public String updatePriority(@RequestBody @Valid UpdatePriorityRequest request){
         priorityService.update(request);
-        return new ResponseEntity<>("Priority updated", HttpStatus.OK);
+        return "Priority updated";
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> addPriority(@RequestBody @Valid AddPriorityRequest request){
+    public String addPriority(@RequestBody @Valid AddPriorityRequest request){
         priorityService.add(request);
-        return new ResponseEntity<>("Priority added", HttpStatus.OK);
+        return "Priority added";
     }
 
     @DeleteMapping("{priorityID}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deletePriority(@PathVariable(name = "priorityID") Long priorityID){
+    public String deletePriority(@PathVariable(name = "priorityID") Long priorityID){
         priorityService.delete(priorityID);
-        return new ResponseEntity<>("Priority removed successfully", HttpStatus.OK);
+        return "Priority removed successfully";
     }
 }

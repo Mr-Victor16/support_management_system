@@ -4,10 +4,8 @@ import com.projekt.payload.request.LoginRequest;
 import com.projekt.payload.request.RegisterRequest;
 import com.projekt.payload.response.LoginResponse;
 import com.projekt.services.UserServiceImpl;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -21,13 +19,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.authenticate(request));
+    public LoginResponse authenticateUser(@Valid @RequestBody LoginRequest request) {
+        return userService.authenticate(request);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest request) {
+    public String registerUser(@Valid @RequestBody RegisterRequest request) {
         userService.register(request);
-        return new ResponseEntity<>("User added", HttpStatus.OK);
+        return "User added";
     }
 }
