@@ -41,6 +41,12 @@ public class TicketController {
         return ticketService.getUserTickets(principal);
     }
 
+    @GetMapping("/user/{userID}")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    public List<TicketResponse> getTicketsByUserId(@PathVariable(name = "userID", required = false) Long userID){
+        return ticketService.getUserTickets(userID);
+    }
+
     @GetMapping("{ticketID}")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
     public TicketResponse getTicketById(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {

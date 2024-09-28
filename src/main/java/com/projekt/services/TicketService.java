@@ -28,4 +28,6 @@ public interface TicketService {
     boolean isAuthorized(Long ticketID, String username);
 
     List<TicketResponse> getUserTickets(Principal principal);
+
+    List<TicketResponse> getUserTickets(Long userID);
 }

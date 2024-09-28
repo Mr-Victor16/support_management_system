@@ -82,6 +82,17 @@ public class TicketServiceImpl implements TicketService{
     }
 
     @Override
+    public List<TicketResponse> getUserTickets(Long userID) {
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new NotFoundException("User", userID));
+
+        return user.getTickets().stream()
+                .map(ticket -> TicketConverter.toTicketResponse(ticket))
+                .toList();
+    }
+
+
+    @Override
     public TicketResponse getById(Long id, Principal principal) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ticket", id));
