@@ -48,12 +48,16 @@ public class TicketReplyServiceImpl implements TicketReplyService{
         Ticket ticket = ticketRepository.findById(request.ticketID())
                 .orElseThrow(() -> new NotFoundException("Ticket", request.ticketID()));
 
+        User user = userRepository.findByUsernameIgnoreCase(principal.getName())
+                .orElseThrow(() -> new NotFoundException("User", principal.getName()));
+
         if(!ticketService.isAuthorized(ticket.getId(), principal.getName())){
             throw UnauthorizedActionException.forActionToResource("add reply", "ticket");
         }
 
-        User user = userRepository.findByUsernameIgnoreCase(principal.getName())
-                .orElseThrow(() -> new NotFoundException("User", principal.getName()));
+        if(ticket.getStatus().isCloseTicket()){
+            throw UnauthorizedActionException.forActionOnClosedTicket();
+        }
 
         TicketReply ticketReply = new TicketReply();
         ticketReply.setUser(user);

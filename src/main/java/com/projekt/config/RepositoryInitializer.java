@@ -70,7 +70,7 @@ public class RepositoryInitializer {
                 operator.setPassword(passwordEncoder.encode("operator"));
 
                 User admin = new User("admin", true);
-                admin.setRoles(new HashSet<>(Arrays.asList(roleAdmin, roleOperator,roleUser)));
+                admin.setRoles(new HashSet<>(List.of(roleAdmin)));
                 admin.setEmail("example3@gmail.com");
                 admin.setName("Piotr");
                 admin.setSurname("Kowalski");

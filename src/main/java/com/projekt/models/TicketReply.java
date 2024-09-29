@@ -36,4 +36,10 @@ public class TicketReply {
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDate createdDate;
+
+    public TicketReply(User user, String content, LocalDate createdDate) {
+        this.user = user;
+        this.content = content;
+        this.createdDate = createdDate;
+    }
 }

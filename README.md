@@ -7,7 +7,7 @@ Project was then refactored to a REST API backend to provide a more modern solut
 
 ## Technologies used
 + Spring Framework, Spring Boot, Spring Security, Spring Data JPA
-+ JUnit, Mockito
++ JUnit, Mockito, Test Containers
 + REST Assured
 + Thymeleaf
 + Spring Boot Starter Mail

@@ -12,4 +12,8 @@ public class UnauthorizedActionException extends RuntimeException {
     public static UnauthorizedActionException forActionOnResource(String action, String resource) {
         return new UnauthorizedActionException("You do not have permission to " + action + " this " + resource);
     }
+
+    public static UnauthorizedActionException forActionOnClosedTicket() {
+        return new UnauthorizedActionException("You do not have permission to add reply to closed ticket");
+    }
 }

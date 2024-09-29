@@ -30,66 +30,66 @@ public class TicketController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public List<TicketResponse> getAllTickets(){
         return ticketService.getAll();
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     public List<TicketResponse> getUserTickets(Principal principal){
         return ticketService.getUserTickets(principal);
     }
 
     @GetMapping("/user/{userID}")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public List<TicketResponse> getTicketsByUserId(@PathVariable(name = "userID", required = false) Long userID){
         return ticketService.getUserTickets(userID);
     }
 
     @GetMapping("{ticketID}")
-    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public TicketResponse getTicketById(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
         return ticketService.getById(ticketID, principal);
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     public String addTicket(@RequestBody @Valid AddTicketRequest request, Principal principal){
         ticketService.add(request, principal.getName());
         return "Ticket added";
     }
 
     @PutMapping
-    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String updateTicket(@RequestBody @Valid UpdateTicketRequest request, Principal principal) {
         ticketService.update(request, principal);
         return "Ticket details changed successfully";
     }
 
     @PostMapping("{ticketID}/image")
-    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String addImages(@PathVariable("ticketID") Long ticketID, @RequestBody List<MultipartFile> files, Principal principal) {
         imageService.add(ticketID, files, principal);
         return "Image added successfully";
     }
 
     @DeleteMapping("/image/{imageID}")
-    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String deleteImage(@PathVariable(name = "imageID", required = false) Long imageID, Principal principal) {
         imageService.deleteById(imageID, principal);
         return "Image removed successfully";
     }
 
     @PostMapping("/reply")
-    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String addTicketReply(@RequestBody @Valid AddTicketReplyRequest request, Principal principal) {
         ticketReplyService.add(request, principal);
         return "Ticket reply added successfully";
     }
 
     @PostMapping("/status")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public String changeTicketStatus(@RequestBody @Valid UpdateTicketStatusRequest request) {
         ticketService.changeStatus(request.ticketID(), request.statusID());
         return "Ticket status changed successfully";
@@ -97,14 +97,14 @@ public class TicketController {
 
     @Transactional
     @DeleteMapping("{ticketID}")
-    @PreAuthorize("hasAnyRole('USER', 'OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String deleteTicket(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
         ticketService.delete(ticketID, principal);
         return "Ticket removed successfully";
     }
 
     @DeleteMapping("/reply/{replyID}")
-    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
+    @PreAuthorize("hasRole('OPERATOR')")
     public String deleteTicketReply(@PathVariable(name = "replyID", required = false) Long replyID) {
         ticketReplyService.deleteById(replyID);
         return "Ticket reply removed successfully";
