@@ -57,6 +57,6 @@ public class PriorityController {
     @PreAuthorize("hasRole('ADMIN')")
     public String deletePriority(@PathVariable(name = "priorityID") Long priorityID){
         priorityService.delete(priorityID);
-        return "Priority removed successfully";
+        return "Priority removed";
     }
 }

@@ -64,35 +64,35 @@ public class TicketController {
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String updateTicket(@RequestBody @Valid UpdateTicketRequest request, Principal principal) {
         ticketService.update(request, principal);
-        return "Ticket details changed successfully";
+        return "Ticket details updated";
     }
 
     @PostMapping("{ticketID}/image")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String addImages(@PathVariable("ticketID") Long ticketID, @RequestBody List<MultipartFile> files, Principal principal) {
         imageService.add(ticketID, files, principal);
-        return "Image added successfully";
+        return "Image added";
     }
 
     @DeleteMapping("/image/{imageID}")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String deleteImage(@PathVariable(name = "imageID", required = false) Long imageID, Principal principal) {
         imageService.deleteById(imageID, principal);
-        return "Image removed successfully";
+        return "Image removed";
     }
 
     @PostMapping("/reply")
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String addTicketReply(@RequestBody @Valid AddTicketReplyRequest request, Principal principal) {
         ticketReplyService.add(request, principal);
-        return "Ticket reply added successfully";
+        return "Ticket reply added";
     }
 
     @PostMapping("/status")
     @PreAuthorize("hasRole('OPERATOR')")
     public String changeTicketStatus(@RequestBody @Valid UpdateTicketStatusRequest request) {
         ticketService.changeStatus(request.ticketID(), request.statusID());
-        return "Ticket status changed successfully";
+        return "Ticket status changed";
     }
 
     @Transactional
@@ -100,13 +100,13 @@ public class TicketController {
     @PreAuthorize("hasAnyRole('USER', 'OPERATOR')")
     public String deleteTicket(@PathVariable(name = "ticketID", required = false) Long ticketID, Principal principal) {
         ticketService.delete(ticketID, principal);
-        return "Ticket removed successfully";
+        return "Ticket removed";
     }
 
     @DeleteMapping("/reply/{replyID}")
     @PreAuthorize("hasRole('OPERATOR')")
     public String deleteTicketReply(@PathVariable(name = "replyID", required = false) Long replyID) {
         ticketReplyService.deleteById(replyID);
-        return "Ticket reply removed successfully";
+        return "Ticket reply removed";
     }
 }

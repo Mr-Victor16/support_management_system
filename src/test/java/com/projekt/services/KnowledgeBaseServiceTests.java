@@ -8,6 +8,8 @@ import com.projekt.repositories.SoftwareRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -83,14 +85,15 @@ public class KnowledgeBaseServiceTests {
         Software software = new Software(2L, "SoftwareName", "SoftwareDescription");
         Knowledge knowledge = new Knowledge(knowledgeID, "Title", "Content", new Software());
 
-        when(knowledgeRepository.getReferenceById(knowledgeID)).thenReturn(knowledge);
-        when(softwareRepository.getReferenceById(softwareID)).thenReturn(software);
+        when(knowledgeRepository.findById(knowledgeID)).thenReturn(Optional.of(knowledge));
+        when(softwareRepository.findById(softwareID)).thenReturn(Optional.of(software));
 
         knowledgeBaseService.update(request);
 
         assertEquals("Updated Title", knowledge.getTitle());
         assertEquals("Updated Content", knowledge.getContent());
         assertEquals(softwareID, knowledge.getSoftware().getId());
+        assertEquals("SoftwareName", knowledge.getSoftware().getName());
 
         verify(knowledgeRepository).save(knowledge);
     }

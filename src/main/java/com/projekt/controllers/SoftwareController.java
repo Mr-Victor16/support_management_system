@@ -55,6 +55,6 @@ public class SoftwareController {
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteSoftware(@PathVariable(name = "softwareID") Long softwareID){
         softwareService.delete(softwareID);
-        return "Software removed successfully";
+        return "Software removed";
     }
 }

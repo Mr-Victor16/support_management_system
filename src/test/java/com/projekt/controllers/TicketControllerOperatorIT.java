@@ -2,164 +2,46 @@ package com.projekt.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.projekt.models.Image;
+import com.projekt.BaseIntegrationTest;
 import com.projekt.models.Ticket;
-import com.projekt.models.TicketReply;
-import com.projekt.payload.request.LoginRequest;
 import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.update.UpdateTicketRequest;
 import com.projekt.payload.request.update.UpdateTicketStatusRequest;
-import com.projekt.repositories.*;
-import com.projekt.services.MailService;
-import io.restassured.RestAssured;
+import com.projekt.repositories.TicketRepository;
 import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ActiveProfiles("test")
-public class TicketControllerOperatorIntegrationTest {
-    @LocalServerPort
-    private int port;
-
+public class TicketControllerOperatorIT extends BaseIntegrationTest {
     private String jwtToken;
-    private Long ticketID;
-    private Long imageID;
-    private Long ticketReplyID;
-
-    @MockBean
-    private MailService mailService;
 
     @Autowired
     private TicketRepository ticketRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private SoftwareRepository softwareRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private PriorityRepository priorityRepository;
-
-    @Autowired
-    private StatusRepository statusRepository;
-
-    @Autowired
-    private ImageRepository imageRepository;
-
-    @Autowired
-    private TicketReplyRepository ticketReplyRepository;
-
-    @Container
-    public static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("testuser")
-            .withPassword("testpass");
-
-    @DynamicPropertySource
-    static void dynamicProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-    }
-
     @BeforeEach
-    public void setUp() throws MessagingException, IOException {
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
-        jwtToken = getJwtToken();
-
-        Mockito.doNothing().when(mailService).sendTicketReplyMessage(Mockito.anyString(), Mockito.anyString());
-        Mockito.doNothing().when(mailService).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
-
-        ticketRepository.deleteAll();
-
-        Ticket ticket = new Ticket();
-        ticket.setId(1L);
-        ticket.setTitle("The website is unreachable");
-        ticket.setStatus(statusRepository.getReferenceById(1L));
-        ticket.setPriority(priorityRepository.getReferenceById(2L));
-        ticket.setSoftware(softwareRepository.getReferenceById(3L));
-        ticket.setUser(userRepository.getReferenceById(1L));
-        ticket.setDescription("When trying to enter the site, I get an error - This site is unreachable :(");
-        ticket.setVersion("1.0");
-
-        ticket.setCategory(categoryRepository.getReferenceById(1L));
-
-        BufferedImage emptyImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ImageIO.write(emptyImage, "png", stream);
-        Image image = new Image(1L,"1.png",stream.toByteArray());
-        imageRepository.save(image);
-
-        List<Image> imageList = new ArrayList<>();
-        imageList.add(image);
-        ticket.setImages(imageList);
-
-        List<TicketReply> ticketReplyList = new ArrayList<>();
-        TicketReply savedReply = ticketReplyRepository.save(new TicketReply(userRepository.getReferenceById(2L),"Have you checked that you have entered the correct address?", LocalDate.of(2021,12,11)));
-        ticketReplyList.add(savedReply);
-        ticket.setReplies(ticketReplyList);
-
-        Ticket savedTicket = ticketRepository.save(ticket);
-        ticketID = savedTicket.getId();
-        imageID = savedTicket.getImages().get(0).getId();
-        ticketReplyID = savedTicket.getReplies().get(0).getId();
-    }
-
-    private String getJwtToken() throws JsonProcessingException {
-        LoginRequest request = new LoginRequest("operator", "operator");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String loginJson = objectMapper.writeValueAsString(request);
-
-        Response response = given()
-                .contentType(ContentType.JSON)
-                .body(loginJson)
-                .when()
-                .post("/api/auth/login")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract().response();
-
-        return response.jsonPath().getString("token");
+    public void setUpTestData() throws JsonProcessingException {
+        jwtToken = getJwtToken("operator", "operator");
+        clearDatabase();
     }
 
     //GET: /api/tickets
     //Expected status: OK (200)
     //Purpose: To verify the returned status and the expected number of elements.
     @Test
-    public void testGetAllTickets() {
-        int expectedSize = (int) ticketRepository.count();
+    public void testGetAllTickets() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -168,7 +50,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)
-                .body("size()", equalTo(expectedSize))
+                .body("size()", equalTo(ticketList.size()))
                 .log().all();
     }
 
@@ -176,7 +58,10 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: To verify the returned status and the expected number of elements.
     @Test
-    public void testGetUserTickets() {
+    public void testGetUserTickets() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeTicket(softwareID);
+
         given()
                 .auth().oauth2(jwtToken)
                 .when()
@@ -184,7 +69,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)
-                .body("size()", equalTo(0))
+                .body("size()", equalTo(1))
                 .log().all();
     }
 
@@ -192,7 +77,9 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the returned status and expected number of items when the user ID is correct.
     @Test
-    public void testGetTicketsByUserId() {
+    public void testGetTicketsByUserId() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeTicket(softwareID);
         long userID = 1;
 
         given()
@@ -202,16 +89,16 @@ public class TicketControllerOperatorIntegrationTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)
-                .body("size()", greaterThan(0))
+                .body("size()", equalTo(2))
                 .log().all();
     }
 
     //GET: /api/tickets/user/<userID>
     //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status and expected number of items when the user ID is incorrect.
+    //Purpose: Verify the returned status when the user ID is incorrect.
     @Test
     public void testGetTicketsByUserIdWhenIdIsWrong() {
-        long userID = 15;
+        long userID = 1000;
 
         given()
                 .auth().oauth2(jwtToken)
@@ -227,18 +114,22 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the returned status when the ticket ID is correct.
     @Test
-    public void testGetTicketById() {
+    public void testGetTicketById() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Ticket ticket = ticketList.get(0);
+
         given()
                 .auth().oauth2(jwtToken)
-                .pathParam("ticketID", ticketID)
+                .pathParam("ticketID", ticket.getId())
                 .when()
                 .get("/api/tickets/{ticketID}")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)
-                .body("id", equalTo(ticketID.intValue()))
-                .body("title", notNullValue())
-                .body("description", notNullValue())
+                .body("id", equalTo(ticket.getId().intValue()))
+                .body("title", equalTo(ticket.getTitle()))
+                .body("description", equalTo(ticket.getDescription()))
                 .log().all();
     }
 
@@ -247,7 +138,7 @@ public class TicketControllerOperatorIntegrationTest {
     //Purpose: Verify the returned status when the ticket ID is incorrect.
     @Test
     public void testGetTicketByIdWhenIdIsWrong() {
-        long ticketID = 100;
+        long ticketID = 1000;
 
         given()
                 .auth().oauth2(jwtToken)
@@ -264,8 +155,13 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
-    public void testAddTicket() throws JsonProcessingException {
-        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", 1L, 1L, "1.1", 1L);
+    public void testAddTicket() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long categoryID = ticketList.get(0).getCategory().getId();
+        Long priorityID = ticketList.get(0).getPriority().getId();
+
+        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String newTicketJson = objectMapper.writeValueAsString(request);
 
@@ -279,15 +175,21 @@ public class TicketControllerOperatorIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Ticket added"))
                 .log().all();
+
+        assertEquals(ticketRepository.count(), ticketList.size()+1);
     }
 
     //POST: /api/tickets
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the category ID is incorrect.
     @Test
-    public void testAddTicketWhenCategoryIdIsWrong() throws JsonProcessingException {
-        long categoryID = 100;
-        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, 1L, "1.1", 1L);
+    public void testAddTicketWhenCategoryIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        long categoryID = 1000;
+        Long priorityID = ticketList.get(0).getPriority().getId();
+
+        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String newTicketJson = objectMapper.writeValueAsString(request);
 
@@ -299,7 +201,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Category with ID " + categoryID + " not found."))
+                .body(equalTo("Category with ID " + request.categoryID() + " not found."))
                 .log().all();
     }
 
@@ -307,9 +209,13 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the priority ID is incorrect.
     @Test
-    public void testAddTicketWhenPriorityIdIsWrong() throws JsonProcessingException {
-        long priorityID = 100;
-        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", 1L, priorityID, "1.1", 1L);
+    public void testAddTicketWhenPriorityIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long categoryID = ticketList.get(0).getCategory().getId();
+        long priorityID = 1000;
+
+        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String newTicketJson = objectMapper.writeValueAsString(request);
 
@@ -321,7 +227,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Priority with ID " + priorityID + " not found."))
+                .body(equalTo("Priority with ID " + request.priorityID() + " not found."))
                 .log().all();
     }
 
@@ -329,9 +235,14 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the software ID is incorrect.
     @Test
-    public void testAddTicketWhenSoftwareIdIsWrong() throws JsonProcessingException {
-        long softwareID = 100;
-        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", 1L, 1L, "1.1", softwareID);
+    public void testAddTicketWhenSoftwareIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long categoryID = ticketList.get(0).getCategory().getId();
+        Long priorityID = ticketList.get(0).getPriority().getId();
+        long addTicketRequestSoftwareID = 1000;
+
+        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", addTicketRequestSoftwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String newTicketJson = objectMapper.writeValueAsString(request);
 
@@ -343,7 +254,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Software with ID " + softwareID + " not found."))
+                .body(equalTo("Software with ID " + request.softwareID() + " not found."))
                 .log().all();
     }
 
@@ -351,8 +262,15 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
-    public void testUpdateTicket() throws JsonProcessingException {
-        UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", 2L, 1L, "1.1", 1L);
+    public void testUpdateTicket() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Ticket ticket = ticketList.get(0);
+        Long newCategoryID = ticketList.get(2).getCategory().getId();
+        Long newPriorityID = ticketList.get(2).getPriority().getId();
+        Long newSoftwareID = ticketList.get(2).getSoftware().getId();
+
+        UpdateTicketRequest request = new UpdateTicketRequest(ticket.getId(), "Updated title", "Updated description", newCategoryID, newPriorityID, "1.1", newSoftwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketJson = objectMapper.writeValueAsString(request);
 
@@ -364,7 +282,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .put("/api/tickets")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Ticket details changed successfully"))
+                .body(equalTo("Ticket details updated"))
                 .log().all();
     }
 
@@ -372,9 +290,15 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the category ID is incorrect.
     @Test
-    public void testUpdateTicketWhenCategoryIdIsWrong() throws JsonProcessingException {
-        long categoryID = 100;
-        UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", categoryID, 1L, "1.1", 1L);
+    public void testUpdateTicketWhenCategoryIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Ticket ticket = ticketList.get(0);
+        long newCategoryID = 1000;
+        Long newPriorityID = ticketList.get(2).getPriority().getId();
+        Long newSoftwareID = ticketList.get(2).getSoftware().getId();
+
+        UpdateTicketRequest request = new UpdateTicketRequest(ticket.getId(), "Updated title", "Updated description", newCategoryID, newPriorityID, "1.1", newSoftwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketJson = objectMapper.writeValueAsString(request);
 
@@ -386,7 +310,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .put("/api/tickets")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Category with ID " + categoryID + " not found."))
+                .body(equalTo("Category with ID " + request.categoryID() + " not found."))
                 .log().all();
     }
 
@@ -394,9 +318,15 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the priority ID is incorrect.
     @Test
-    public void testUpdateTicketWhenPriorityIdIsWrong() throws JsonProcessingException {
-        long priorityID = 100;
-        UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", 2L, priorityID, "1.1", 1L);
+    public void testUpdateTicketWhenPriorityIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Ticket ticket = ticketList.get(0);
+        Long newCategoryID = ticketList.get(2).getCategory().getId();
+        long newPriorityID = 1000;
+        Long newSoftwareID = ticketList.get(2).getSoftware().getId();
+
+        UpdateTicketRequest request = new UpdateTicketRequest(ticket.getId(), "Updated title", "Updated description", newCategoryID, newPriorityID, "1.1", newSoftwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketJson = objectMapper.writeValueAsString(request);
 
@@ -408,7 +338,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .put("/api/tickets")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Priority with ID " + priorityID + " not found."))
+                .body(equalTo("Priority with ID " + request.priorityID() + " not found."))
                 .log().all();
     }
 
@@ -416,9 +346,15 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the software ID is incorrect.
     @Test
-    public void testUpdateTicketWhenSoftwareIdIsWrong() throws JsonProcessingException {
-        long softwareID = 100;
-        UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", 1L, 1L, "1.1", softwareID);
+    public void testUpdateTicketWhenSoftwareIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Ticket ticket = ticketList.get(0);
+        Long newCategoryID = ticketList.get(2).getCategory().getId();
+        Long newPriorityID = ticketList.get(2).getPriority().getId();
+        long newSoftwareID = 1000;
+
+        UpdateTicketRequest request = new UpdateTicketRequest(ticket.getId(), "Updated title", "Updated description", newCategoryID, newPriorityID, "1.1", newSoftwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketJson = objectMapper.writeValueAsString(request);
 
@@ -430,7 +366,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .put("/api/tickets")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Software with ID " + softwareID + " not found."))
+                .body(equalTo("Software with ID " + request.softwareID() + " not found."))
                 .log().all();
     }
 
@@ -438,9 +374,15 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the ticket ID is incorrect.
     @Test
-    public void testUpdateTicketWhenIdIsWrong() throws JsonProcessingException {
-        long ticketID = 100;
-        UpdateTicketRequest request = new UpdateTicketRequest(100L, "Updated title", "Updated description", 1L, 1L, "1.1", 1L);
+    public void testUpdateTicketWhenIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        long ticketID = 1000;
+        Long newCategoryID = ticketList.get(2).getCategory().getId();
+        Long newPriorityID = ticketList.get(2).getPriority().getId();
+        Long newSoftwareID = ticketList.get(2).getSoftware().getId();
+
+        UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", newCategoryID, newPriorityID, "1.1", newSoftwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketJson = objectMapper.writeValueAsString(request);
 
@@ -452,7 +394,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .put("/api/tickets")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Ticket with ID " + ticketID + " not found."))
+                .body(equalTo("Ticket with ID " + request.ticketID() + " not found."))
                 .log().all();
     }
 
@@ -460,7 +402,11 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
-    public void testDeleteTicket() {
+    public void testDeleteTicket() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long ticketID = ticketList.get(0).getId();
+
         given()
                 .auth().oauth2(jwtToken)
                 .pathParam("ticketID", ticketID)
@@ -468,7 +414,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .delete("/api/tickets/{ticketID}")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Ticket removed successfully"))
+                .body(equalTo("Ticket removed"))
                 .log().all();
     }
 
@@ -476,8 +422,10 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the ticket ID is incorrect.
     @Test
-    public void testDeleteTicketWhenIdIsWrong() {
-        long ticketID = 100;
+    public void testDeleteTicketWhenIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeTicket(softwareID);
+        long ticketID = 1000;
 
         given()
                 .auth().oauth2(jwtToken)
@@ -494,7 +442,11 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
-    public void testAddImageToTicket() {
+    public void testAddImageToTicket() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long ticketID = ticketList.get(0).getId();
+
         given()
                 .auth().oauth2(jwtToken)
                 .contentType(ContentType.MULTIPART)
@@ -504,7 +456,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets/{ticketID}/image")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Image added successfully"))
+                .body(equalTo("Image added"))
                 .log().all();
     }
 
@@ -512,8 +464,10 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the ticket ID is incorrect.
     @Test
-    public void testAddImageToTicketWhenTicketIdIsWrong() {
-        long ticketID = 100;
+    public void testAddImageToTicketWhenTicketIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeTicket(softwareID);
+        long ticketID = 1000;
 
         given()
                 .auth().oauth2(jwtToken)
@@ -532,7 +486,11 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
-    public void testDeleteImage() {
+    public void testDeleteImage() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long imageID = ticketList.get(0).getImages().get(0).getId();
+
         given()
                 .auth().oauth2(jwtToken)
                 .pathParam("imageID", imageID)
@@ -540,7 +498,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .delete("/api/tickets/image/{imageID}")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Image removed successfully"))
+                .body(equalTo("Image removed"))
                 .log().all();
     }
 
@@ -548,8 +506,10 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the image ID is incorrect.
     @Test
-    public void testDeleteImageWhenIdIsWrong() {
-        long imageID = 100;
+    public void testDeleteImageWhenIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeTicket(softwareID);
+        long imageID = 1000;
 
         given()
                 .auth().oauth2(jwtToken)
@@ -566,7 +526,11 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
-    public void testAddTicketReply() throws MessagingException, JsonProcessingException {
+    public void testAddTicketReply() throws MessagingException, IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long ticketID = ticketList.get(0).getId();
+
         AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, "Reply content");
         ObjectMapper objectMapper = new ObjectMapper();
         String addTicketReplyJson = objectMapper.writeValueAsString(request);
@@ -579,7 +543,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets/reply")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Ticket reply added successfully"))
+                .body(equalTo("Ticket reply added"))
                 .log().all();
 
         Mockito.verify(mailService, Mockito.times(1)).sendTicketReplyMessage(Mockito.anyString(), Mockito.anyString());
@@ -589,8 +553,11 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the ticket ID is incorrect.
     @Test
-    public void testAddTicketReplyWhenTicketIdIsWrong() throws MessagingException, JsonProcessingException {
-        long ticketID = 100;
+    public void testAddTicketReplyWhenTicketIdIsWrong() throws MessagingException, IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeTicket(softwareID);
+        long ticketID = 1000;
+
         AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, "Reply content");
         ObjectMapper objectMapper = new ObjectMapper();
         String addTicketReplyJson = objectMapper.writeValueAsString(request);
@@ -603,7 +570,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets/reply")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Ticket with ID " + ticketID + " not found."))
+                .body(equalTo("Ticket with ID " + request.ticketID() + " not found."))
                 .log().all();
 
         Mockito.verify(mailService, Mockito.times(0)).sendTicketReplyMessage(Mockito.anyString(), Mockito.anyString());
@@ -613,8 +580,12 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
-    public void testChangeTicketStatus() throws MessagingException, JsonProcessingException {
-        long statusID = 2;
+    public void testChangeTicketStatus() throws MessagingException, IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long ticketID = ticketList.get(0).getId();
+        long statusID = ticketList.get(2).getStatus().getId();
+
         UpdateTicketStatusRequest request = new UpdateTicketStatusRequest(ticketID, statusID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketStatusJson = objectMapper.writeValueAsString(request);
@@ -627,7 +598,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets/status")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Ticket status changed successfully"))
+                .body(equalTo("Ticket status changed"))
                 .log().all();
 
         Mockito.verify(mailService, Mockito.times(1)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
@@ -637,9 +608,12 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the ticket ID is incorrect.
     @Test
-    public void testChangeTicketStatusWhenTicketIdIsWrong() throws MessagingException, JsonProcessingException {
-        long ticketID = 100;
-        long statusID = 2;
+    public void testChangeTicketStatusWhenTicketIdIsWrong() throws MessagingException, IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        long ticketID = 1000;
+        long statusID = ticketList.get(0).getStatus().getId();
+
         UpdateTicketStatusRequest request = new UpdateTicketStatusRequest(ticketID, statusID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketStatusJson = objectMapper.writeValueAsString(request);
@@ -652,7 +626,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets/status")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Ticket with ID " + ticketID + " not found."))
+                .body(equalTo("Ticket with ID " + request.ticketID() + " not found."))
                 .log().all();
 
         Mockito.verify(mailService, Mockito.times(0)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
@@ -662,8 +636,12 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the status ID is incorrect.
     @Test
-    public void testChangeTicketStatusWhenStatusIdIsWrong() throws MessagingException, JsonProcessingException {
-        long statusID = 100;
+    public void testChangeTicketStatusWhenStatusIdIsWrong() throws MessagingException, IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long ticketID = ticketList.get(0).getId();
+        long statusID = 1000;
+
         UpdateTicketStatusRequest request = new UpdateTicketStatusRequest(ticketID, statusID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketStatusJson = objectMapper.writeValueAsString(request);
@@ -676,7 +654,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets/status")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Status with ID " + statusID + " not found."))
+                .body(equalTo("Status with ID " + request.statusID() + " not found."))
                 .log().all();
 
         Mockito.verify(mailService, Mockito.times(0)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
@@ -686,8 +664,12 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned in case of a change to the current status
     @Test
-    public void testChangeTicketStatusToCurrentStatus() throws MessagingException, JsonProcessingException {
-        long statusID = 1;
+    public void testChangeTicketStatusToCurrentStatus() throws MessagingException, IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long ticketID = ticketList.get(0).getId();
+        long statusID = ticketList.get(0).getStatus().getId();
+
         UpdateTicketStatusRequest request = new UpdateTicketStatusRequest(ticketID, statusID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketStatusJson = objectMapper.writeValueAsString(request);
@@ -700,7 +682,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .post("/api/tickets/status")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Ticket status changed successfully"))
+                .body(equalTo("Ticket status changed"))
                 .log().all();
 
         Mockito.verify(mailService, Mockito.times(0)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
@@ -710,7 +692,11 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: OK (200)
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
-    public void testDeleteTicketReply(){
+    public void testDeleteTicketReply() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        List<Ticket> ticketList = initializeTicket(softwareID);
+        Long ticketReplyID = ticketList.get(0).getReplies().get(0).getId();
+
         given()
                 .auth().oauth2(jwtToken)
                 .pathParam("replyID", ticketReplyID)
@@ -718,7 +704,7 @@ public class TicketControllerOperatorIntegrationTest {
                 .delete("/api/tickets/reply/{replyID}")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Ticket reply removed successfully"))
+                .body(equalTo("Ticket reply removed"))
                 .log().all();
     }
 
@@ -726,17 +712,19 @@ public class TicketControllerOperatorIntegrationTest {
     //Expected status: NOT FOUND (404)
     //Purpose: Verify the returned status when the ticket reply ID is incorrect.
     @Test
-    public void testDeleteTicketReplyWhenIdIsWrong() {
-        long replyID = 100L;
+    public void testDeleteTicketReplyWhenIdIsWrong() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeTicket(softwareID);
+        long ticketReplyID = 1000;
 
         given()
                 .auth().oauth2(jwtToken)
-                .pathParam("replyID", replyID)
+                .pathParam("replyID", ticketReplyID)
                 .when()
                 .delete("/api/tickets/reply/{replyID}")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Ticket reply with ID " + replyID + " not found."))
+                .body(equalTo("Ticket reply with ID " + ticketReplyID + " not found."))
                 .log().all();
     }
 }

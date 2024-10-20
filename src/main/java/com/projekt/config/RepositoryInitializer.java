@@ -5,6 +5,7 @@ import com.projekt.repositories.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Configuration
+@Profile("!test")
 public class RepositoryInitializer {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;

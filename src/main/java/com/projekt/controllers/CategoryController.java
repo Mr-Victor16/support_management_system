@@ -57,6 +57,6 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteCategory(@PathVariable(name = "categoryID") Long categoryID){
         categoryService.delete(categoryID);
-        return "Category removed successfully";
+        return "Category removed";
     }
 }

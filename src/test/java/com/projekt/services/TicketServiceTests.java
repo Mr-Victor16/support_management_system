@@ -2,6 +2,7 @@ package com.projekt.services;
 
 import com.projekt.models.*;
 import com.projekt.repositories.*;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ public class TicketServiceTests {
     private StatusRepository statusRepository;
     private JavaMailSender javaMailSender;
     private TemplateEngine templateEngine;
+    private MailService mailService;
 
     @BeforeEach
     public void setUp() {
@@ -33,8 +35,7 @@ public class TicketServiceTests {
         statusRepository = mock(StatusRepository.class);
         javaMailSender = mock(JavaMailSender.class);
         templateEngine = mock(TemplateEngine.class);
-
-        MailService mailService = new MailService(javaMailSender, templateEngine, userRepository);
+        mailService = mock(MailService.class);
 
         ticketService = new TicketServiceImpl(ticketRepository, mailService, userRepository, statusRepository, categoryRepository, priorityRepository, softwareRepository);
     }
@@ -68,7 +69,7 @@ public class TicketServiceTests {
 
         when(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)).thenReturn(false);
         when(userRepository.findByUsernameIgnoreCase(username)).thenReturn(Optional.of(user));
-        when(ticketRepository.getReferenceById(ticketID)).thenReturn(ticket);
+        when(ticketRepository.findById(ticketID)).thenReturn(Optional.of(ticket));
 
         assertTrue(ticketService.isAuthorized(ticketID, username));
     }
@@ -95,7 +96,7 @@ public class TicketServiceTests {
 
         when(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)).thenReturn(false);
         when(userRepository.findByUsernameIgnoreCase(username)).thenReturn(Optional.of(user));
-        when(ticketRepository.getReferenceById(ticketID)).thenReturn(ticket);
+        when(ticketRepository.findById(ticketID)).thenReturn(Optional.of(ticket));
 
         assertFalse(ticketService.isAuthorized(ticketID, username));
     }
@@ -103,14 +104,19 @@ public class TicketServiceTests {
     //void changeStatus(Long ticketID, Long statusID);
     //Verifies the correctness of the change in the status of the ticket.
     @Test
-    void testChangeStatus() {
+    void testChangeStatus() throws MessagingException {
         Long ticketID = 1L;
         Long statusID = 2L;
+        Long newStatusID = 3L;
         Long userID = 3L;
 
         Status status = new Status();
         status.setId(statusID);
-        status.setName("Closed");
+        status.setName("Opened");
+
+        Status newStatus = new Status();
+        newStatus.setId(newStatusID);
+        newStatus.setName("Closed");
 
         User user = new User();
         user.setId(userID);
@@ -118,19 +124,21 @@ public class TicketServiceTests {
 
         Ticket ticket = new Ticket();
         ticket.setId(ticketID);
+        ticket.setTitle("Title");
         ticket.setUser(user);
+        ticket.setStatus(status);
 
         MimeMessage mimeMessage = mock(MimeMessage.class);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
         when(templateEngine.process(anyString(), any(Context.class))).thenReturn("mocked-html");
-        when(statusRepository.getReferenceById(statusID)).thenReturn(status);
-        when(ticketRepository.getReferenceById(ticketID)).thenReturn(ticket);
-        when(userRepository.getReferenceById(userID)).thenReturn(user);
+        when(statusRepository.findById(newStatusID)).thenReturn(Optional.of(newStatus));
+        when(ticketRepository.findById(ticketID)).thenReturn(Optional.of(ticket));
+        when(userRepository.findById(userID)).thenReturn(Optional.of(user));
 
-        ticketService.changeStatus(ticketID, statusID);
+        ticketService.changeStatus(ticketID, newStatusID);
 
-        verify(userRepository, times(1)).getReferenceById(userID);
         verify(ticketRepository, times(1)).save(ticket);
-        assertEquals(status.getName(), ticket.getStatus().getName());
+        verify(mailService, times(1)).sendChangeStatusMessage(userID, ticket.getTitle(), newStatus.getName());
+        assertEquals(newStatus.getName(), ticket.getStatus().getName());
     }
 }

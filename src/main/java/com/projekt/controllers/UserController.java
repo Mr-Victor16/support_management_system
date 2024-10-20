@@ -50,6 +50,6 @@ public class UserController {
     @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public String deleteUser(@PathVariable("userID") Long userID){
         userService.delete(userID);
-        return "User removed successfully";
+        return "User removed";
     }
 }

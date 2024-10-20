@@ -48,6 +48,6 @@ public class KnowledgeBaseController {
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteKnowledge(@PathVariable(name = "knowledgeID") Long knowledgeID){
         knowledgeBaseService.delete(knowledgeID);
-        return "Knowledge removed successfully";
+        return "Knowledge removed";
     }
 }

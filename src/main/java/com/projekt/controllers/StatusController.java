@@ -43,7 +43,7 @@ public class StatusController {
     @PreAuthorize("hasRole('ADMIN')")
     public String updateStatus(@RequestBody @Valid UpdateStatusRequest request){
         statusService.update(request);
-        return "Status edited";
+        return "Status details updated";
     }
 
     @PostMapping
@@ -57,6 +57,6 @@ public class StatusController {
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteStatus(@PathVariable(name = "statusID") Long statusID){
         statusService.delete(statusID);
-        return "Status removed successfully";
+        return "Status remove";
     }
 }

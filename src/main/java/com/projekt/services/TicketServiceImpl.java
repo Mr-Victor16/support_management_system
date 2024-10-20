@@ -147,8 +147,7 @@ public class TicketServiceImpl implements TicketService{
                 .orElseThrow(() -> new NotFoundException("Software", request.softwareID())));
 
         ticket.setUser(userRepository.findByUsernameIgnoreCase(username)
-                .orElseThrow(() -> new NotFoundException("User", username))
-        );
+                .orElseThrow(() -> new NotFoundException("User", username)));
 
         ticketRepository.save(ticket);
     }

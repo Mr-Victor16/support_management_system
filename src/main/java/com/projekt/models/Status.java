@@ -42,4 +42,9 @@ public class Status {
         this.closeTicket = closeTicket;
         this.defaultStatus = defaultStatus;
     }
+
+    public Status(String name, boolean closeTicket) {
+        this.name = name;
+        this.closeTicket = closeTicket;
+    }
 }
