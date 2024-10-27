@@ -1,13 +1,14 @@
 # Support Management System [Backend]
-Support Management System is a solution designed to meet the essential requirements of handling technical support tickets. It allows users to submit and track the status of their tickets. Support operators can efficiently respond to tickets and adjust their status, priority, and category. Administrators are responsible for managing user accounts, as well as overseeing the lists of statuses, priorities, and categories.
+Support Management System is designed to efficiently manage technical support tickets, meeting essential requirements for submission, tracking, and resolution. Users can submit tickets and monitor their status, while support operators can respond to tickets and adjust their status, priority, and category. Administrators manage user accounts and configure ticket settings, including status, priority and category lists.
 
-Support Management System was initially created for an individual project as part of a university Programming Platforms course. Backend was developed using Spring Boot, Spring Security and H2 database. Frontend was built using HTML and Thymeleaf.
+This system was originally created as an individual project for a university course in Programming Platforms. The backend was developed using Spring Boot, Spring Security and an H2 database, with the frontend built using HTML and Thymeleaf.
 
-Project was then refactored to a REST API backend to provide a more modern solution. During the refactoring process, many redundant features were removed, and technologies such as Docker, JWT, and JUnit were incorporated.
+The project was later refactored to a REST API backend to provide a more modern and streamlined solution. During this process, redundant features were removed, and technologies such as Docker, JWT and JUnit were integrated to enhance the system’s functionality and scalability.
 
 ## Technologies used
 + Spring Framework, Spring Boot, Spring Security, Spring Data JPA
-+ JUnit, Mockito, Test Containers
++ JUnit, Mockito
++ Test Containers
 + REST Assured
 + Thymeleaf
 + Spring Boot Starter Mail

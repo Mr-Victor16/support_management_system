@@ -276,4 +276,42 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .body(equalTo("Software with ID " + softwareID + " not found."))
                 .log().all();
     }
+
+    //DELETE: /api/software/<softwareID>
+    //Expected status: CONFLICT (409)
+    //Purpose: Verify the returned status if software is assigned to the ticket.
+    @Test
+    public void testDeleteSoftwareWhenIsAssignedToTicket() throws IOException {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeTicket(softwareID);
+
+        given()
+                .auth().oauth2(jwtToken)
+                .pathParam("softwareID", softwareID)
+                .when()
+                .delete("/api/software/{softwareID}")
+                .then()
+                .statusCode(HttpStatus.CONFLICT.value())
+                .body(equalTo("You cannot remove a software if it has a ticket or knowledge assigned to it"))
+                .log().all();
+    }
+
+    //DELETE: /api/software/<softwareID>
+    //Expected status: CONFLICT (409)
+    //Purpose: Verify the returned status if software is assigned to the knowledge base.
+    @Test
+    public void testDeleteSoftwareWhenIsAssignedToKnowledgeBase() {
+        Long softwareID = initializeSoftware().get(0).getId();
+        initializeKnowledge(softwareID);
+
+        given()
+                .auth().oauth2(jwtToken)
+                .pathParam("softwareID", softwareID)
+                .when()
+                .delete("/api/software/{softwareID}")
+                .then()
+                .statusCode(HttpStatus.CONFLICT.value())
+                .body(equalTo("You cannot remove a software if it has a ticket or knowledge assigned to it"))
+                .log().all();
+    }
 }

@@ -43,7 +43,7 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     public String updateCategory(@RequestBody @Valid UpdateCategoryRequest request){
         categoryService.update(request);
-        return "Category name updated";
+        return "Category updated";
     }
 
     @PostMapping
