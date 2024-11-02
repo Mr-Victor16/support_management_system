@@ -416,6 +416,8 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Ticket removed"))
                 .log().all();
+
+        assertEquals(ticketRepository.count(), ticketList.size()-1);
     }
 
     //DELETE: /api/tickets/<ticketID>

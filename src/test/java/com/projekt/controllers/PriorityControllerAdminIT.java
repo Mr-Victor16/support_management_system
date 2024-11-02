@@ -264,7 +264,8 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testDeletePriority() {
-        Priority priority = initializePriority().get(0);
+        List<Priority> priorityList = initializePriority();
+        Priority priority = priorityList.get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -275,6 +276,8 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Priority removed"))
                 .log().all();
+
+        assertEquals(priorityRepository.count(), priorityList.size()-1);
     }
 
     //DELETE: /api/priorities/<priorityID>

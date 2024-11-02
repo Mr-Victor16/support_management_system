@@ -57,6 +57,6 @@ public class StatusController {
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteStatus(@PathVariable(name = "statusID") Long statusID){
         statusService.delete(statusID);
-        return "Status remove";
+        return "Status removed";
     }
 }

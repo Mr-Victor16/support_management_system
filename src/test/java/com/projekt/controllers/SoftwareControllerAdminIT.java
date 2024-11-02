@@ -246,7 +246,8 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testDeleteSoftware() {
-        Software software = initializeSoftware().get(0);
+        List<Software> softwareList = initializeSoftware();
+        Software software = softwareList.get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -257,6 +258,8 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Software removed"))
                 .log().all();
+
+        assertEquals(softwareRepository.count(), softwareList.size()-1);
     }
 
     //DELETE: /api/software/<softwareID>

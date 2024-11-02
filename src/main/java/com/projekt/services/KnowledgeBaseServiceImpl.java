@@ -70,11 +70,23 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService{
     }
 
     @Override
+    public boolean findDuplicate(Long knowledgeID, String knowledgeTitle, Long softwareID) {
+        Knowledge knowledge = knowledgeRepository.findByTitleIgnoreCase(knowledgeTitle);
+        if (knowledge == null) return false;
+
+        if (Objects.equals(knowledge.getSoftware().getId(), softwareID)){
+            return !Objects.equals(knowledge.getId(), knowledgeID);
+        }
+
+        return false;
+    }
+
+    @Override
     public void update(UpdateKnowledgeRequest request) {
         Knowledge knowledge = knowledgeRepository.findById(request.knowledgeID())
                 .orElseThrow(() -> new NotFoundException("Knowledge", request.knowledgeID()));
 
-        if(findDuplicate(request.title(), request.softwareID())) {
+        if(findDuplicate(knowledge.getId(), request.title(), request.softwareID())) {
             throw new KnowledgeConflictException(request.title(), request.softwareID());
         }
 

@@ -264,7 +264,8 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testDeleteCategory() {
-        Category category = initializeCategory().get(0);
+        List<Category> categoryList = initializeCategory();
+        Category category = categoryList.get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -275,6 +276,8 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Category removed"))
                 .log().all();
+
+        assertEquals(categoryRepository.count(), categoryList.size()-1);
     }
 
     //DELETE: /api/categories/<categoryID>
