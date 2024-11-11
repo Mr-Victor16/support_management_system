@@ -1,6 +1,5 @@
 package com.projekt.payload.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.projekt.validators.FirstCharacterConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +11,6 @@ public record RegisterRequest(
         String username,
 
         @NotBlank
-        @JsonIgnore
         String password,
 
         @Email

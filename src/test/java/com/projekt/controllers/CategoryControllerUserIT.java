@@ -33,12 +33,17 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/categories
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: CategoryController.getAllCategories
+     * HTTP Method: GET
+     * Endpoint: /api/categories
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all categories with user role.
+     * Verification: Confirms the returned list size matches the expected category count in the repository.
+     */
     @Test
-    public void testGetAllCategories() {
-        List<Category> categoryList = initializeCategory();
+    public void getAllCategories_ReturnsCategoryListSuccessfully() {
+        List<Category> categoryList = initializeCategories();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -51,11 +56,15 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/categories/use
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: CategoryController.getAllCategoriesWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/categories/use
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve all categories with associated usage numbers as a user without sufficient permissions (as USER).
+     */
     @Test
-    public void testGetAllCategoriesWithUseNumbers() throws IOException {
+    public void getAllCategoriesWithUseNumbers_WithUserRole_ReturnsUnauthorized() throws IOException {
         List<Software> softwareList = initializeSoftware();
         initializeTicket(softwareList.get(0).getId());
 
@@ -69,12 +78,16 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/categories/<categoryID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: CategoryController.getCategoryById
+     * HTTP Method: GET
+     * Endpoint: /api/categories/{userID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve category by ID as a user without sufficient permissions (as USER).
+     */
     @Test
-    public void testGetCategoryById() {
-        Category category = initializeCategory().get(0);
+    public void getCategoryById_WithUserRole_ReturnsUnauthorized() {
+        Category category = initializeCategories().get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -87,12 +100,16 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/categories
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: CategoryController.updateCategory
+     * HTTP Method: PUT
+     * Endpoint: /api/categories
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to update category as a user without sufficient permissions (as USER).
+     */
     @Test
-    public void testUpdateCategory() throws JsonProcessingException {
-        Category category = initializeCategory().get(0);
+    public void updateCategory_WithUserRole_ReturnsUnauthorized() throws JsonProcessingException {
+        Category category = initializeCategories().get(0);
 
         UpdateCategoryRequest request = new UpdateCategoryRequest(category.getId(), "Updated category");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -110,12 +127,16 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/categories
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: CategoryController.addCategory
+     * HTTP Method: POST
+     * Endpoint: /api/categories
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to add category as a user without sufficient permissions (as USER).
+     */
     @Test
-    public void testAddCategory() throws JsonProcessingException {
-        List<Category> categoryList = initializeCategory();
+    public void addCategory_WithUserRole_ReturnsUnauthorized() throws JsonProcessingException {
+        List<Category> categoryList = initializeCategories();
 
         AddCategoryRequest request = new AddCategoryRequest("New category");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -135,12 +156,16 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
         assertEquals(categoryRepository.count(), categoryList.size());
     }
 
-    //DELETE: /api/categories/<categoryID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: CategoryController.deleteCategory
+     * HTTP Method: DELETE
+     * Endpoint: /api/categories
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to delete category as a user without sufficient permissions (as USER).
+     */
     @Test
-    public void testDeleteCategory() {
-        Category category = initializeCategory().get(0);
+    public void deleteCategory_WithUserRole_ReturnsUnauthorized() {
+        Category category = initializeCategories().get(0);
 
         given()
                 .auth().oauth2(jwtToken)

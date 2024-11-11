@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -66,6 +68,12 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
 
     @Autowired
     private KnowledgeRepository knowledgeRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry) {
@@ -109,6 +117,12 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         priorityRepository.deleteAll();
         statusRepository.deleteAll();
         softwareRepository.deleteAll();
+
+        List<User> users = userRepository.findAll();
+        if(users.size() > 3){
+            List<User> usersToDelete = users.subList(3, users.size());
+            usersToDelete.forEach(user -> userRepository.deleteById(user.getId()));
+        }
     }
 
     public List<Software> initializeSoftware(){
@@ -129,40 +143,98 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         return knowledgeRepository.saveAll(knowledgeList);
     }
 
-    public List<Category> initializeCategory(){
-        List<Category> categoryList = List.of(
-                new Category("General"),
-                new Category("Question"),
-                new Category("Suggestion")
-        );
-
-        return categoryRepository.saveAll(categoryList);
+    public Category initializeCategory(String categoryName){
+        return categoryRepository.save(new Category(categoryName));
     }
 
-    public List<Priority> initializePriority(){
-        List<Priority> priorityList = List.of(
-                new Priority("High",1),
-                new Priority("Normal",2),
-                new Priority("Low", 5)
-        );
+    public List<Category> initializeCategories(){
+        initializeCategory("General");
+        initializeCategory("Question");
+        initializeCategory("Suggestion");
 
-        return priorityRepository.saveAll(priorityList);
+        return categoryRepository.findAll();
     }
 
-    public List<Status> initializeStatus(){
-        List<Status> statusList = List.of(
-                new Status("New",false, true),
-                new Status("In progress", false),
-                new Status("Closed", true)
-        );
+    public Priority initializePriority(String priorityName, Integer maxTime){
+        return priorityRepository.save(new Priority(priorityName, maxTime));
+    }
 
-        return statusRepository.saveAll(statusList);
+    public List<Priority> initializePriorities(){
+        initializePriority("High", 1);
+        initializePriority("Normal", 2);
+        initializePriority("Low", 5);
+
+        return priorityRepository.findAll();
+    }
+
+    public Status initializeStatus(String statusName, Boolean closeTicket, Boolean defaultStatus){
+        return statusRepository.save(new Status(statusName, closeTicket, defaultStatus));
+    }
+
+    public List<Status> initializeStatuses(){
+        initializeStatus("New",false, true);
+        initializeStatus("In progress", false, false);
+        initializeStatus("Closed", true, false);
+
+        return statusRepository.findAll();
+    }
+
+    public User initializeUser(String username, String password, boolean activated, Role.Types role){
+        User user = new User(
+                username,
+                passwordEncoder.encode(password),
+                "username@email.com",
+                "Name",
+                "Surname",
+                activated,
+                Set.of(roleRepository.findByType(role))
+        );
+        return userRepository.save(user);
+    }
+
+    public void initializeTicketForUser(Long userID) throws IOException {
+        Status status = initializeStatus("New",false, true);
+        Priority priority = initializePriority("Normal", 2);
+        Category category = initializeCategory("General");
+        List<Software> softwareList = initializeSoftware();
+
+        BufferedImage emptyImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(emptyImage, "png", stream);
+
+        Ticket ticket = new Ticket();
+        ticket.setTitle("The website is unreachable");
+        ticket.setStatus(status);
+        ticket.setPriority(priority);
+        ticket.setSoftware(softwareList.get(0));
+        ticket.setUser(userRepository.getReferenceById(userID));
+        ticket.setDescription("When trying to enter the site, I get an error - This site is unreachable :(");
+        ticket.setVersion("1.0");
+        ticket.setCategory(category);
+
+        Image image = new Image("1.png", stream.toByteArray());
+        List<Image> imageList = new ArrayList<>();
+        imageList.add(image);
+        ticket.setImages(imageList);
+
+        List<TicketReply> ticketReplyList = new ArrayList<>();
+        TicketReply savedReply = ticketReplyRepository.save(
+                new TicketReply(
+                        userRepository.getReferenceById(userID),
+                        "Please, I need help",
+                        LocalDate.of(2021,12,11)
+                )
+        );
+        ticketReplyList.add(savedReply);
+        ticket.setReplies(ticketReplyList);
+
+        ticketRepository.save(ticket);
     }
 
     public List<Ticket> initializeTicket(Long softwareID) throws IOException {
-        List<Status> statusList = initializeStatus();
-        List<Priority> priorityList = initializePriority();
-        List<Category> categoryList = initializeCategory();
+        List<Status> statusList = initializeStatuses();
+        List<Priority> priorityList = initializePriorities();
+        List<Category> categoryList = initializeCategories();
 
         BufferedImage emptyImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -185,7 +257,14 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         ticket1.setImages(imageList1);
 
         List<TicketReply> ticketReplyList = new ArrayList<>();
-        TicketReply savedReply = ticketReplyRepository.save(new TicketReply(userRepository.getReferenceById(2L),"Have you checked that you have entered the correct address?", LocalDate.of(2021,12,11)));
+        TicketReply savedReply = ticketReplyRepository.save(
+                new TicketReply(
+                        userRepository.getReferenceById(2L),
+                        "Have you checked that you have entered the correct address?",
+
+                        LocalDate.of(2021,12,11)
+                )
+        );
         ticketReplyList.add(savedReply);
         ticket1.setReplies(ticketReplyList);
 

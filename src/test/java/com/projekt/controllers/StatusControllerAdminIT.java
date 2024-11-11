@@ -41,7 +41,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: To verify the returned status and the expected number of elements.
     @Test
     public void testGetAllStatuses() {
-        List<Status> statusList = initializeStatus();
+        List<Status> statusList = initializeStatuses();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -83,7 +83,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the returned status when the status ID is correct.
     @Test
     public void testGetStatusById() {
-        Status status = initializeStatus().get(0);
+        Status status = initializeStatuses().get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -123,7 +123,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testUpdateStatus() throws JsonProcessingException {
-        Status status = initializeStatus().get(0);
+        Status status = initializeStatuses().get(0);
 
         UpdateStatusRequest request = new UpdateStatusRequest(status.getId(), "Updated status", true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -169,7 +169,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the returned status if the new status name is the same as the current name.
     @Test
     public void testUpdateStatusWhenNewNameIsSameAsCurrent() throws JsonProcessingException {
-        Status status = initializeStatus().get(0);
+        Status status = initializeStatuses().get(0);
 
         UpdateStatusRequest request = new UpdateStatusRequest(status.getId(), status.getName(), true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -192,7 +192,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if status with the given name already exists.
     @Test
     public void testUpdateStatusWhenNewNameIsAlreadyUsed() throws JsonProcessingException {
-        List<Status> statusList = initializeStatus();
+        List<Status> statusList = initializeStatuses();
         Long statusID = statusList.get(0).getId();
         String statusName = statusList.get(1).getName();
 
@@ -217,7 +217,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testAddStatus() throws JsonProcessingException {
-        List<Status> statusList = initializeStatus();
+        List<Status> statusList = initializeStatuses();
 
         AddStatusRequest request = new AddStatusRequest("New status", true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -242,7 +242,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if status with the given name already exists.
     @Test
     public void testAddStatusWhenNewNameIsAlreadyUsed() throws JsonProcessingException {
-        List<Status> statusList = initializeStatus();
+        List<Status> statusList = initializeStatuses();
         String statusName = statusList.get(1).getName();
 
         AddStatusRequest request = new AddStatusRequest(statusName, true, true);
@@ -266,7 +266,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testDeleteStatus() {
-        List<Status> statusList = initializeStatus();
+        List<Status> statusList = initializeStatuses();
         Status status = statusList.get(2);
 
         given()
@@ -325,7 +325,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the returned status if status is default.
     @Test
     public void testDeleteDefaultStatus() {
-        Status status = initializeStatus().get(0);
+        Status status = initializeStatuses().get(0);
 
         given()
                 .auth().oauth2(jwtToken)

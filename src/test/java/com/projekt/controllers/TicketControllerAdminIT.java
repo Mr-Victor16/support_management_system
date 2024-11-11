@@ -73,11 +73,13 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
     public void testGetTicketsByUserId() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         initializeTicket(softwareID);
+        long userID = 1;
 
         given()
                 .auth().oauth2(jwtToken)
+                .pathParam("userID", userID)
                 .when()
-                .get("/api/tickets/user/1")
+                .get("/api/tickets/user/{userID}")
                 .then()
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
                 .body("message", equalTo("Full authentication is required to access this resource"))

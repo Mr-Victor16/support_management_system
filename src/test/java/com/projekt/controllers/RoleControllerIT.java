@@ -18,11 +18,15 @@ public class RoleControllerIT extends BaseIntegrationTest {
     @Autowired
     private RoleRepository roleRepository;
 
-    //GET: /api/roles
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned. User doesn't have access rights to this method.
+    /**
+     * Controller method: RoleController.getAllRoles
+     * HTTP Method: GET
+     * Endpoint: /api/roles
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to access roles list as a user without sufficient permissions (as USER).
+     */
     @Test
-    public void testGetAllRolesAsUser() throws JsonProcessingException {
+    public void getAllRoles_WithUserRole_ReturnsUnauthorized() throws JsonProcessingException {
         String jwtToken = getJwtToken("user", "user");
 
         given()
@@ -35,11 +39,16 @@ public class RoleControllerIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/roles
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: RoleController.getAllRoles
+     * HTTP Method: GET
+     * Endpoint: /api/roles
+     * Expected Status: 200 OK
+     * Scenario: Accessing the roles list as OPERATOR.
+     * Verification: Verifies the returned list size matches the number of roles in the repository.
+     */
     @Test
-    public void testGetAllRolesAsOperator() throws JsonProcessingException {
+    public void getAllRoles_WithOperatorRole_ReturnsRolesListSuccessfully() throws JsonProcessingException {
         String jwtToken = getJwtToken("operator", "operator");
         List<Role> roleList = roleRepository.findAll();
 
@@ -54,11 +63,16 @@ public class RoleControllerIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/roles
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: RoleController.getAllRoles
+     * HTTP Method: GET
+     * Endpoint: /api/roles
+     * Expected Status: 200 OK
+     * Scenario: Accessing the roles list as ADMIN.
+     * Verification: Verifies the returned list size matches the number of roles in the repository.
+     */
     @Test
-    public void testGetAllRolesAsAdmin() throws JsonProcessingException {
+    public void getAllRoles_WithAdminRole_ReturnsRolesListSuccessfully() throws JsonProcessingException {
         String jwtToken = getJwtToken("admin", "admin");
         List<Role> roleList = roleRepository.findAll();
 

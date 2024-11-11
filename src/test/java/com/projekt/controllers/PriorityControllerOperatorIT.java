@@ -40,7 +40,7 @@ public class PriorityControllerOperatorIT extends BaseIntegrationTest {
     //Purpose: To verify the returned status and the expected number of elements.
     @Test
     public void testGetAllPriorities() {
-        List<Priority> priorityList = initializePriority();
+        List<Priority> priorityList = initializePriorities();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -82,7 +82,7 @@ public class PriorityControllerOperatorIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
     @Test
     public void testGetPriorityById() {
-        Priority priority = initializePriority().get(0);
+        Priority priority = initializePriorities().get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -100,7 +100,7 @@ public class PriorityControllerOperatorIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
     @Test
     public void testUpdatePriority() throws JsonProcessingException {
-        Priority priority = initializePriority().get(0);
+        Priority priority = initializePriorities().get(0);
 
         UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), "Updated priority", 2);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -123,7 +123,7 @@ public class PriorityControllerOperatorIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
     @Test
     public void testAddPriority() throws JsonProcessingException {
-        List<Priority> priorityList = initializePriority();
+        List<Priority> priorityList = initializePriorities();
 
         AddPriorityRequest request = new AddPriorityRequest("New priority", 5);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -148,7 +148,7 @@ public class PriorityControllerOperatorIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
     @Test
     public void testDeletePriority() {
-        Priority priority = initializePriority().get(0);
+        Priority priority = initializePriorities().get(0);
 
         given()
                 .auth().oauth2(jwtToken)

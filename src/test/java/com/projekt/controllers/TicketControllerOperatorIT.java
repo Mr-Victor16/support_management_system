@@ -84,8 +84,9 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
 
         given()
                 .auth().oauth2(jwtToken)
+                .pathParam("userID", userID)
                 .when()
-                .get("/api/tickets/user/"+userID)
+                .get("/api/tickets/user/{userID}")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)
@@ -102,8 +103,9 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
 
         given()
                 .auth().oauth2(jwtToken)
+                .pathParam("userID", userID)
                 .when()
-                .get("/api/tickets/user/"+userID)
+                .get("/api/tickets/user/{userID}")
                 .then()
                 .statusCode(HttpStatus.NOT_FOUND.value())
                 .body(equalTo("User with ID " + userID + " not found."))

@@ -41,7 +41,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: To verify the returned status and the expected number of elements.
     @Test
     public void testGetAllPriorities() {
-        List<Priority> priorityList = initializePriority();
+        List<Priority> priorityList = initializePriorities();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -83,7 +83,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the returned status when the priority ID is correct.
     @Test
     public void testGetPriorityById() {
-        Priority priority = initializePriority().get(0);
+        Priority priority = initializePriorities().get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -122,7 +122,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testUpdatePriority() throws JsonProcessingException {
-        Priority priority = initializePriority().get(0);
+        Priority priority = initializePriorities().get(0);
 
         UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), "Updated priority", 2);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -145,7 +145,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testUpdatePriorityWhenNewNameIsAlreadyUsed() throws JsonProcessingException {
-        List<Priority> priorityList = initializePriority();
+        List<Priority> priorityList = initializePriorities();
         Long priorityID = priorityList.get(0).getId();
         String priorityName = priorityList.get(1).getName();
 
@@ -170,7 +170,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the returned status if the new priority name is the same as the current name.
     @Test
     public void testUpdatePriorityWhenNewNameIsSameAsCurrent() throws JsonProcessingException {
-        Priority priority = initializePriority().get(0);
+        Priority priority = initializePriorities().get(0);
 
         UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), priority.getName(), priority.getMaxTime());
         ObjectMapper objectMapper = new ObjectMapper();
@@ -216,7 +216,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testAddPriority() throws JsonProcessingException {
-        List<Priority> priorityList = initializePriority();
+        List<Priority> priorityList = initializePriorities();
 
         AddPriorityRequest request = new AddPriorityRequest("New priority", 5);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -241,7 +241,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if priority with the given name already exists.
     @Test
     public void testAddPriorityWhenNameAlreadyExists() throws JsonProcessingException {
-        Priority priority = initializePriority().get(0);
+        Priority priority = initializePriorities().get(0);
 
         AddPriorityRequest request = new AddPriorityRequest(priority.getName(), priority.getMaxTime());
         ObjectMapper objectMapper = new ObjectMapper();
@@ -264,7 +264,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data.
     @Test
     public void testDeletePriority() {
-        List<Priority> priorityList = initializePriority();
+        List<Priority> priorityList = initializePriorities();
         Priority priority = priorityList.get(0);
 
         given()

@@ -31,7 +31,7 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
     @Test
     public void testGetAllStatuses() {
-        initializeStatus();
+        initializeStatuses();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -66,7 +66,7 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
     @Test
     public void testGetStatusById() {
-        Status status = initializeStatus().get(0);
+        Status status = initializeStatuses().get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -84,7 +84,7 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
     @Test
     public void testUpdateStatus() throws JsonProcessingException {
-        Status status = initializeStatus().get(0);
+        Status status = initializeStatuses().get(0);
 
         UpdateStatusRequest request = new UpdateStatusRequest(status.getId(), "Updated status", true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -128,7 +128,7 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
     //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
     @Test
     public void testDeleteStatus() {
-        List<Status> statusList = initializeStatus();
+        List<Status> statusList = initializeStatuses();
         Status status = statusList.get(2);
 
         given()
