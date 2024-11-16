@@ -30,12 +30,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/tickets
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.getAllTickets
+     * HTTP Method: GET
+     * Endpoint: /api/tickets
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve all tickets as a user without sufficient permissions.
+     */
     @Test
-    public void testGetAllTickets() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void getAllTickets_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
 
         given()
@@ -48,12 +52,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/tickets/user
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.getUserTickets
+     * HTTP Method: GET
+     * Endpoint: /api/tickets/user
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve user tickets as a user without sufficient permissions.
+     */
     @Test
-    public void testGetUserTickets() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void getUserTickets_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
 
         given()
@@ -66,12 +74,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/tickets/user/<userID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.getTicketsByUserId
+     * HTTP Method: GET
+     * Endpoint: /api/tickets/user/{userID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve tickets by user ID as a user without sufficient permissions.
+     */
     @Test
-    public void testGetTicketsByUserId() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void getTicketsByUserId_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
         long userID = 1;
 
@@ -86,12 +98,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/tickets/<ticketID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.getTicketById
+     * HTTP Method: GET
+     * Endpoint: /api/tickets/{ticketID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve a ticket by ID as a user without sufficient permissions.
+     */
     @Test
-    public void testGetTicketById() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void getTicketById_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         Long ticketID = initializeTicket(softwareID).get(2).getId();
 
         given()
@@ -105,15 +121,18 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/tickets
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.addTicket
+     * HTTP Method: POST
+     * Endpoint: /api/tickets
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to add a new ticket as a user without sufficient permissions.
+     */
     @Test
-    public void testAddTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
-        List<Ticket> ticketList = initializeTicket(softwareID);
-        Long categoryID = ticketList.get(0).getCategory().getId();
-        Long priorityID = ticketList.get(0).getPriority().getId();
+    public void addTicket_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        Long categoryID = initializeCategory("General").getId();
+        Long priorityID = initializePriority("High", 1).getId();
 
         AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -131,19 +150,21 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/tickets
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.updateTicket
+     * HTTP Method: PUT
+     * Endpoint: /api/tickets
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to update a ticket as a user without sufficient permissions.
+     */
     @Test
-    public void testUpdateTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
-        List<Ticket> ticketList = initializeTicket(softwareID);
-        Ticket ticket = ticketList.get(0);
-        Long newCategoryID = ticketList.get(2).getCategory().getId();
-        Long newPriorityID = ticketList.get(2).getPriority().getId();
-        Long newSoftwareID = ticketList.get(2).getSoftware().getId();
+    public void updateTicket_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long ticketID = initializeTicketForUser(1L).getId();
+        Long softwareID = initializeSingleSoftware("Other software name", "Software description").getId();
+        Long categoryID = initializeCategory("Question").getId();
+        Long priorityID = initializePriority("High", 1).getId();
 
-        UpdateTicketRequest request = new UpdateTicketRequest(ticket.getId(), "Updated title", "Updated description", newCategoryID, newPriorityID, "1.1", newSoftwareID);
+        UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", categoryID, priorityID, "2.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketJson = objectMapper.writeValueAsString(request);
 
@@ -159,12 +180,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/tickets/<ticketID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.deleteTicket
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/{ticketID}
+     * Expected Status: 401 Unauthorized
+     * Scenario: Attempt to delete a ticket as a user without sufficient permissions.
+     */
     @Test
-    public void testDeleteTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteTicket_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
 
@@ -179,12 +204,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/tickets/<ticketID>/image
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.addImages
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/{ticketID}/image
+     * Expected Status: 401 Unauthorized
+     * Scenario: Attempt to add an image to a ticket as a user without sufficient permissions.
+     */
     @Test
-    public void testAddImageToTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addImages_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
 
@@ -201,12 +230,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/tickets/image/<imageID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.deleteImage
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/image/{imageID}
+     * Expected Status: 401 Unauthorized
+     * Scenario: Attempt to delete an image from a ticket as a user without sufficient permissions.
+     */
     @Test
-    public void testDeleteImage() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteImage_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long imageID = ticketList.get(0).getImages().get(0).getId();
 
@@ -221,12 +254,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/tickets/reply
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.addTicketReply
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/reply
+     * Expected Status: 401 Unauthorized
+     * Scenario: Attempt to add a reply to a ticket as a user without sufficient permissions.
+     */
     @Test
-    public void testAddTicketReply() throws MessagingException, IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addTicketReply_InsufficientPermissions_ReturnsUnauthorized() throws MessagingException, IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
 
@@ -248,12 +285,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
         Mockito.verify(mailService, Mockito.times(0)).sendTicketReplyMessage(Mockito.anyString(), Mockito.anyString());
     }
 
-    //POST: /api/tickets/status
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.changeTicketStatus
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/status
+     * Expected Status: 401 Unauthorized
+     * Scenario: Attempt to change ticket status as a user without sufficient permissions.
+     */
     @Test
-    public void testChangeTicketStatus() throws MessagingException, IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void changeTicketStatus_InsufficientPermissions_ReturnsUnauthorized() throws MessagingException, IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
         long statusID = 2;
@@ -276,12 +317,16 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
         Mockito.verify(mailService, Mockito.times(0)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
     }
 
-    //DELETE: /api/tickets/reply/<replyID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Administrator doesn't have access rights to this method.
+    /**
+     * Controller method: TicketController.deleteTicketReply
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/reply/{replyID}
+     * Expected Status: 401 Unauthorized
+     * Scenario: Attempt to delete a ticket reply as a user without sufficient permissions.
+     */
     @Test
-    public void testDeleteTicketReply() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteTicketReply_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketReplyID = ticketList.get(0).getReplies().get(0).getId();
 

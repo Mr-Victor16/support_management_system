@@ -36,7 +36,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      * Verification: Confirms returned user profile data (id, username, name, surname, email).
      */
     @Test
-    public void authenticate_WithValidCredentials_ReturnsUserDetailsSuccessfully() throws JsonProcessingException {
+    public void authenticate_ValidCredentials_ReturnsUserDetailsSuccessfully() throws JsonProcessingException {
         User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
 
         LoginRequest request = new LoginRequest(user.getUsername(), "password");
@@ -67,7 +67,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      * Scenario: Attempting to authenticate with a non-existent username.
      */
     @Test
-    public void authenticate_WithNonExistentUsername_ReturnsNotFound() throws JsonProcessingException {
+    public void authenticate_NonExistentUsername_ReturnsNotFound() throws JsonProcessingException {
         LoginRequest request = new LoginRequest("noUser", "password");
         ObjectMapper objectMapper = new ObjectMapper();
         String loginJson = objectMapper.writeValueAsString(request);
@@ -91,7 +91,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      * Scenario: Attempting to authenticate with an incorrect password.
      */
     @Test
-    public void authenticate_WithIncorrectPassword_ReturnsUnauthorized() throws JsonProcessingException {
+    public void authenticate_IncorrectPassword_ReturnsUnauthorized() throws JsonProcessingException {
         User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
 
         LoginRequest request = new LoginRequest(user.getUsername(), "wrongPassword");
@@ -118,7 +118,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      * Verification: Verifies an increment in the user count in the repository.
      */
     @Test
-    public void registerUser_WithUniqueData_ReturnsSuccess() throws JsonProcessingException {
+    public void registerUser_UniqueData_ReturnsSuccess() throws JsonProcessingException {
         RegisterRequest request = new RegisterRequest("newUser", "password", "newUserEmail@email.com", "Name", "Surname");
         ObjectMapper objectMapper = new ObjectMapper();
         String registerJson = objectMapper.writeValueAsString(request);
@@ -147,7 +147,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      * Verification: Verifies no change in the user count in the repository.
      */
     @Test
-    public void registerUser_WithDuplicateUsername_ReturnsConflict() throws JsonProcessingException {
+    public void registerUser_DuplicateUsername_ReturnsConflict() throws JsonProcessingException {
         User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
 
         RegisterRequest request = new RegisterRequest(user.getUsername(), "password", "newUserEmail@email.com", "Name", "Surname");
@@ -178,7 +178,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      * Verification: Verifies no change in the user count in the repository.
      */
     @Test
-    public void registerUser_WithDuplicateEmail_ReturnsConflict() throws JsonProcessingException {
+    public void registerUser_DuplicateEmail_ReturnsConflict() throws JsonProcessingException {
         User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
 
         RegisterRequest request = new RegisterRequest("newUser", "password", user.getEmail(), "Name", "Surname");

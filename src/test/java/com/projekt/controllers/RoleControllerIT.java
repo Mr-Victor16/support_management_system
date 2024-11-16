@@ -26,7 +26,7 @@ public class RoleControllerIT extends BaseIntegrationTest {
      * Scenario: Attempting to access roles list as a user without sufficient permissions (as USER).
      */
     @Test
-    public void getAllRoles_WithUserRole_ReturnsUnauthorized() throws JsonProcessingException {
+    public void getAllRoles_UserRole_ReturnsUnauthorized() throws JsonProcessingException {
         String jwtToken = getJwtToken("user", "user");
 
         given()
@@ -48,7 +48,7 @@ public class RoleControllerIT extends BaseIntegrationTest {
      * Verification: Verifies the returned list size matches the number of roles in the repository.
      */
     @Test
-    public void getAllRoles_WithOperatorRole_ReturnsRolesListSuccessfully() throws JsonProcessingException {
+    public void getAllRoles_OperatorRole_ReturnsRolesListSuccessfully() throws JsonProcessingException {
         String jwtToken = getJwtToken("operator", "operator");
         List<Role> roleList = roleRepository.findAll();
 
@@ -72,7 +72,7 @@ public class RoleControllerIT extends BaseIntegrationTest {
      * Verification: Verifies the returned list size matches the number of roles in the repository.
      */
     @Test
-    public void getAllRoles_WithAdminRole_ReturnsRolesListSuccessfully() throws JsonProcessingException {
+    public void getAllRoles_AdminRole_ReturnsRolesListSuccessfully() throws JsonProcessingException {
         String jwtToken = getJwtToken("admin", "admin");
         List<Role> roleList = roleRepository.findAll();
 

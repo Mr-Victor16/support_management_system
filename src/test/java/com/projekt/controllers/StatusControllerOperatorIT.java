@@ -35,11 +35,16 @@ public class StatusControllerOperatorIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/statuses
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: StatusController.getAllStatuses
+     * HTTP Method: GET
+     * Endpoint: /api/statuses
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all statuses.
+     * Verification: Confirms the returned list size matches the expected status count in the repository.
+     */
     @Test
-    public void testGetAllStatuses() {
+    public void getAllStatuses_ReturnsStatusListSuccessfully() {
         List<Status> statusList = initializeStatuses();
 
         given()
@@ -53,11 +58,16 @@ public class StatusControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/statuses/use
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: StatusController.getAllStatusesWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/statuses/use
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all statuses with associated usage numbers.
+     * Verification: Confirms the correct usage count for each status.
+     */
     @Test
-    public void testGetAllStatusesWithUseNumbers() throws IOException {
+    public void getAllStatusesWithUseNumbers_ReturnsStatusUsageCountListSuccessfully() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         initializeTicket(softwareID);
 
@@ -74,15 +84,19 @@ public class StatusControllerOperatorIT extends BaseIntegrationTest {
 
         List<StatusResponse> statusList = response.jsonPath().getList(".", StatusResponse.class);
 
-        assertEquals(statusList.get(0).useNumber(), 2);
+        assertEquals(2, statusList.get(0).useNumber());
     }
 
-    //GET: /api/statuses/<statusID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.getStatusById
+     * HTTP Method: GET
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve a status by ID as a user without sufficient permissions.
+     */
     @Test
-    public void testGetStatusById() {
-        Status status = initializeStatuses().get(0);
+    public void getStatusById_InsufficientPermissions_ReturnsUnauthorized() {
+        Status status = initializeStatus("Closed", true, true);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -95,12 +109,16 @@ public class StatusControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/statuses
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.updateStatus
+     * HTTP Method: PUT
+     * Endpoint: /api/statuses
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to update a status as a user without sufficient permissions.
+     */
     @Test
-    public void testUpdateStatus() throws JsonProcessingException {
-        Status status = initializeStatuses().get(0);
+    public void updateStatus_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
+        Status status = initializeStatus("Pending", false, false);
 
         UpdateStatusRequest request = new UpdateStatusRequest(status.getId(), "Updated status", true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -118,11 +136,15 @@ public class StatusControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/statuses
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.addStatus
+     * HTTP Method: POST
+     * Endpoint: /api/statuses
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to add a status as a user without sufficient permissions.
+     */
     @Test
-    public void testAddStatus() throws JsonProcessingException {
+    public void addStatus_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         AddStatusRequest request = new AddStatusRequest("New status", true, true);
         ObjectMapper objectMapper = new ObjectMapper();
         String addStatusJson = objectMapper.writeValueAsString(request);
@@ -139,13 +161,16 @@ public class StatusControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/statuses/<statusID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.deleteStatus
+     * HTTP Method: DELETE
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to delete a status as a user without sufficient permissions.
+     */
     @Test
-    public void testDeleteStatus() {
-        List<Status> statusList = initializeStatuses();
-        Status status = statusList.get(2);
+    public void deleteStatus_InsufficientPermissions_ReturnsUnauthorized() {
+        Status status = initializeStatus("Closed", true, false);
 
         given()
                 .auth().oauth2(jwtToken)

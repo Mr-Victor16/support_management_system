@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
-import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -26,11 +25,15 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/statuses
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.getAllStatuses
+     * HTTP Method: GET
+     * Endpoint: /api/statuses
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Verifying that the user role cannot access the statuses list.
+     */
     @Test
-    public void testGetAllStatuses() {
+    public void getAllStatuses_InsufficientPermissions_ReturnsUnauthorized() {
         initializeStatuses();
 
         given()
@@ -43,11 +46,15 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/statuses/use
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.getAllStatusesWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/statuses/use
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Verifying that the user role cannot access the statuses use numbers.
+     */
     @Test
-    public void testGetAllStatusesWithUseNumbers() throws IOException {
+    public void getAllStatusesWithUseNumbers_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         initializeTicket(softwareID);
 
@@ -61,12 +68,16 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/statuses/<statusID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.getStatusById
+     * HTTP Method: GET
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve a status by ID as a user without sufficient permissions
+     */
     @Test
-    public void testGetStatusById() {
-        Status status = initializeStatuses().get(0);
+    public void getStatusById_InsufficientPermissions_ReturnsUnauthorized() {
+        Status status = initializeStatus("Closed", true, true);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -79,12 +90,16 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/statuses
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.updateStatus
+     * HTTP Method: PUT
+     * Endpoint: /api/statuses
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to update a status as a user without sufficient permissions.
+     */
     @Test
-    public void testUpdateStatus() throws JsonProcessingException {
-        Status status = initializeStatuses().get(0);
+    public void updateStatus_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
+        Status status = initializeStatus("Closed", false, false);
 
         UpdateStatusRequest request = new UpdateStatusRequest(status.getId(), "Updated status", true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -102,11 +117,15 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/statuses
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.addStatus
+     * HTTP Method: POST
+     * Endpoint: /api/statuses
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to add a status as a user without sufficient permissions.
+     */
     @Test
-    public void testAddStatus() throws JsonProcessingException {
+    public void addStatus_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         AddStatusRequest request = new AddStatusRequest("New status", true, true);
         ObjectMapper objectMapper = new ObjectMapper();
         String addStatusJson = objectMapper.writeValueAsString(request);
@@ -123,13 +142,16 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/statuses/<statusID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: StatusController.deleteStatus
+     * HTTP Method: DELETE
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to delete a status as a user without sufficient permissions.
+     */
     @Test
-    public void testDeleteStatus() {
-        List<Status> statusList = initializeStatuses();
-        Status status = statusList.get(2);
+    public void deleteStatus_InsufficientPermissions_ReturnsUnauthorized() {
+        Status status = initializeStatus("Closed", true, false);
 
         given()
                 .auth().oauth2(jwtToken)

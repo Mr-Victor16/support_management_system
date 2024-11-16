@@ -8,6 +8,8 @@ import com.projekt.payload.request.add.AddTicketReplyRequest;
 import com.projekt.payload.request.add.AddTicketRequest;
 import com.projekt.payload.request.update.UpdateTicketRequest;
 import com.projekt.payload.request.update.UpdateTicketStatusRequest;
+import com.projekt.repositories.ImageRepository;
+import com.projekt.repositories.TicketReplyRepository;
 import com.projekt.repositories.TicketRepository;
 import io.restassured.http.ContentType;
 import jakarta.mail.MessagingException;
@@ -29,18 +31,29 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
     @Autowired
     private TicketRepository ticketRepository;
 
+    @Autowired
+    private TicketReplyRepository ticketReplyRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
     @BeforeEach
     public void setUpTestData() throws JsonProcessingException {
         jwtToken = getJwtToken("operator", "operator");
         clearDatabase();
     }
 
-    //GET: /api/tickets
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: TicketController.getAllTickets
+     * HTTP Method: GET
+     * Endpoint: /api/tickets
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all tickets.
+     * Verification: Confirms the returned list size matches the expected ticket count in the repository.
+     */
     @Test
-    public void testGetAllTickets() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void getAllTickets_ReturnsTicketListSuccessfully() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
 
         given()
@@ -54,12 +67,17 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/tickets/user
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: TicketController.getUserTickets
+     * HTTP Method: GET
+     * Endpoint: /api/tickets/user
+     * Expected Status: 200 OK
+     * Scenario: Retrieving tickets for the authenticated user.
+     * Verification: Confirms the returned list size matches the number of tickets initialized for the user.
+     */
     @Test
-    public void testGetUserTickets() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void getUserTickets_ReturnsUserTicketsSuccessfully() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
 
         given()
@@ -73,12 +91,17 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/tickets/user/<userID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status and expected number of items when the user ID is correct.
+    /**
+     * Controller method: TicketController.getTicketsByUserId
+     * HTTP Method: GET
+     * Endpoint: /api/tickets/user/{userID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieving tickets by a valid user ID.
+     * Verification: Confirms the returned list size matches the expected ticket count for the given user ID.
+     */
     @Test
-    public void testGetTicketsByUserId() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void getTicketsByUserId_ValidId_ReturnsTicketsSuccessfully() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
         long userID = 1;
 
@@ -94,11 +117,15 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/tickets/user/<userID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the user ID is incorrect.
+    /**
+     * Controller method: TicketController.getTicketsByUserId
+     * HTTP Method: GET
+     * Endpoint: /api/tickets/user/{userID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Retrieving tickets with an invalid user ID.
+     */
     @Test
-    public void testGetTicketsByUserIdWhenIdIsWrong() {
+    public void getTicketsByUserId_InvalidId_ReturnsNotFound() {
         long userID = 1000;
 
         given()
@@ -112,12 +139,17 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/tickets/<ticketID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the ticket ID is correct.
+    /**
+     * Controller method: TicketController.getTicketById
+     * HTTP Method: GET
+     * Endpoint: /api/tickets/{ticketID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieving a ticket by valid ID.
+     * Verification: Confirms the response contains the ticket details matching the provided ticket ID.
+     */
     @Test
-    public void testGetTicketById() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void getTicketById_ValidId_ReturnsTicketDetailsSuccessfully() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Ticket ticket = ticketList.get(0);
 
@@ -135,11 +167,15 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/tickets/<ticketID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the ticket ID is incorrect.
+    /**
+     * Controller method: TicketController.getTicketById
+     * HTTP Method: GET
+     * Endpoint: /api/tickets/{ticketID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Retrieving a ticket using an invalid ticket ID.
+     */
     @Test
-    public void testGetTicketByIdWhenIdIsWrong() {
+    public void getTicketById_InvalidId_ReturnsNotFound() {
         long ticketID = 1000;
 
         given()
@@ -153,15 +189,22 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/tickets
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: TicketController.addTicket
+     * HTTP Method: POST
+     * Endpoint: /api/tickets
+     * Expected Status: 200 OK
+     * Scenario: Adding a ticket with valid data.
+     * Verification: Confirms that the ticket count in the repository has increased.
+     */
     @Test
-    public void testAddTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
-        List<Ticket> ticketList = initializeTicket(softwareID);
-        Long categoryID = ticketList.get(0).getCategory().getId();
-        Long priorityID = ticketList.get(0).getPriority().getId();
+    public void addTicket_ValidData_ReturnsSuccess() throws IOException {
+        initializeStatus("Default", false, true);
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        Long categoryID = initializeCategory("General").getId();
+        Long priorityID = initializePriority("High", 1).getId();
+
+        long ticketCount = ticketRepository.count();
 
         AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -178,18 +221,21 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .body(equalTo("Ticket added"))
                 .log().all();
 
-        assertEquals(ticketRepository.count(), ticketList.size()+1);
+        assertEquals(ticketRepository.count(), ticketCount+1);
     }
 
-    //POST: /api/tickets
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the category ID is incorrect.
+    /**
+     * Controller method: TicketController.addTicket
+     * HTTP Method: POST
+     * Endpoint: /api/tickets
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Adding a ticket with an invalid category ID.
+     */
     @Test
-    public void testAddTicketWhenCategoryIdIsWrong() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
-        List<Ticket> ticketList = initializeTicket(softwareID);
+    public void addTicket_InvalidCategoryId_ReturnsNotFound() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        Long priorityID = initializePriority("High", 1).getId();
         long categoryID = 1000;
-        Long priorityID = ticketList.get(0).getPriority().getId();
 
         AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -207,14 +253,17 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/tickets
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the priority ID is incorrect.
+    /**
+     * Controller method: TicketController.addTicket
+     * HTTP Method: POST
+     * Endpoint: /api/tickets
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Adding a ticket with an invalid priority ID.
+     */
     @Test
-    public void testAddTicketWhenPriorityIdIsWrong() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
-        List<Ticket> ticketList = initializeTicket(softwareID);
-        Long categoryID = ticketList.get(0).getCategory().getId();
+    public void addTicket_InvalidPriorityId_ReturnsNotFound() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        Long categoryID = initializeCategory("General").getId();
         long priorityID = 1000;
 
         AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
@@ -233,18 +282,21 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/tickets
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the software ID is incorrect.
+    /**
+     * Controller method: TicketController.addTicket
+     * HTTP Method: POST
+     * Endpoint: /api/tickets
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Adding a ticket with an invalid software ID.
+     */
     @Test
-    public void testAddTicketWhenSoftwareIdIsWrong() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
-        List<Ticket> ticketList = initializeTicket(softwareID);
-        Long categoryID = ticketList.get(0).getCategory().getId();
-        Long priorityID = ticketList.get(0).getPriority().getId();
-        long addTicketRequestSoftwareID = 1000;
+    public void addTicket_InvalidSoftwareId_ReturnsNotFound() throws IOException {
+        initializeStatus("Default", false, true);
+        Long categoryID = initializeCategory("General").getId();
+        Long priorityID = initializePriority("High", 1).getId();
+        long softwareID = 1000;
 
-        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", addTicketRequestSoftwareID);
+        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String newTicketJson = objectMapper.writeValueAsString(request);
 
@@ -260,19 +312,21 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/tickets
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: TicketController.updateTicket
+     * HTTP Method: PUT
+     * Endpoint: /api/tickets
+     * Expected Status: 200 OK
+     * Scenario: Updating a ticket with valid data.
+     */
     @Test
-    public void testUpdateTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
-        List<Ticket> ticketList = initializeTicket(softwareID);
-        Ticket ticket = ticketList.get(0);
-        Long newCategoryID = ticketList.get(2).getCategory().getId();
-        Long newPriorityID = ticketList.get(2).getPriority().getId();
-        Long newSoftwareID = ticketList.get(2).getSoftware().getId();
+    public void updateTicket_ValidData_ReturnsSuccess() throws IOException {
+        Long ticketID = initializeTicketForUser(1L).getId();
+        Long softwareID = initializeSingleSoftware("Other software name", "Software description").getId();
+        Long categoryID = initializeCategory("Question").getId();
+        Long priorityID = initializePriority("High", 1).getId();
 
-        UpdateTicketRequest request = new UpdateTicketRequest(ticket.getId(), "Updated title", "Updated description", newCategoryID, newPriorityID, "1.1", newSoftwareID);
+        UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", categoryID, priorityID, "2.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String updateTicketJson = objectMapper.writeValueAsString(request);
 
@@ -288,11 +342,15 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/tickets
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the category ID is incorrect.
+    /**
+     * Controller method: TicketController.updateTicket
+     * HTTP Method: PUT
+     * Endpoint: /api/tickets
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Updating a ticket with an invalid category ID.
+     */
     @Test
-    public void testUpdateTicketWhenCategoryIdIsWrong() throws IOException {
+    public void updateTicket_InvalidCategoryId_ReturnsNotFound() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Ticket ticket = ticketList.get(0);
@@ -316,11 +374,15 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/tickets
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the priority ID is incorrect.
+    /**
+     * Controller method: TicketController.updateTicket
+     * HTTP Method: PUT
+     * Endpoint: /api/tickets
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Updating a ticket with an invalid priority ID.
+     */
     @Test
-    public void testUpdateTicketWhenPriorityIdIsWrong() throws IOException {
+    public void updateTicket_InvalidPriorityId_ReturnsNotFound() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Ticket ticket = ticketList.get(0);
@@ -344,11 +406,15 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/tickets
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the software ID is incorrect.
+    /**
+     * Controller method: TicketController.updateTicket
+     * HTTP Method: PUT
+     * Endpoint: /api/tickets
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Updating a ticket with an invalid software ID.
+     */
     @Test
-    public void testUpdateTicketWhenSoftwareIdIsWrong() throws IOException {
+    public void updateTicket_InvalidSoftwareId_ReturnsNotFound() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Ticket ticket = ticketList.get(0);
@@ -372,11 +438,15 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/tickets
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the ticket ID is incorrect.
+    /**
+     * Controller method: TicketController.updateTicket
+     * HTTP Method: PUT
+     * Endpoint: /api/tickets
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Updating a ticket with an invalid ticket ID.
+     */
     @Test
-    public void testUpdateTicketWhenIdIsWrong() throws IOException {
+    public void updateTicket_InvalidTicketId_ReturnsNotFound() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         long ticketID = 1000;
@@ -400,12 +470,17 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/tickets/<ticketID>
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: TicketController.deleteTicket
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/{ticketID}
+     * Expected Status: 200 OK
+     * Scenario: Deleting a ticket with a valid ticket ID.
+     * Verification: Confirms the repository count decreases.
+     */
     @Test
-    public void testDeleteTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteTicket_ValidTicketId_ReturnsSuccess() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
 
@@ -422,12 +497,16 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
         assertEquals(ticketRepository.count(), ticketList.size()-1);
     }
 
-    //DELETE: /api/tickets/<ticketID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the ticket ID is incorrect.
+    /**
+     * Controller method: TicketController.deleteTicket
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/{ticketID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to delete a ticket with an invalid ticket ID.
+     */
     @Test
-    public void testDeleteTicketWhenIdIsWrong() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteTicket_InvalidTicketId_ReturnsNotFound() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
         long ticketID = 1000;
 
@@ -442,14 +521,21 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/tickets/<ticketID>/image
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: TicketController.addImages
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/{ticketID}/image
+     * Expected Status: 200 OK
+     * Scenario: Adding an image to a ticket with a valid ticket ID and image file.
+     * Verification: Confirms the repository count increases.
+     */
     @Test
-    public void testAddImageToTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addImages_ValidTicketId_ReturnsSuccess() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
+
+        long imageNumber = imageRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -462,14 +548,20 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Image added"))
                 .log().all();
+
+        assertEquals(imageRepository.count(), imageNumber+1);
     }
 
-    //POST: /api/tickets/<ticketID>/image
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the ticket ID is incorrect.
+    /**
+     * Controller method: TicketController.addImages
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/{ticketID}/image
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Adding an image to a ticket with an invalid ticket ID.
+     */
     @Test
-    public void testAddImageToTicketWhenTicketIdIsWrong() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addImages_InvalidTicketId_ReturnsNotFound() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
         long ticketID = 1000;
 
@@ -486,14 +578,21 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/tickets/image/<imageID>
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: TicketController.deleteImage
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/image/{imageID}
+     * Expected Status: 200 OK
+     * Scenario: Deleting an image with a valid image ID.
+     * Verification: Confirms the repository count decreases.
+     */
     @Test
-    public void testDeleteImage() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteImage_ValidImageId_ReturnsSuccess() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long imageID = ticketList.get(0).getImages().get(0).getId();
+
+        long imageNumber = imageRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -504,14 +603,20 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Image removed"))
                 .log().all();
+
+        assertEquals(imageRepository.count(), imageNumber-1);
     }
 
-    //DELETE: /api/tickets/image/<imageID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the image ID is incorrect.
+    /**
+     * Controller method: TicketController.deleteImage
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/image/{imageID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Deleting an image with an invalid image ID.
+     */
     @Test
-    public void testDeleteImageWhenIdIsWrong() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteImage_InvalidImageId_ReturnsNotFound() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
         long imageID = 1000;
 
@@ -526,14 +631,21 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/tickets/reply
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: TicketController.addTicketReply
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/reply
+     * Expected Status: 200 OK
+     * Scenario: Adding a reply to a ticket with a valid ticket ID and reply content.
+     * Verification: Confirms the ticket repository count increases.
+     */
     @Test
-    public void testAddTicketReply() throws MessagingException, IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addTicketReply_ValidTicketId_ReturnsSuccess() throws MessagingException, IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
+
+        long replyNumber = ticketReplyRepository.count();
 
         AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, "Reply content");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -551,14 +663,19 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
 
         Mockito.verify(mailService, Mockito.times(1)).sendTicketReplyMessage(Mockito.anyString(), Mockito.anyString());
+        assertEquals(ticketReplyRepository.count(), replyNumber+1);
     }
 
-    //POST: /api/tickets/reply
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the ticket ID is incorrect.
+    /**
+     * Controller method: TicketController.addTicketReply
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/reply
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Adding a reply to a ticket with an invalid ticket ID.
+     */
     @Test
-    public void testAddTicketReplyWhenTicketIdIsWrong() throws MessagingException, IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addTicketReply_InvalidTicketId_ReturnsNotFound() throws MessagingException, IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
         long ticketID = 1000;
 
@@ -580,12 +697,16 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
         Mockito.verify(mailService, Mockito.times(0)).sendTicketReplyMessage(Mockito.anyString(), Mockito.anyString());
     }
 
-    //POST: /api/tickets/status
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: TicketController.changeTicketStatus
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/status
+     * Expected Status: 200 OK
+     * Scenario: Changing the status of a ticket with valid data.
+     */
     @Test
-    public void testChangeTicketStatus() throws MessagingException, IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void changeTicketStatus_ValidData_ReturnsSuccess() throws MessagingException, IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
         long statusID = ticketList.get(2).getStatus().getId();
@@ -608,12 +729,16 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
         Mockito.verify(mailService, Mockito.times(1)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
     }
 
-    //POST: /api/tickets/status
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the ticket ID is incorrect.
+    /**
+     * Controller method: TicketController.changeTicketStatus
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/status
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Changing the status of a ticket with an invalid ticket ID.
+     */
     @Test
-    public void testChangeTicketStatusWhenTicketIdIsWrong() throws MessagingException, IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void changeTicketStatus_InvalidTicketId_ReturnsNotFound() throws MessagingException, IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         long ticketID = 1000;
         long statusID = ticketList.get(0).getStatus().getId();
@@ -636,12 +761,16 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
         Mockito.verify(mailService, Mockito.times(0)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
     }
 
-    //POST: /api/tickets/status
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the status ID is incorrect.
+    /**
+     * Controller method: TicketController.changeTicketStatus
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/status
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Changing the status of a ticket with an invalid status ID.
+     */
     @Test
-    public void testChangeTicketStatusWhenStatusIdIsWrong() throws MessagingException, IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void changeTicketStatus_InvalidStatusId_ReturnsNotFound() throws MessagingException, IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
         long statusID = 1000;
@@ -664,12 +793,16 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
         Mockito.verify(mailService, Mockito.times(0)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
     }
 
-    //POST: /api/tickets/status
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned in case of a change to the current status
+    /**
+     * Controller method: TicketController.changeTicketStatus
+     * HTTP Method: POST
+     * Endpoint: /api/tickets/status
+     * Expected Status: 200 OK
+     * Scenario: Changing the status of a ticket to its current status.
+     */
     @Test
-    public void testChangeTicketStatusToCurrentStatus() throws MessagingException, IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void changeTicketStatus_NewStatusIsSameCurrentStatus_ReturnsSuccess() throws MessagingException, IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketID = ticketList.get(0).getId();
         long statusID = ticketList.get(0).getStatus().getId();
@@ -692,14 +825,21 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
         Mockito.verify(mailService, Mockito.times(0)).sendChangeStatusMessage(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString());
     }
 
-    //DELETE: /api/tickets/reply/<replyID>
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: TicketController.deleteTicketReply
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/reply/{replyID}
+     * Expected Status: 200 OK
+     * Scenario: Deleting a ticket reply with a valid reply ID.
+     * Verification: Confirms the reply repository count decreases.
+     */
     @Test
-    public void testDeleteTicketReply() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteTicketReply_ValidReplyId_ReturnsSuccess() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long ticketReplyID = ticketList.get(0).getReplies().get(0).getId();
+
+        long replyNumber = ticketReplyRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -710,14 +850,20 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Ticket reply removed"))
                 .log().all();
+
+        assertEquals(ticketReplyRepository.count(), replyNumber-1);
     }
 
-    //DELETE: /api/tickets/reply/<replyID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the ticket reply ID is incorrect.
+    /**
+     * Controller method: TicketController.deleteTicketReply
+     * HTTP Method: DELETE
+     * Endpoint: /api/tickets/reply/{replyID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Deleting a ticket reply with an invalid reply ID.
+     */
     @Test
-    public void testDeleteTicketReplyWhenIdIsWrong() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteTicketReply_InvalidReplyId_ReturnsNotFound() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
         long ticketReplyID = 1000;
 

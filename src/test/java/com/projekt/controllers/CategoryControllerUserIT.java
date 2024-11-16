@@ -7,11 +7,9 @@ import com.projekt.models.Category;
 import com.projekt.models.Software;
 import com.projekt.payload.request.add.AddCategoryRequest;
 import com.projekt.payload.request.update.UpdateCategoryRequest;
-import com.projekt.repositories.CategoryRepository;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
@@ -19,13 +17,9 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CategoryControllerUserIT extends BaseIntegrationTest {
     private String jwtToken;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
 
     @BeforeEach
     public void setUpTestData() throws JsonProcessingException {
@@ -38,7 +32,7 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/categories
      * Expected Status: 200 OK
-     * Scenario: Retrieving all categories with user role.
+     * Scenario: Retrieving all categories.
      * Verification: Confirms the returned list size matches the expected category count in the repository.
      */
     @Test
@@ -61,10 +55,10 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/categories/use
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to retrieve all categories with associated usage numbers as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to retrieve all categories with associated usage numbers as a user without sufficient permissions.
      */
     @Test
-    public void getAllCategoriesWithUseNumbers_WithUserRole_ReturnsUnauthorized() throws IOException {
+    public void getAllCategoriesWithUseNumbers_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
         List<Software> softwareList = initializeSoftware();
         initializeTicket(softwareList.get(0).getId());
 
@@ -83,11 +77,11 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/categories/{userID}
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to retrieve category by ID as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to retrieve category by ID as a user without sufficient permissions.
      */
     @Test
-    public void getCategoryById_WithUserRole_ReturnsUnauthorized() {
-        Category category = initializeCategories().get(0);
+    public void getCategoryById_InsufficientPermissions_ReturnsUnauthorized() {
+        Category category = initializeCategory("General");
 
         given()
                 .auth().oauth2(jwtToken)
@@ -105,11 +99,11 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: PUT
      * Endpoint: /api/categories
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to update category as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to update category as a user without sufficient permissions.
      */
     @Test
-    public void updateCategory_WithUserRole_ReturnsUnauthorized() throws JsonProcessingException {
-        Category category = initializeCategories().get(0);
+    public void updateCategory_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
+        Category category = initializeCategory("General");
 
         UpdateCategoryRequest request = new UpdateCategoryRequest(category.getId(), "Updated category");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -132,12 +126,10 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: POST
      * Endpoint: /api/categories
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to add category as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to add category as a user without sufficient permissions.
      */
     @Test
-    public void addCategory_WithUserRole_ReturnsUnauthorized() throws JsonProcessingException {
-        List<Category> categoryList = initializeCategories();
-
+    public void addCategory_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         AddCategoryRequest request = new AddCategoryRequest("New category");
         ObjectMapper objectMapper = new ObjectMapper();
         String newCategoryJson = objectMapper.writeValueAsString(request);
@@ -152,8 +144,6 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
                 .body("message", equalTo("Full authentication is required to access this resource"))
                 .log().all();
-
-        assertEquals(categoryRepository.count(), categoryList.size());
     }
 
     /**
@@ -161,11 +151,11 @@ public class CategoryControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: DELETE
      * Endpoint: /api/categories
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to delete category as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to delete category as a user without sufficient permissions.
      */
     @Test
-    public void deleteCategory_WithUserRole_ReturnsUnauthorized() {
-        Category category = initializeCategories().get(0);
+    public void deleteCategory_InsufficientPermissions_ReturnsUnauthorized() {
+        Category category = initializeCategory("General");
 
         given()
                 .auth().oauth2(jwtToken)

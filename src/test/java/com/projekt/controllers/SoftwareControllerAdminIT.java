@@ -28,20 +28,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SoftwareControllerAdminIT extends BaseIntegrationTest {
     private static String jwtToken;
 
+    @Autowired
+    private SoftwareRepository softwareRepository;
+
     @BeforeEach
     public void setUpTestData() throws JsonProcessingException {
         jwtToken = getJwtToken("admin", "admin");
         clearDatabase();
     }
 
-    @Autowired
-    private SoftwareRepository softwareRepository;
-
-    //GET: /api/software
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: SoftwareController.getAllSoftware
+     * HTTP Method: GET
+     * Endpoint: /api/software
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all software with admin role.
+     * Verification: Confirms the returned list size matches the expected software count in the repository.
+     */
     @Test
-    public void testGetAllSoftware() {
+    public void getAllSoftware_ReturnsSoftwareListSuccessfully() {
         List<Software> softwareList = initializeSoftware();
 
         given()
@@ -55,11 +60,16 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/software/use
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: SoftwareController.getAllSoftwareWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/software/use
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all software with use numbers.
+     * Verification: Confirms use numbers for tickets and knowledge base are correctly returned.
+     */
     @Test
-    public void testGetAllSoftwareWithUseNumbers() throws IOException {
+    public void getAllSoftwareWithUseNumbers_ReturnsSoftwareUsageCountListSuccessfully() throws IOException {
         List<Software> softwareList = initializeSoftware();
         List<Knowledge> knowledgeList = initializeKnowledge(softwareList.get(0).getId());
         List<Ticket> ticketList = initializeTicket(softwareList.get(0).getId());
@@ -79,15 +89,20 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
 
         assertEquals(responseList.get(0).useNumberTicket(), ticketList.size());
         assertEquals(responseList.get(0).useNumberKnowledge(), knowledgeList.size());
-        assertEquals(responseList.get(1).useNumberTicket(), 0);
-        assertEquals(responseList.get(1).useNumberKnowledge(), 0);
+        assertEquals(0, responseList.get(1).useNumberTicket());
+        assertEquals(0, responseList.get(1).useNumberKnowledge());
     }
 
-    //GET: /api/software/<softwareID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the software ID is correct.
+    /**
+     * Controller method: SoftwareController.getSoftwareById
+     * HTTP Method: GET
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieving a software by ID with admin role.
+     * Verification: Confirms that the software details returned match the expected values.
+     */
     @Test
-    public void testGetSoftwareById() {
+    public void getSoftwareById_ReturnsSoftwareSuccessfully() {
         Software software = initializeSoftware().get(0);
 
         given()
@@ -104,11 +119,15 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/software/<softwareID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the software ID is incorrect.
+    /**
+     * Controller method: SoftwareController.getSoftwareById
+     * HTTP Method: GET
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Retrieving a software by incorrect ID with admin role.
+     */
     @Test
-    public void testGetSoftwareByIdWhenIdIsWrong() {
+    public void getSoftwareById_InvalidId_ReturnsNotFound() {
         long softwareID = 1000;
 
         given()
@@ -122,11 +141,15 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/software
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: SoftwareController.updateSoftware
+     * HTTP Method: PUT
+     * Endpoint: /api/software
+     * Expected Status: 200 OK
+     * Scenario: Updating software details with valid data.
+     */
     @Test
-    public void testUpdateSoftware() throws JsonProcessingException {
+    public void updateSoftware_ValidData_ReturnsSuccess() throws JsonProcessingException {
         Software software = initializeSoftware().get(0);
 
         UpdateSoftwareRequest request = new UpdateSoftwareRequest(software.getId(), "Updated title", "Updated description");
@@ -145,11 +168,15 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/software
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: SoftwareController.updateSoftware
+     * HTTP Method: PUT
+     * Endpoint: /api/software
+     * Expected Status: 409 CONFLICT
+     * Scenario: Updating software with an already used name.
+     */
     @Test
-    public void testUpdateSoftwareWhenNewNameIsAlreadyUsed() throws JsonProcessingException {
+    public void updateSoftware_NameAlreadyExists_ReturnsConflict() throws JsonProcessingException {
         List<Software> softwareList = initializeSoftware();
         Software software1 = softwareList.get(0);
         Software software2 = softwareList.get(1);
@@ -170,11 +197,15 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/software
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status if the new software name is the same as the current name.
+    /**
+     * Controller method: SoftwareController.updateSoftware
+     * HTTP Method: PUT
+     * Endpoint: /api/software
+     * Expected Status: 200 OK
+     * Scenario: Updating software with the same name.
+     */
     @Test
-    public void testUpdateSoftwareWhenNewNameIsSameAsCurrent() throws JsonProcessingException {
+    public void updateSoftware_NewNameIsSameAsCurrent_ReturnsSuccess() throws JsonProcessingException {
         Software software = initializeSoftware().get(0);
 
         UpdateSoftwareRequest request = new UpdateSoftwareRequest(software.getId(), software.getName(), "Updated description");
@@ -193,11 +224,16 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/software
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: SoftwareController.addSoftware
+     * HTTP Method: POST
+     * Endpoint: /api/software
+     * Expected Status: 200 OK
+     * Scenario: Adding a new software with valid data.
+     * Verification: Confirms the software count increases.
+     */
     @Test
-    public void testAddSoftware() throws JsonProcessingException {
+    public void addSoftware_ValidData_ReturnsSuccess() throws JsonProcessingException {
         List<Software> softwareList = initializeSoftware();
 
         AddSoftwareRequest request = new AddSoftwareRequest("New software", "New software description");
@@ -218,16 +254,23 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
         assertEquals(softwareRepository.count(), softwareList.size()+1);
     }
 
-    //POST: /api/software
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the status returned if software with the given name already exists.
+    /**
+     * Controller method: SoftwareController.addSoftware
+     * HTTP Method: POST
+     * Endpoint: /api/software
+     * Expected Status: 409 CONFLICT
+     * Scenario: Trying to add software with an already existing name.
+     * Verification: Confirms the software count remains unchanged.
+     */
     @Test
-    public void testAddSoftwareWhenNameAlreadyExists() throws JsonProcessingException {
+    public void addSoftware_NameAlreadyExists_ReturnsConflict() throws JsonProcessingException {
         Software software = initializeSoftware().get(0);
 
         AddSoftwareRequest request = new AddSoftwareRequest(software.getName(), "New software description");
         ObjectMapper objectMapper = new ObjectMapper();
         String newSoftwareJson = objectMapper.writeValueAsString(request);
+
+        long softwareNumber = softwareRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -239,13 +282,20 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("Software with name '" + request.name() + "' already exists."))
                 .log().all();
+
+        assertEquals(softwareRepository.count(), softwareNumber);
     }
 
-    //DELETE: /api/software/<softwareID>
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: SoftwareController.deleteSoftware
+     * HTTP Method: DELETE
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 200 OK
+     * Scenario: Deleting a software with a valid ID.
+     * Verification: Confirms the software count decreases.
+     */
     @Test
-    public void testDeleteSoftware() {
+    public void deleteSoftware_NoAssignedTicketAndKnowledge_ReturnsSuccess() {
         List<Software> softwareList = initializeSoftware();
         Software software = softwareList.get(0);
 
@@ -262,11 +312,15 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
         assertEquals(softwareRepository.count(), softwareList.size()-1);
     }
 
-    //DELETE: /api/software/<softwareID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the software ID is incorrect.
+    /**
+     * Controller method: SoftwareController.deleteSoftware
+     * HTTP Method: DELETE
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Trying to delete a software with an incorrect ID.
+     */
     @Test
-    public void testDeleteSoftwareWhenIdIsWrong() {
+    public void deleteSoftware_InvalidId_ReturnsNotFound() {
         long softwareID = 1000;
 
         given()
@@ -280,14 +334,21 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/software/<softwareID>
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the returned status if software is assigned to the ticket.
+    /**
+     * Controller method: SoftwareController.deleteSoftware
+     * HTTP Method: DELETE
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 409 CONFLICT
+     * Scenario: Trying to delete software that is assigned to a ticket.
+     * Verification: Confirms the status count remains unchanged.
+     */
     @Test
-    public void testDeleteSoftwareWhenIsAssignedToTicket() throws IOException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteSoftware_AssignedToTicket_ReturnsConflict() throws IOException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
 
+        long softwareNumber = softwareRepository.count();
+
         given()
                 .auth().oauth2(jwtToken)
                 .pathParam("softwareID", softwareID)
@@ -297,15 +358,24 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("You cannot remove a software if it has a ticket or knowledge assigned to it"))
                 .log().all();
+
+        assertEquals(softwareRepository.count(), softwareNumber);
     }
 
-    //DELETE: /api/software/<softwareID>
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the returned status if software is assigned to the knowledge base.
+    /**
+     * Controller method: SoftwareController.deleteSoftware
+     * HTTP Method: DELETE
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 409 CONFLICT
+     * Scenario: Trying to delete software that is assigned to the knowledge base.
+     * Verification: Confirms the status count remains unchanged.
+     */
     @Test
-    public void testDeleteSoftwareWhenIsAssignedToKnowledgeBase() {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void deleteSoftware_AssignedToKnowledgeBase_ReturnsConflict() {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeKnowledge(softwareID);
+
+        long softwareNumber = softwareRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -316,5 +386,7 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("You cannot remove a software if it has a ticket or knowledge assigned to it"))
                 .log().all();
+
+        assertEquals(softwareRepository.count(), softwareNumber);
     }
 }

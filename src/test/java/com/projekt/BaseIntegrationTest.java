@@ -125,26 +125,30 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         }
     }
 
-    public List<Software> initializeSoftware(){
-        List<Software> softwareList = List.of(
-                new Software("Software name", "Software description"),
-                new Software("Other software name", "Software description")
-        );
+    public Software initializeSingleSoftware(String name, String description){
+        return softwareRepository.save(new Software(name, description));
+    }
 
-        return softwareRepository.saveAll(softwareList);
+    public List<Software> initializeSoftware(){
+        initializeSingleSoftware("Software name", "Software description");
+        initializeSingleSoftware("Other software name", "Software description");
+
+        return softwareRepository.findAll();
+    }
+
+    public Knowledge initializeSingleKnowledge(String title, String content, Long softwareID){
+        return knowledgeRepository.save(new Knowledge(title, content, softwareRepository.getReferenceById(softwareID)));
     }
 
     public List<Knowledge> initializeKnowledge(Long softwareID){
-        List<Knowledge> knowledgeList = List.of(
-                new Knowledge("Knowledge name", "First knowledge content", softwareRepository.getReferenceById(softwareID)),
-                new Knowledge("Other knowledge name", "Other knowledge content", softwareRepository.getReferenceById(softwareID))
-        );
+        initializeSingleKnowledge("Knowledge name", "First knowledge content", softwareID);
+        initializeSingleKnowledge("Other knowledge name", "Other knowledge content", softwareID);
 
-        return knowledgeRepository.saveAll(knowledgeList);
+        return knowledgeRepository.findAll();
     }
 
-    public Category initializeCategory(String categoryName){
-        return categoryRepository.save(new Category(categoryName));
+    public Category initializeCategory(String name){
+        return categoryRepository.save(new Category(name));
     }
 
     public List<Category> initializeCategories(){
@@ -155,8 +159,8 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         return categoryRepository.findAll();
     }
 
-    public Priority initializePriority(String priorityName, Integer maxTime){
-        return priorityRepository.save(new Priority(priorityName, maxTime));
+    public Priority initializePriority(String name, Integer maxTime){
+        return priorityRepository.save(new Priority(name, maxTime));
     }
 
     public List<Priority> initializePriorities(){
@@ -167,8 +171,8 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         return priorityRepository.findAll();
     }
 
-    public Status initializeStatus(String statusName, Boolean closeTicket, Boolean defaultStatus){
-        return statusRepository.save(new Status(statusName, closeTicket, defaultStatus));
+    public Status initializeStatus(String name, Boolean closeTicket, Boolean defaultStatus){
+        return statusRepository.save(new Status(name, closeTicket, defaultStatus));
     }
 
     public List<Status> initializeStatuses(){
@@ -192,11 +196,11 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         return userRepository.save(user);
     }
 
-    public void initializeTicketForUser(Long userID) throws IOException {
+    public Ticket initializeTicketForUser(Long userID) throws IOException {
         Status status = initializeStatus("New",false, true);
         Priority priority = initializePriority("Normal", 2);
         Category category = initializeCategory("General");
-        List<Software> softwareList = initializeSoftware();
+        Software software = initializeSingleSoftware("Software name", "Software description");
 
         BufferedImage emptyImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -206,7 +210,7 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         ticket.setTitle("The website is unreachable");
         ticket.setStatus(status);
         ticket.setPriority(priority);
-        ticket.setSoftware(softwareList.get(0));
+        ticket.setSoftware(software);
         ticket.setUser(userRepository.getReferenceById(userID));
         ticket.setDescription("When trying to enter the site, I get an error - This site is unreachable :(");
         ticket.setVersion("1.0");
@@ -228,7 +232,7 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         ticketReplyList.add(savedReply);
         ticket.setReplies(ticketReplyList);
 
-        ticketRepository.save(ticket);
+        return ticketRepository.save(ticket);
     }
 
     public List<Ticket> initializeTicket(Long softwareID) throws IOException {

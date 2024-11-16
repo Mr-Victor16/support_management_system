@@ -36,11 +36,16 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/priorities
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: PriorityController.getAllPriorities
+     * HTTP Method: GET
+     * Endpoint: /api/priorities
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all priorities.
+     * Verification: Confirms the returned list size matches the expected priority count in the repository.
+     */
     @Test
-    public void testGetAllPriorities() {
+    public void getAllPriorities_ReturnsPriorityListSuccessfully() {
         List<Priority> priorityList = initializePriorities();
 
         given()
@@ -54,11 +59,16 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/priorities/use
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: PriorityController.getAllPrioritiesWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/priorities/use
+     * Expected Status: 200 OK
+     * Scenario: Retrieving priorities with their use numbers.
+     * Verification: Confirms the returned list size matches the expected priority count and specific usage numbers.
+     */
     @Test
-    public void testGetAllPrioritiesWithUseNumbers() throws IOException {
+    public void getAllPrioritiesWithUseNumbers_ReturnsPriorityListWithUseNumbersSuccessfully() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         initializeTicket(softwareID);
 
@@ -75,15 +85,20 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
 
         List<PriorityResponse> responseList = response.jsonPath().getList(".", PriorityResponse.class);
 
-        assertEquals(responseList.get(1).useNumber(), 2);
+        assertEquals(2, responseList.get(1).useNumber());
     }
 
-    //GET: /api/priorities/<priorityID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the priority ID is correct.
+    /**
+     * Controller method: PriorityController.getPriorityById
+     * HTTP Method: GET
+     * Endpoint: /api/priorities/{priorityID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieving a priority by ID.
+     * Verification: Confirms the returned priority matches the expected ID, name and maxTime.
+     */
     @Test
-    public void testGetPriorityById() {
-        Priority priority = initializePriorities().get(0);
+    public void getPriorityById_ReturnsPrioritySuccessfully() {
+        Priority priority = initializePriority("High", 1);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -99,11 +114,15 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/priorities/<priorityID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the priority ID is incorrect.
+    /**
+     * Controller method: PriorityController.getPriorityById
+     * HTTP Method: GET
+     * Endpoint: /api/priorities/{priorityID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to retrieve a priority by an invalid ID.
+     */
     @Test
-    public void testGetPriorityByIdWhenIdIsWrong() {
+    public void getPriorityById_InvalidId_ReturnsNotFound() {
         long priorityID = 1000;
 
         given()
@@ -117,12 +136,16 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/priorities
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: PriorityController.updatePriority
+     * HTTP Method: PUT
+     * Endpoint: /api/priorities
+     * Expected Status: 200 OK
+     * Scenario: Updating a priority with valid data.
+     */
     @Test
-    public void testUpdatePriority() throws JsonProcessingException {
-        Priority priority = initializePriorities().get(0);
+    public void updatePriority_ValidData_ReturnsSuccess() throws JsonProcessingException {
+        Priority priority = initializePriority("High", 1);
 
         UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), "Updated priority", 2);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -140,11 +163,16 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/priorities
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: PriorityController.updatePriority
+     * HTTP Method: PUT
+     * Endpoint: /api/priorities
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempting to update a priority to a name that already exists.
+     * Verification: Confirms the priority count remains unchanged.
+     */
     @Test
-    public void testUpdatePriorityWhenNewNameIsAlreadyUsed() throws JsonProcessingException {
+    public void updatePriority_ExistingName_ReturnsConflict() throws JsonProcessingException {
         List<Priority> priorityList = initializePriorities();
         Long priorityID = priorityList.get(0).getId();
         String priorityName = priorityList.get(1).getName();
@@ -165,12 +193,16 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/priorities
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status if the new priority name is the same as the current name.
+    /**
+     * Controller method: PriorityController.updatePriority
+     * HTTP Method: PUT
+     * Endpoint: /api/priorities
+     * Expected Status: 200 OK
+     * Scenario: Attempting to update a priority with the same name as the current one.
+     */
     @Test
-    public void testUpdatePriorityWhenNewNameIsSameAsCurrent() throws JsonProcessingException {
-        Priority priority = initializePriorities().get(0);
+    public void updatePriority_NewNameIsSameAsCurrent_ReturnsSuccess() throws JsonProcessingException {
+        Priority priority = initializePriority("High", 1);
 
         UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), priority.getName(), priority.getMaxTime());
         ObjectMapper objectMapper = new ObjectMapper();
@@ -188,11 +220,15 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/priorities
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the priority ID is incorrect.
+    /**
+     * Controller method: PriorityController.updatePriority
+     * HTTP Method: PUT
+     * Endpoint: /api/priorities
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to update a priority by an invalid ID.
+     */
     @Test
-    public void testUpdatePriorityWhenIdIsWrong() throws JsonProcessingException {
+    public void updatePriority_InvalidId_ReturnsNotFound() throws JsonProcessingException {
         long priorityID = 1000;
 
         UpdatePriorityRequest request = new UpdatePriorityRequest(priorityID, "Updated priority", 3);
@@ -211,11 +247,16 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/priorities
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: PriorityController.addPriority
+     * HTTP Method: POST
+     * Endpoint: /api/priorities
+     * Expected Status: 200 OK
+     * Scenario: Adding a new priority with a unique name.
+     * Verification: Confirms the priority count increases.
+     */
     @Test
-    public void testAddPriority() throws JsonProcessingException {
+    public void addPriority_UniqueName_ReturnsSuccess() throws JsonProcessingException {
         List<Priority> priorityList = initializePriorities();
 
         AddPriorityRequest request = new AddPriorityRequest("New priority", 5);
@@ -236,16 +277,23 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
         assertEquals(priorityRepository.count(), priorityList.size()+1);
     }
 
-    //POST: /api/priorities
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the status returned if priority with the given name already exists.
+    /**
+     * Controller method: PriorityController.addPriority
+     * HTTP Method: POST
+     * Endpoint: /api/priorities
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempting to add a priority with a name that already exists.
+     * Verification: Confirms the priority count remains unchanged.
+     */
     @Test
-    public void testAddPriorityWhenNameAlreadyExists() throws JsonProcessingException {
-        Priority priority = initializePriorities().get(0);
+    public void addPriority_ExistingName_ReturnsConflict() throws JsonProcessingException {
+        Priority priority = initializePriority("High",1);
 
         AddPriorityRequest request = new AddPriorityRequest(priority.getName(), priority.getMaxTime());
         ObjectMapper objectMapper = new ObjectMapper();
         String newPriorityJson = objectMapper.writeValueAsString(request);
+
+        long priorityNumber = priorityRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -257,15 +305,22 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("Priority with name '" + request.name() + "' already exists."))
                 .log().all();
+
+        assertEquals(priorityRepository.count(), priorityNumber);
     }
 
-    //DELETE: /api/priorities/<priorityID>
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: PriorityController.deletePriority
+     * HTTP Method: DELETE
+     * Endpoint: /api/priorities/{priorityID}
+     * Expected Status: 200 OK
+     * Scenario: Deleting a priority with no associated tickets.
+     * Verification: Confirms the priority count decreases.
+     */
     @Test
-    public void testDeletePriority() {
-        List<Priority> priorityList = initializePriorities();
-        Priority priority = priorityList.get(0);
+    public void deletePriority_NoAssignedTickets_ReturnsSuccess() {
+        Priority priority = initializePriority("High",1);
+        long priorityNumber = priorityRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -277,14 +332,18 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .body(equalTo("Priority removed"))
                 .log().all();
 
-        assertEquals(priorityRepository.count(), priorityList.size()-1);
+        assertEquals(priorityRepository.count(), priorityNumber-1);
     }
 
-    //DELETE: /api/priorities/<priorityID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the priority ID is incorrect.
+    /**
+     * Controller method: PriorityController.deletePriority
+     * HTTP Method: DELETE
+     * Endpoint: /api/priorities/{priorityID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to delete a priority by an invalid ID.
+     */
     @Test
-    public void testDeletePriorityWhenIdIsWrong() {
+    public void deletePriority_InvalidId_ReturnsNotFound() {
         long priorityID = 1000;
 
         given()
@@ -298,14 +357,21 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/priorities/<priorityID>
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the returned status if priority is assigned to the ticket.
+    /**
+     * Controller method: PriorityController.deletePriority
+     * HTTP Method: DELETE
+     * Endpoint: /api/priorities/{priorityID}
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempting to delete a priority that has assigned tickets.
+     * Verification: Confirms the priority count remains unchanged.
+     */
     @Test
-    public void testDeletePriorityWhenIsAssignedToTicket() throws IOException {
+    public void deletePriority_AssignedTickets_ReturnsConflict() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long priorityID = ticketList.get(0).getPriority().getId();
+
+        long priorityNumber = priorityRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -316,5 +382,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("You cannot remove a priority if it has a ticket assigned to it"))
                 .log().all();
+
+        assertEquals(priorityRepository.count(), priorityNumber);
     }
 }

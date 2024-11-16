@@ -26,10 +26,10 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * Endpoint: /api/profiles
      * Expected status: 200 OK
      * Scenario: Retrieving own user profile data as ADMIN.
-     * Verification: Confirms returned profile data fields match the authenticated user's details (id, username, name, surname, email).
+     * Verification: Confirms returned profile data fields match the authenticated user's details.
      */
     @Test
-    public void getProfile_WithAdminRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
+    public void getProfile_AdminRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
         User user = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
@@ -54,10 +54,10 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * Endpoint: /api/profiles
      * Expected status: 200 OK
      * Scenario: Retrieving own user profile data as OPERATOR.
-     * Verification: Confirms returned profile data fields match the authenticated user's details (id, username, name, surname, email).
+     * Verification: Confirms returned profile data fields match the authenticated user's details.
      */
     @Test
-    public void getProfile_WithOperatorRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
+    public void getProfile_OperatorRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_OPERATOR);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
@@ -82,10 +82,10 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * Endpoint: /api/profiles
      * Expected status: 200 OK
      * Scenario: Retrieving own user profile data as USER.
-     * Verification: Confirms returned profile data fields match the authenticated user's details (id, username, name, surname, email).
+     * Verification: Confirms returned profile data fields match the authenticated user's details.
      */
     @Test
-    public void getProfile_WithUserRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
+    public void getProfile_UserRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
@@ -112,7 +112,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * Scenario: Updating own user profile data as ADMIN.
      */
     @Test
-    public void updateProfile_WithAdminRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
+    public void updateProfile_AdminRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_ADMIN);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
@@ -140,7 +140,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * Scenario: Updating own user profile data as OPERATOR.
      */
     @Test
-    public void updateProfile_WithOperatorRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
+    public void updateProfile_OperatorRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_OPERATOR);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
@@ -168,7 +168,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * Scenario: Updating own user profile data as USER.
      */
     @Test
-    public void updateProfile_WithUserRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
+    public void updateProfile_UserRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
@@ -193,10 +193,10 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/profiles/activate/{userID}
      * Expected Status: 200 OK
-     * Scenario: Activating a user profile with a valid and inactive user ID.
+     * Scenario: Activating a user profile with a valid ID.
      */
     @Test
-    public void activateProfile_WithValidInactiveUserId_ReturnsSuccess() {
+    public void activateProfile_ValidInactiveUserId_ReturnsSuccess() {
         Long userID = initializeUser("username", "password",false, Role.Types.ROLE_USER).getId();
 
         given()
@@ -217,7 +217,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * Scenario: Attempting to activate a user profile with a non-existent user ID.
      */
     @Test
-    public void activateProfile_WithNonExistentUserId_ReturnsNotFound() {
+    public void activateProfile_NonExistentUserId_ReturnsNotFound() {
         Long userID = 1000L;
 
         given()
@@ -238,7 +238,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      * Scenario: Attempting to activate a user profile that is already active.
      */
     @Test
-    public void activateProfile_WithAlreadyActiveUserId_ReturnsConflict() {
+    public void activateProfile_AlreadyActiveUserId_ReturnsConflict() {
         Long userID = initializeUser("username", "password",true, Role.Types.ROLE_USER).getId();
 
         given()

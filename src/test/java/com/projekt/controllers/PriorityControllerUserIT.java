@@ -32,11 +32,15 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/priorities
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: PriorityController.getAllPriorities
+     * HTTP Method: GET
+     * Endpoint: /api/priorities
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Verifying that the user role cannot access the priorities list.
+     */
     @Test
-    public void testGetAllPriorities() {
+    public void getAllPriorities_InsufficientPermissions_ReturnsUnauthorized() {
         List<Priority> priorityList = initializePriorities();
 
         given()
@@ -50,11 +54,15 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/priorities/use
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: PriorityController.getAllPrioritiesWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/priorities/use
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve all priorities with associated usage numbers as a user without sufficient permissions.
+     */
     @Test
-    public void testGetAllPrioritiesWithUseNumbers() throws IOException {
+    public void getAllPrioritiesWithUseNumbers_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         initializeTicket(softwareID);
 
@@ -68,12 +76,16 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/priorities/<priorityID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: PriorityController.getPriorityById
+     * HTTP Method: GET
+     * Endpoint: /api/priorities/{priorityID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve priority by ID as a user without sufficient permissions.
+     */
     @Test
-    public void testGetPriorityById() {
-        Priority priority = initializePriorities().get(0);
+    public void getPriorityById_InsufficientPermissions_ReturnsUnauthorized() {
+        Priority priority = initializePriority("High", 1);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -86,12 +98,16 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/priorities
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: PriorityController.updatePriority
+     * HTTP Method: PUT
+     * Endpoint: /api/priorities
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to update priority as a user without sufficient permissions.
+     */
     @Test
-    public void testUpdatePriority() throws JsonProcessingException {
-        Priority priority = initializePriorities().get(0);
+    public void updatePriority_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
+        Priority priority = initializePriority("High", 1);
 
         UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), "Updated priority", 2);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -109,11 +125,15 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/priorities
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: PriorityController.addPriority
+     * HTTP Method: POST
+     * Endpoint: /api/priorities
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to add priority as a user without sufficient permissions.
+     */
     @Test
-    public void testAddPriority() throws JsonProcessingException {
+    public void addPriority_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         List<Priority> priorityList = initializePriorities();
 
         AddPriorityRequest request = new AddPriorityRequest("New priority", 5);
@@ -134,12 +154,16 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
         assertEquals(priorityRepository.count(), priorityList.size());
     }
 
-    //DELETE: /api/priorities/<priorityID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: PriorityController.deletePriority
+     * HTTP Method: DELETE
+     * Endpoint: /api/priorities/{priorityID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to delete priority as a user without sufficient permissions.
+     */
     @Test
-    public void testDeletePriority() {
-        Priority priority = initializePriorities().get(0);
+    public void deletePriority_InsufficientPermissions_ReturnsUnauthorized() {
+        Priority priority = initializePriority("High", 1);
 
         given()
                 .auth().oauth2(jwtToken)

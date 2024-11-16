@@ -42,7 +42,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/categories
      * Expected Status: 200 OK
-     * Scenario: Retrieving all categories with admin role.
+     * Scenario: Retrieving all categories.
      * Verification: Confirms the returned list size matches the expected category count in the repository.
      */
     @Test
@@ -86,7 +86,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
 
         List<CategoryResponse> responseList = response.jsonPath().getList(".", CategoryResponse.class);
 
-        assertEquals(responseList.get(0).useNumber(), 2);
+        assertEquals(2, responseList.get(0).useNumber());
     }
 
     /**
@@ -94,12 +94,12 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/categories/{categoryID}
      * Expected Status: 200 OK
-     * Scenario: Retrieving a category by its valid ID with admin role.
+     * Scenario: Retrieving a category by its valid ID.
      * Verification: Confirms the category's details match the expected values.
      */
     @Test
-    public void getCategoryById_ReturnsCategoryDetailsSuccessfully() {
-        Category category = initializeCategories().get(0);
+    public void getCategoryById_ReturnsCategorySuccessfully() {
+        Category category = initializeCategory("General");
 
         given()
                 .auth().oauth2(jwtToken)
@@ -122,7 +122,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Scenario: Attempting to retrieve a category by an invalid ID.
      */
     @Test
-    public void getCategoryById_WithInvalidId_ReturnsNotFound() {
+    public void getCategoryById_InvalidId_ReturnsNotFound() {
         long categoryID = 1000;
 
         given()
@@ -141,11 +141,11 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * HTTP Method: PUT
      * Endpoint: /api/categories
      * Expected Status: 200 OK
-     * Scenario: Updating a category with valid data as an admin.
+     * Scenario: Updating a category with valid data.
      */
     @Test
-    public void updateCategory_WithValidData_ReturnsSuccess() throws JsonProcessingException {
-        Category category = initializeCategories().get(0);
+    public void updateCategory_ValidData_ReturnsSuccess() throws JsonProcessingException {
+        Category category = initializeCategory("General");
 
         UpdateCategoryRequest request = new UpdateCategoryRequest(category.getId(), "Updated category");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -169,12 +169,15 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Endpoint: /api/categories
      * Expected Status: 409 CONFLICT
      * Scenario: Attempting to update a category to a name that already exists.
+     * Verification: Confirms the category count remains unchanged.
      */
     @Test
-    public void updateCategory_WithExistingName_ReturnsConflict() throws JsonProcessingException {
+    public void updateCategory_ExistingName_ReturnsConflict() throws JsonProcessingException {
         List<Category> categoryList = initializeCategories();
         Long categoryID = categoryList.get(0).getId();
         String categoryName = categoryList.get(1).getName();
+
+        long categoryNumber = categoryRepository.count();
 
         UpdateCategoryRequest request = new UpdateCategoryRequest(categoryID, categoryName);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -190,6 +193,8 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("Category with name '" + request.name() + "' already exists."))
                 .log().all();
+
+        assertEquals(categoryRepository.count(), categoryNumber);
     }
 
     /**
@@ -200,8 +205,8 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Scenario: Attempting to update a category with the same name as the current one.
      */
     @Test
-    public void updateCategory_WithSameNameAsCurrent_ReturnsSuccess() throws JsonProcessingException {
-        Category category = initializeCategories().get(0);
+    public void updateCategory_SameNameAsCurrent_ReturnsSuccess() throws JsonProcessingException {
+        Category category = initializeCategory("General");
 
         UpdateCategoryRequest request = new UpdateCategoryRequest(category.getId(), category.getName());
         ObjectMapper objectMapper = new ObjectMapper();
@@ -227,7 +232,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Scenario: Attempting to update a category by an invalid ID.
      */
     @Test
-    public void updateCategory_WithInvalidId_ReturnsNotFound() throws JsonProcessingException {
+    public void updateCategory_InvalidId_ReturnsNotFound() throws JsonProcessingException {
         long categoryID = 1000;
 
         UpdateCategoryRequest request = new UpdateCategoryRequest(categoryID, "Updated category");
@@ -255,7 +260,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Verification: Confirms the category count increases.
      */
     @Test
-    public void addCategory_WithUniqueName_ReturnsSuccess() throws JsonProcessingException {
+    public void addCategory_UniqueName_ReturnsSuccess() throws JsonProcessingException {
         List<Category> categoryList = initializeCategories();
 
         AddCategoryRequest request = new AddCategoryRequest("New category");
@@ -282,10 +287,12 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Endpoint: /api/categories
      * Expected Status: 409 CONFLICT
      * Scenario: Attempting to add a category with a name that already exists.
+     * Verification: Confirms the category count remains unchanged.
      */
     @Test
-    public void addCategory_WithExistingName_ReturnsConflict() throws JsonProcessingException {
-        Category category = initializeCategories().get(0);
+    public void addCategory_ExistingName_ReturnsConflict() throws JsonProcessingException {
+        Category category = initializeCategory("General");
+        long categoryNumber = categoryRepository.count();
 
         AddCategoryRequest request = new AddCategoryRequest(category.getName());
         ObjectMapper objectMapper = new ObjectMapper();
@@ -301,6 +308,8 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("Category with name '" + request.name() + "' already exists."))
                 .log().all();
+
+        assertEquals(categoryRepository.count(), categoryNumber);
     }
 
     /**
@@ -312,7 +321,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Verification: Confirms the category count decreases.
      */
     @Test
-    public void deleteCategory_WithNoAssignedTickets_ReturnsSuccess() {
+    public void deleteCategory_NoAssignedTickets_ReturnsSuccess() {
         List<Category> categoryList = initializeCategories();
         Category category = categoryList.get(0);
 
@@ -337,7 +346,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Scenario: Attempting to delete a category by an invalid ID.
      */
     @Test
-    public void deleteCategory_WithInvalidId_ReturnsNotFound() {
+    public void deleteCategory_InvalidId_ReturnsNotFound() {
         long categoryID = 1000;
 
         given()
@@ -360,7 +369,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
      * Verification: Confirms the category count remains unchanged.
      */
     @Test
-    public void deleteCategory_WithAssignedTickets_ReturnsConflict() throws IOException {
+    public void deleteCategory_AssignedTickets_ReturnsConflict() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long categoryID = ticketList.get(0).getCategory().getId();

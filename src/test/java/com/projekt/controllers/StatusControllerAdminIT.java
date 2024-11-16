@@ -36,11 +36,16 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/statuses
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: StatusController.getAllStatuses
+     * HTTP Method: GET
+     * Endpoint: /api/statuses
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all statuses.
+     * Verification: Confirms the returned list size matches the expected status count in the repository.
+     */
     @Test
-    public void testGetAllStatuses() {
+    public void getAllStatuses_ReturnsStatusListSuccessfully() {
         List<Status> statusList = initializeStatuses();
 
         given()
@@ -54,11 +59,16 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/statuses/use
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: StatusController.getAllStatusesWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/statuses/use
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all statuses with associated usage numbers.
+     * Verification: Confirms the correct usage count for each status.
+     */
     @Test
-    public void testGetAllStatusesWithUseNumbers() throws IOException {
+    public void getAllStatusesWithUseNumbers_ReturnsStatusUsageCountListSuccessfully() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         initializeTicket(softwareID);
 
@@ -75,15 +85,20 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
 
         List<StatusResponse> statusList = response.jsonPath().getList(".", StatusResponse.class);
 
-        assertEquals(statusList.get(0).useNumber(), 2);
+        assertEquals(2, statusList.get(0).useNumber());
     }
 
-    //GET: /api/statuses/<statusID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the status ID is correct.
+    /**
+     * Controller method: StatusController.getStatusById
+     * HTTP Method: GET
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieving a specific status by its ID.
+     * Verification: Confirms the status details match the expected values.
+     */
     @Test
-    public void testGetStatusById() {
-        Status status = initializeStatuses().get(0);
+    public void getStatusById_ReturnsStatusSuccessfully() {
+        Status status = initializeStatus("Closed", true, true);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -100,11 +115,15 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/statuses/<statusID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the status ID is incorrect.
+    /**
+     * Controller method: StatusController.getStatusById
+     * HTTP Method: GET
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to retrieve a status by an invalid ID.
+     */
     @Test
-    public void testGetStatusByIdWhenIdIsWrong() {
+    public void getStatusById_InvalidId_ReturnsNotFound() {
         long statusID = 1000;
 
         given()
@@ -118,12 +137,16 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/statuses
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: StatusController.updateStatus
+     * HTTP Method: PUT
+     * Endpoint: /api/statuses
+     * Expected Status: 200 OK
+     * Scenario: Updating a status with valid data.
+     */
     @Test
-    public void testUpdateStatus() throws JsonProcessingException {
-        Status status = initializeStatuses().get(0);
+    public void updateStatus_ReturnsSuccess() throws JsonProcessingException {
+        Status status = initializeStatus("Pending", false, false);
 
         UpdateStatusRequest request = new UpdateStatusRequest(status.getId(), "Updated status", true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -141,11 +164,15 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/statuses
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the status ID is incorrect.
+    /**
+     * Controller method: StatusController.updateStatus
+     * HTTP Method: PUT
+     * Endpoint: /api/statuses
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to update a status by an invalid ID.
+     */
     @Test
-    public void testUpdateStatusWhenIdIsWrong() throws JsonProcessingException {
+    public void updateStatus_InvalidId_ReturnsNotFound() throws JsonProcessingException {
         long statusID = 1000;
 
         UpdateStatusRequest request = new UpdateStatusRequest(statusID, "Updated status", true, true);
@@ -164,12 +191,16 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/statuses
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status if the new status name is the same as the current name.
+    /**
+     * Controller method: StatusController.updateStatus
+     * HTTP Method: PUT
+     * Endpoint: /api/statuses
+     * Expected Status: 200 OK
+     * Scenario: Attempting to update a status with the same name as the current one.
+     */
     @Test
-    public void testUpdateStatusWhenNewNameIsSameAsCurrent() throws JsonProcessingException {
-        Status status = initializeStatuses().get(0);
+    public void updateStatus_NewNameIsSameAsCurrent_ReturnsSuccess() throws JsonProcessingException {
+        Status status = initializeStatus("Pending", false, false);
 
         UpdateStatusRequest request = new UpdateStatusRequest(status.getId(), status.getName(), true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -187,14 +218,21 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/statuses
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the status returned if status with the given name already exists.
+    /**
+     * Controller method: StatusController.updateStatus
+     * HTTP Method: PUT
+     * Endpoint: /api/statuses
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempting to update a status with a name that already exists.
+     * Verification: Confirms the status count remains unchanged.
+     */
     @Test
-    public void testUpdateStatusWhenNewNameIsAlreadyUsed() throws JsonProcessingException {
+    public void updateStatus_NewNameIsAlreadyUsed_ReturnsConflict() throws JsonProcessingException {
         List<Status> statusList = initializeStatuses();
         Long statusID = statusList.get(0).getId();
         String statusName = statusList.get(1).getName();
+
+        long statusNumber = statusRepository.count();
 
         UpdateStatusRequest request = new UpdateStatusRequest(statusID, statusName, true, true);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -210,13 +248,20 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("Status with name '" + request.name() + "' already exists."))
                 .log().all();
+
+        assertEquals(statusRepository.count(), statusNumber);
     }
 
-    //POST: /api/statuses
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: StatusController.addStatus
+     * HTTP Method: POST
+     * Endpoint: /api/statuses
+     * Expected Status: 200 OK
+     * Scenario: Adding a new status with a unique name.
+     * Verification: Confirms the status count increases.
+     */
     @Test
-    public void testAddStatus() throws JsonProcessingException {
+    public void addStatus_UniqueName_ReturnsSuccess() throws JsonProcessingException {
         List<Status> statusList = initializeStatuses();
 
         AddStatusRequest request = new AddStatusRequest("New status", true, true);
@@ -237,15 +282,20 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
         assertEquals(statusRepository.count(), statusList.size()+1);
     }
 
-    //POST: /api/statuses
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the status returned if status with the given name already exists.
+    /**
+     * Controller method: StatusController.addStatus
+     * HTTP Method: POST
+     * Endpoint: /api/statuses
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempting to add a status with an already existing name.
+     * Verification: Confirms the status count remains unchanged.
+     */
     @Test
-    public void testAddStatusWhenNewNameIsAlreadyUsed() throws JsonProcessingException {
-        List<Status> statusList = initializeStatuses();
-        String statusName = statusList.get(1).getName();
+    public void addStatus_NameAlreadyExists_ReturnsConflict() throws JsonProcessingException {
+        Status status = initializeStatus("Pending", false, false);
+        long statusNumber = statusRepository.count();
 
-        AddStatusRequest request = new AddStatusRequest(statusName, true, true);
+        AddStatusRequest request = new AddStatusRequest(status.getName(), true, true);
         ObjectMapper objectMapper = new ObjectMapper();
         String addStatusJson = objectMapper.writeValueAsString(request);
 
@@ -259,13 +309,20 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("Status with name '" + request.name() + "' already exists."))
                 .log().all();
+
+        assertEquals(statusRepository.count(), statusNumber);
     }
 
-    //DELETE: /api/statuses/<statusID>
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: StatusController.deleteStatus
+     * HTTP Method: DELETE
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 200 OK
+     * Scenario: Deleting a status with no associated tickets.
+     * Verification: Confirms the status count decreases.
+     */
     @Test
-    public void testDeleteStatus() {
+    public void deleteStatus_NoAssignedTickets_ReturnsSuccess() {
         List<Status> statusList = initializeStatuses();
         Status status = statusList.get(2);
 
@@ -282,11 +339,15 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
         assertEquals(statusRepository.count(), statusList.size()-1);
     }
 
-    //DELETE: /api/statuses/<statusID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the status ID is incorrect.
+    /**
+     * Controller method: StatusController.deleteStatus
+     * HTTP Method: DELETE
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to delete a status by an invalid ID.
+     */
     @Test
-    public void testDeleteStatusWhenIdIsWrong() {
+    public void deleteStatus_InvalidId_ReturnsNotFound() {
         long statusID = 1000;
 
         given()
@@ -300,14 +361,21 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/statuses/<statusID>
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the returned status if status is assigned to the ticket.
+    /**
+     * Controller method: StatusController.deleteStatus
+     * HTTP Method: DELETE
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempting to delete a status that has assigned tickets.
+     * Verification: Confirms the status count remains unchanged.
+     */
     @Test
-    public void testDeleteStatusWhenIsAssignedToTicket() throws IOException {
+    public void deleteStatus_AssignedTickets_ReturnsConflict() throws IOException {
         Long softwareID = initializeSoftware().get(0).getId();
         List<Ticket> ticketList = initializeTicket(softwareID);
         Long statusID = ticketList.get(0).getStatus().getId();
+
+        long statusNumber = statusRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -318,14 +386,20 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("You cannot remove a status if it has a ticket assigned to it"))
                 .log().all();
+
+        assertEquals(statusRepository.count(), statusNumber);
     }
 
-    //DELETE: /api/statuses/<statusID>
-    //Expected status: FORBIDDEN (401)
-    //Purpose: Verify the returned status if status is default.
+    /**
+     * Controller method: StatusController.deleteStatus
+     * HTTP Method: DELETE
+     * Endpoint: /api/statuses/{statusID}
+     * Expected Status: 403 FORBIDDEN
+     * Scenario: Attempting to delete a status default status.
+     */
     @Test
-    public void testDeleteDefaultStatus() {
-        Status status = initializeStatuses().get(0);
+    public void deleteStatus_DefaultStatus_ReturnsForbidden() {
+        Status status = initializeStatus("Pending", false, true);
 
         given()
                 .auth().oauth2(jwtToken)

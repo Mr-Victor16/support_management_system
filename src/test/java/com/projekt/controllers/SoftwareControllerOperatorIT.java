@@ -37,11 +37,16 @@ public class SoftwareControllerOperatorIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/software
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: SoftwareController.getAllSoftware
+     * HTTP Method: GET
+     * Endpoint: /api/software
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all software with operator role.
+     * Verification: Confirms the returned list size matches the expected software count in the repository.
+     */
     @Test
-    public void testGetAllSoftware() {
+    public void getAllSoftware_ReturnsSoftwareListSuccessfully() {
         List<Software> softwareList = initializeSoftware();
 
         given()
@@ -55,11 +60,16 @@ public class SoftwareControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/software/use
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: SoftwareController.getAllSoftwareWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/software/use
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all software with use numbers.
+     * Verification: Confirms use numbers for tickets and knowledge base are correctly returned.
+     */
     @Test
-    public void testGetAllSoftwareWithUseNumbers() throws IOException {
+    public void getAllSoftwareWithUseNumbers_ReturnsSoftwareUsageCountListSuccessfully() throws IOException {
         List<Software> softwareList = initializeSoftware();
         List<Knowledge> knowledgeList = initializeKnowledge(softwareList.get(0).getId());
         List<Ticket> ticketList = initializeTicket(softwareList.get(0).getId());
@@ -79,16 +89,21 @@ public class SoftwareControllerOperatorIT extends BaseIntegrationTest {
 
         assertEquals(responseList.get(0).useNumberTicket(), ticketList.size());
         assertEquals(responseList.get(0).useNumberKnowledge(), knowledgeList.size());
-        assertEquals(responseList.get(1).useNumberTicket(), 0);
-        assertEquals(responseList.get(1).useNumberKnowledge(), 0);
+        assertEquals(0, responseList.get(1).useNumberTicket());
+        assertEquals(0, responseList.get(1).useNumberKnowledge());
     }
 
-    //GET: /api/software/<softwareID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the software ID is correct.
+    /**
+     * Controller method: SoftwareController.getSoftwareById
+     * HTTP Method: GET
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieving a software by ID.
+     * Verification: Confirms that the software details returned match the expected values.
+     */
     @Test
-    public void testGetSoftwareById() {
-        Software software = initializeSoftware().get(0);
+    public void getSoftwareById_ReturnsSoftwareSuccessfully() {
+        Software software = initializeSingleSoftware("Software name", "Software description");
 
         given()
                 .auth().oauth2(jwtToken)
@@ -104,11 +119,15 @@ public class SoftwareControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/software/<softwareID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the software ID is incorrect.
+    /**
+     * Controller method: SoftwareController.getSoftwareById
+     * HTTP Method: GET
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Retrieving a software by incorrect ID.
+     */
     @Test
-    public void testGetSoftwareByIdWhenIdIsWrong() {
+    public void getSoftwareById_InvalidId_ReturnsNotFound() {
         long softwareID = 1000;
 
         given()
@@ -122,12 +141,16 @@ public class SoftwareControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/software
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: SoftwareController.updateSoftware
+     * HTTP Method: PUT
+     * Endpoint: /api/software
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempt to update software with insufficient permissions.
+     */
     @Test
-    public void testUpdateSoftware() throws JsonProcessingException {
-        Software software = initializeSoftware().get(0);
+    public void updateSoftware_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
+        Software software = initializeSingleSoftware("Software name", "Software description");
 
         UpdateSoftwareRequest request = new UpdateSoftwareRequest(software.getId(), "Updated title", "Updated description");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -145,11 +168,15 @@ public class SoftwareControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/software
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: SoftwareController.addSoftware
+     * HTTP Method: POST
+     * Endpoint: /api/software
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempt to add software with insufficient permissions.
+     */
     @Test
-    public void testAddSoftware() throws JsonProcessingException {
+    public void addSoftware_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         AddSoftwareRequest request = new AddSoftwareRequest("New software", "New software description");
         ObjectMapper objectMapper = new ObjectMapper();
         String newSoftwareJson = objectMapper.writeValueAsString(request);
@@ -166,12 +193,16 @@ public class SoftwareControllerOperatorIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/software/<softwareID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. Operator doesn't have access rights to this method.
+    /**
+     * Controller method: SoftwareController.deleteSoftware
+     * HTTP Method: DELETE
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempt to delete software with insufficient permissions.
+     */
     @Test
-    public void testDeleteSoftware() {
-        Software software = initializeSoftware().get(0);
+    public void deleteSoftware_InsufficientPermissions_ReturnsUnauthorized() {
+        Software software = initializeSingleSoftware("Software name", "Software description");
 
         given()
                 .auth().oauth2(jwtToken)

@@ -25,11 +25,16 @@ public class SoftwareControllerUserIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/software
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: SoftwareController.getAllSoftware
+     * HTTP Method: GET
+     * Endpoint: /api/software
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all software.
+     * Verification: Confirms the returned list size matches the expected software count in the repository.
+     */
     @Test
-    public void testGetAllSoftware() {
+    public void getAllSoftware_ReturnsSoftwareListSuccessfully() {
         List<Software> softwareList = initializeSoftware();
 
         given()
@@ -43,11 +48,15 @@ public class SoftwareControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/software/use
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: SoftwareController.getAllSoftwareWithUseNumbers
+     * HTTP Method: GET
+     * Endpoint: /api/software/use
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Verifying that the user role cannot access the software use numbers.
+     */
     @Test
-    public void testGetAllSoftwareWithUseNumbers() {
+    public void getAllSoftwareWithUseNumbers_ReturnsUnauthorized() {
         given()
                 .auth().oauth2(jwtToken)
                 .when()
@@ -58,12 +67,17 @@ public class SoftwareControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/software/<softwareID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the software ID is correct.
+    /**
+     * Controller method: SoftwareController.getSoftwareById
+     * HTTP Method: GET
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieving a software by ID.
+     * Verification: Confirms that the software details returned match the expected values.
+     */
     @Test
-    public void testGetSoftwareById() {
-        Software software = initializeSoftware().get(0);
+    public void getSoftwareById_ReturnsSoftwareSuccessfully() {
+        Software software = initializeSingleSoftware("Software name", "Software description");
 
         given()
                 .auth().oauth2(jwtToken)
@@ -79,11 +93,15 @@ public class SoftwareControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/software/<softwareID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the software ID is incorrect.
+    /**
+     * Controller method: SoftwareController.getSoftwareById
+     * HTTP Method: GET
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Retrieving a software by incorrect ID.
+     */
     @Test
-    public void testGetSoftwareByIdWhenIdIsWrong() {
+    public void getSoftwareById_InvalidId_ReturnsNotFound() {
         long softwareID = 1000;
 
         given()
@@ -97,12 +115,16 @@ public class SoftwareControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/software
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: SoftwareController.updateSoftware
+     * HTTP Method: PUT
+     * Endpoint: /api/software
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempt to update software with insufficient permissions.
+     */
     @Test
-    public void testUpdateSoftware() throws JsonProcessingException {
-        Software software = initializeSoftware().get(0);
+    public void updateSoftware_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
+        Software software = initializeSingleSoftware("Software name", "Software description");
 
         UpdateSoftwareRequest request = new UpdateSoftwareRequest(software.getId(), "Updated title", "Updated description");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -120,11 +142,15 @@ public class SoftwareControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/software
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: SoftwareController.addSoftware
+     * HTTP Method: POST
+     * Endpoint: /api/software
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempt to add software with insufficient permissions.
+     */
     @Test
-    public void testAddSoftware() throws JsonProcessingException {
+    public void addSoftware_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         AddSoftwareRequest request = new AddSoftwareRequest("New software", "New software description");
         ObjectMapper objectMapper = new ObjectMapper();
         String newSoftwareJson = objectMapper.writeValueAsString(request);
@@ -141,12 +167,16 @@ public class SoftwareControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/software/<softwareID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: SoftwareController.deleteSoftware
+     * HTTP Method: DELETE
+     * Endpoint: /api/software/{softwareID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempt to delete software with insufficient permissions.
+     */
     @Test
-    public void testDeleteSoftware() {
-        Software software = initializeSoftware().get(0);
+    public void deleteSoftware_InsufficientPermissions_ReturnsUnauthorized() {
+        Software software = initializeSingleSoftware("Software name", "Software description");
 
         given()
                 .auth().oauth2(jwtToken)

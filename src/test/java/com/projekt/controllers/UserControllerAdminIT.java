@@ -45,12 +45,17 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/users/<userID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the user ID is correct.
+    /**
+     * Controller method: UserController.getUserById
+     * HTTP Method: GET
+     * Endpoint: /api/users/{userID}
+     * Expected Status: 200 OK
+     * Scenario: Successfully retrieve user details by ID.
+     * Verification: Confirms the response contains correct user details.
+     */
     @Test
-    public void testGetUser() {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
+    public void getUserById_ReturnsUserDetailsSuccessfully() {
+        User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -68,11 +73,15 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/users/<userID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the user ID is incorrect.
+    /**
+     * Controller method: UserController.getUserById
+     * HTTP Method: GET
+     * Endpoint: /api/users/{userID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempt to retrieve user details using a non-existent ID.
+     */
     @Test
-    public void testGetUserWhenIdIsWrong() {
+    public void getUserById_InvalidId_ReturnsNotFound() {
         Long userID = 1000L;
 
         given()
@@ -86,11 +95,16 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/users
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: UserController.addUser
+     * HTTP Method: POST
+     * Endpoint: /api/users
+     * Expected Status: 200 OK
+     * Scenario: Successfully add a new user with valid data.
+     * Verification: Confirms the user count increases.
+     */
     @Test
-    public void testAddUser() throws JsonProcessingException {
+    public void addUser_ValidData_ReturnsSuccess() throws JsonProcessingException {
         AddUserRequest request = new AddUserRequest("username", "password", "newaccount@mail.com", "Name", "Surname", List.of("ROLE_OPERATOR"));
         ObjectMapper objectMapper = new ObjectMapper();
         String newUserJson = objectMapper.writeValueAsString(request);
@@ -111,11 +125,16 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
         assertEquals(userRepository.count(), userNumbers+1);
     }
 
-    //POST: /api/users
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the status returned if username already used.
+    /**
+     * Controller method: UserController.addUser
+     * HTTP Method: POST
+     * Endpoint: /api/users
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempt to create a user with an already used username.
+     * Verification: Confirms the user count remains unchanged.
+     */
     @Test
-    public void testAddUserWhenUsernameAlreadyUsed() throws JsonProcessingException {
+    public void addUser_DuplicateUsername_ReturnsConflict() throws JsonProcessingException {
         User user = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
 
         AddUserRequest request = new AddUserRequest(user.getUsername(), "password", "newaccount@mail.com", "Name", "Surname", List.of("ROLE_OPERATOR"));
@@ -138,11 +157,16 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
         assertEquals(userRepository.count(), userNumbers);
     }
 
-    //POST: /api/users
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the status returned if email already used.
+    /**
+     * Controller method: UserController.addUser
+     * HTTP Method: POST
+     * Endpoint: /api/users
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempt to create a user with an already used e-mail address.
+     * Verification: Confirms the user count remains unchanged.
+     */
     @Test
-    public void testAddUserWhenEmailAlreadyUsed() throws JsonProcessingException {
+    public void addUser_DuplicateEmail_ReturnsConflict() throws JsonProcessingException {
         User user = initializeUser("newAccount", "password", true, Role.Types.ROLE_ADMIN);
 
         AddUserRequest request = new AddUserRequest("username", "password", user.getEmail(), "Name", "Surname", List.of("ROLE_OPERATOR"));
@@ -165,11 +189,15 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
         assertEquals(userRepository.count(), userNumbers);
     }
 
-    //PUT: /api/users
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when request data is correct.
+    /**
+     * Controller method: UserController.updateUser
+     * HTTP Method: PUT
+     * Endpoint: /api/users
+     * Expected Status: 200 OK
+     * Scenario: Successfully update user details with valid data.
+     */
     @Test
-    public void testUpdateUser() throws JsonProcessingException {
+    public void updateUser_ValidData_ReturnsSuccess() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
 
         UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, List.of("ROLE_OPERATOR"));
@@ -188,11 +216,15 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/users
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the returned status when username is already used.
+    /**
+     * Controller method: UserController.updateUser
+     * HTTP Method: PUT
+     * Endpoint: /api/users
+     * Expected Status: 409 CONFLICT
+     * Scenario: Update user to an already used username.
+     */
     @Test
-    public void testUpdateUserWhenUsernameAlreadyUsed() throws JsonProcessingException {
+    public void updateUser_UsernameAlreadyUsed_ReturnsConflict() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
         String usedUsername = userRepository.findAll().get(0).getUsername();
 
@@ -212,11 +244,15 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/users
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the returned status when email is already used.
+    /**
+     * Controller method: UserController.updateUser
+     * HTTP Method: PUT
+     * Endpoint: /api/users
+     * Expected Status: 409 CONFLICT
+     * Scenario: Update user to an already used e-mail address.
+     */
     @Test
-    public void testUpdateUserWhenEmailAlreadyUsed() throws JsonProcessingException {
+    public void updateUser_EmailAlreadyUsed_ReturnsConflict() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
         String usedEmail = userRepository.findAll().get(0).getEmail();
 
@@ -236,11 +272,15 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/users
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when request data is incorrect.
+    /**
+     * Controller method: UserController.updateUser
+     * HTTP Method: PUT
+     * Endpoint: /api/users
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Updating a user with an incorrect ID.
+     */
     @Test
-    public void testUpdateUserWhenIdIsWrong() throws JsonProcessingException {
+    public void updateUser_InvalidUserId_ReturnsNotFound() throws JsonProcessingException {
         Long userID = 1000L;
 
         UpdateUserRequest request = new UpdateUserRequest(userID, "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, List.of("ROLE_OPERATOR"));
@@ -259,11 +299,16 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/users
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: UserController.getAllUsers
+     * HTTP Method: GET
+     * Endpoint: /api/users
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all users from the repository.
+     * Verification: Confirms the returned list size matches the expected user count.
+     */
     @Test
-    public void testGetAllUsers() {
+    public void getAllUsers_ReturnsUserListSuccessfully() {
         initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
         int userNumbers = userRepository.findAll().size();
 
@@ -278,14 +323,18 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/users/<userID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the user ID is correct.
+    /**
+     * Controller method: UserController.deleteUser
+     * HTTP Method: DELETE
+     * Endpoint: /api/users/{userID}
+     * Expected Status: 200 OK
+     * Scenario: Deleting a user with a valid user ID.
+     * Verification: Confirms the user count decreases.
+     */
     @Test
-    public void testDeleteUser() {
-        initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
+    public void deleteUser_ValidUserId_ReturnsSuccess() {
+        Long userID = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN).getId();
         long userNumbers = userRepository.findAll().size();
-        Long userID = userRepository.findAll().get(3).getId();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -300,11 +349,15 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
         assertEquals(userRepository.count(), userNumbers-1);
     }
 
-    //DELETE: /api/users/<userID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the user ID is incorrect.
+    /**
+     * Controller method: UserController.deleteUser
+     * HTTP Method: DELETE
+     * Endpoint: /api/users/{userID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Deleting a user with non-existing user ID.
+     */
     @Test
-    public void testDeleteUserWhenIdIsWrong() {
+    public void deleteUser_InvalidUserId_ReturnsNotFound() {
         Long userID = 1000L;
 
         given()
@@ -318,13 +371,17 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/users/<userID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the user ID is correct and user has tickets
+    /**
+     * Controller method: UserController.deleteUser
+     * HTTP Method: DELETE
+     * Endpoint: /api/users/{userID}
+     * Expected Status: 200 OK
+     * Scenario: Deleting a user with a valid user ID when the user has associated tickets.
+     * Verification: Confirms that related data is also deleted.
+     */
     @Test
-    public void testDeleteUserWithTickets() throws IOException {
-        initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
-        Long userID = userRepository.findAll().get(3).getId();
+    public void deleteUser_UserWithTickets_ReturnsSuccess() throws IOException {
+        Long userID = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN).getId();
         initializeTicketForUser(userID);
 
         long userNumbers = userRepository.findAll().size();
@@ -348,11 +405,16 @@ public class UserControllerAdminIT extends BaseIntegrationTest {
         assertEquals(imageRepository.count(), imageNumbers-1);
     }
 
-    //DELETE: /api/users/<userID>
-    //Expected status: FORBIDDEN (403)
-    //Purpose: Verify the returned status when user is last one with role Admin
+    /**
+     * Controller method: UserController.deleteUser
+     * HTTP Method: DELETE
+     * Endpoint: /api/users/{userID}
+     * Expected Status: 403 FORBIDDEN
+     * Scenario: Attempting to delete the last user with the admin role.
+     * Verification: Confirms the user count remains unchanged.
+     */
     @Test
-    public void testDeleteUserWhenLastOneAdmin() {
+    public void deleteUser_LastAdminAccount_ReturnsForbidden() {
         long userNumbers = userRepository.findAll().size();
         Long adminID = userRepository.findAll().get(2).getId();
 

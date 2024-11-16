@@ -26,13 +26,18 @@ public class KnowledgeBaseControllerUserIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/knowledge-bases
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: KnowledgeBaseController.getAllKnowledgeItems
+     * HTTP Method: GET
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 200 OK
+     * Scenario: Retrieve all knowledge items as user.
+     * Verification: Confirms the size of the returned list matches the expected number of elements in the repository.
+     */
     @Test
-    public void testGetAllKnowledgeItems() {
-        List<Software> softwareList = initializeSoftware();
-        List<Knowledge> knowledgeList = initializeKnowledge(softwareList.get(0).getId());
+    public void getAllKnowledgeItems_ReturnsKnowledgeListSuccessfully() {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        List<Knowledge> knowledgeList = initializeKnowledge(softwareID);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -45,13 +50,18 @@ public class KnowledgeBaseControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/knowledge-bases/<knowledgeID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the knowledge ID is correct.
+    /**
+     * Controller method: KnowledgeBaseController.getKnowledgeById
+     * HTTP Method: GET
+     * Endpoint: /api/knowledge-bases/{knowledgeID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieve a knowledge item by a valid ID.
+     * Verification: Confirms the returned item's details match the expected data.
+     */
     @Test
-    public void testGetKnowledgeById() {
-        List<Software> softwareList = initializeSoftware();
-        Knowledge knowledge = initializeKnowledge(softwareList.get(0).getId()).get(0);
+    public void getKnowledgeById_ValidId_ReturnsKnowledgeSuccessfully() {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        Knowledge knowledge = initializeSingleKnowledge("Knowledge name", "First knowledge content", softwareID);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -68,11 +78,15 @@ public class KnowledgeBaseControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/knowledge-bases/<knowledgeID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the knowledge ID is incorrect.
+    /**
+     * Controller method: KnowledgeBaseController.getKnowledgeById
+     * HTTP Method: GET
+     * Endpoint: /api/knowledge-bases/{knowledgeID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempt to retrieve a knowledge item with an invalid ID.
+     */
     @Test
-    public void testGetKnowledgeByIdWhenIdIsWrong() {
+    public void getKnowledgeById_InvalidId_ReturnsNotFound() {
         long knowledgeID = 1000;
 
         given()
@@ -86,11 +100,15 @@ public class KnowledgeBaseControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/knowledge-bases
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: KnowledgeBaseController.updateKnowledge
+     * HTTP Method: PUT
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to update knowledge as a user without sufficient permissions.
+     */
     @Test
-    public void testUpdateKnowledge() throws JsonProcessingException {
+    public void updateKnowledge_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         List<Software> softwareList = initializeSoftware();
         Long softwareID = softwareList.get(0).getId();
         Knowledge knowledge = initializeKnowledge(softwareID).get(0);
@@ -111,12 +129,16 @@ public class KnowledgeBaseControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/knowledge-bases
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: KnowledgeBaseController.addKnowledge
+     * HTTP Method: POST
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to add knowledge as a user without sufficient permissions.
+     */
     @Test
-    public void testAddKnowledge() throws JsonProcessingException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addKnowledge_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
 
         AddKnowledgeRequest request = new AddKnowledgeRequest("knowledge title", "example knowledge content", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -134,14 +156,17 @@ public class KnowledgeBaseControllerUserIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //DELETE: /api/knowledge-bases/<knowledgeID>
-    //Expected status: UNAUTHORIZED (401)
-    //Purpose: Verify the status returned if the request contains valid data. User doesn't have access rights to this method.
+    /**
+     * Controller method: KnowledgeBaseController.deleteKnowledge
+     * HTTP Method: DELETE
+     * Endpoint: /api/knowledge-bases/{knowledgeID}
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to delete knowledge as a user without sufficient permissions.
+     */
     @Test
-    public void testDeleteKnowledge() {
-        List<Software> softwareList = initializeSoftware();
-        List<Knowledge> knowledgeList = initializeKnowledge(softwareList.get(0).getId());
-        Knowledge knowledge = knowledgeList.get(0);
+    public void deleteKnowledge_InsufficientPermissions_ReturnsUnauthorized() {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        Knowledge knowledge = initializeSingleKnowledge("Knowledge name", "First knowledge content", softwareID);
 
         given()
                 .auth().oauth2(jwtToken)

@@ -32,13 +32,18 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
         clearDatabase();
     }
 
-    //GET: /api/knowledge-bases
-    //Expected status: OK (200)
-    //Purpose: To verify the returned status and the expected number of elements.
+    /**
+     * Controller method: KnowledgeBaseController.getAllKnowledgeItems
+     * HTTP Method: GET
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 200 OK
+     * Scenario: Retrieve all knowledge items.
+     * Verification: Confirms the size of the returned list matches the expected number of elements in the repository.
+     */
     @Test
-    public void testGetAllKnowledgeItems() {
-        List<Software> softwareList = initializeSoftware();
-        List<Knowledge> knowledgeList = initializeKnowledge(softwareList.get(0).getId());
+    public void getAllKnowledgeItems_ReturnsKnowledgeListSuccessfully() {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        List<Knowledge> knowledgeList = initializeKnowledge(softwareID);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -51,13 +56,18 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/knowledge-bases/<knowledgeID>
-    //Expected status: OK (200)
-    //Purpose: Verify the returned status when the knowledge ID is correct.
+    /**
+     * Controller method: KnowledgeBaseController.getKnowledgeById
+     * HTTP Method: GET
+     * Endpoint: /api/knowledge-bases/{knowledgeID}
+     * Expected Status: 200 OK
+     * Scenario: Retrieve a knowledge item by a valid ID.
+     * Verification: Confirms the returned item's details match the expected data.
+     */
     @Test
-    public void testGetKnowledgeById() {
-        List<Software> softwareList = initializeSoftware();
-        Knowledge knowledge = initializeKnowledge(softwareList.get(0).getId()).get(0);
+    public void getKnowledgeById_ValidId_ReturnsKnowledgeSuccessfully() {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        Knowledge knowledge = initializeKnowledge(softwareID).get(0);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -74,11 +84,15 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //GET: /api/knowledge-bases/<knowledgeID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the knowledge ID is incorrect.
+    /**
+     * Controller method: KnowledgeBaseController.getKnowledgeById
+     * HTTP Method: GET
+     * Endpoint: /api/knowledge-bases/{knowledgeID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempt to retrieve a knowledge item with an invalid ID.
+     */
     @Test
-    public void testGetKnowledgeByIdWhenIdIsWrong() {
+    public void getKnowledgeById_InvalidId_ReturnsNotFound() {
         long knowledgeID = 1000;
 
         given()
@@ -92,11 +106,15 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/knowledge-bases
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: KnowledgeBaseController.updateKnowledge
+     * HTTP Method: PUT
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 200 OK
+     * Scenario: Update an existing knowledge item with valid data.
+     */
     @Test
-    public void testUpdateKnowledge() throws JsonProcessingException {
+    public void updateKnowledge_ValidData_ReturnsSuccess() throws JsonProcessingException {
         List<Software> softwareList = initializeSoftware();
         Long softwareID = softwareList.get(0).getId();
         Knowledge knowledge = initializeKnowledge(softwareID).get(0);
@@ -117,14 +135,18 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/knowledge-bases
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the software ID is incorrect.
+    /**
+     * Controller method: KnowledgeBaseController.updateKnowledge
+     * HTTP Method: PUT
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempt to update a knowledge item with an invalid software ID.
+     */
     @Test
-    public void testUpdateKnowledgeWhenSoftwareIdIsWrong() throws JsonProcessingException {
-        List<Software> softwareList = initializeSoftware();
+    public void updateKnowledge_InvalidSoftwareId_ReturnsNotFound() throws JsonProcessingException {
+        Software software = initializeSingleSoftware("Software name", "Software description");
         long softwareID = 1000;
-        Knowledge knowledge = initializeKnowledge(softwareList.get(0).getId()).get(0);
+        Knowledge knowledge = initializeKnowledge(software.getId()).get(0);
 
         UpdateKnowledgeRequest request = new UpdateKnowledgeRequest(knowledge.getId(), "new title", "new example knowledge content", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -142,12 +164,16 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/knowledge-bases
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the knowledge ID is incorrect.
+    /**
+     * Controller method: KnowledgeBaseController.updateKnowledge
+     * HTTP Method: PUT
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to update knowledge by an invalid ID.
+     */
     @Test
-    public void testUpdateKnowledgeWhenIdIsWrong() throws JsonProcessingException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void updateKnowledge_InvalidId_ReturnsNotFound() throws JsonProcessingException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         long knowledgeID = 1000;
 
         UpdateKnowledgeRequest request = new UpdateKnowledgeRequest(knowledgeID, "new title", "new example knowledge content", softwareID);
@@ -166,11 +192,15 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/knowledge-bases
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if knowledge with the given title already exists.
+    /**
+     * Controller method: KnowledgeBaseController.updateKnowledge
+     * HTTP Method: PUT
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 200 OK
+     * Scenario: Attempting to update knowledge when the title already exists.
+     */
     @Test
-    public void testUpdateKnowledgeWhenTitleAlreadyExists() throws JsonProcessingException {
+    public void updateKnowledge_TitleAlreadyExists_UpdatesSuccessfully() throws JsonProcessingException {
         List<Software> softwareList = initializeSoftware();
         Long softwareID = softwareList.get(1).getId();
         List<Knowledge> knowledgeList = initializeKnowledge(softwareID);
@@ -193,12 +223,16 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //PUT: /api/knowledge-bases
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the status returned if knowledge with the given name and software already exists.
+    /**
+     * Controller method: KnowledgeBaseController.updateKnowledge
+     * HTTP Method: PUT
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempt to update a knowledge item with a title that already exists for the same software.
+     */
     @Test
-    public void testUpdateKnowledgeWhenKnowledgeWithGivenTitleAndSoftwareAlreadyExists() throws JsonProcessingException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void updateKnowledge_DuplicateTitleAndSoftware_ReturnsConflict() throws JsonProcessingException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         List<Knowledge> knowledgeList = initializeKnowledge(softwareID);
         Knowledge baseKnowledge = knowledgeList.get(0);
         Knowledge otherKnowledge = knowledgeList.get(1);
@@ -219,12 +253,17 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/knowledge-bases
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: KnowledgeBaseController.addKnowledge
+     * HTTP Method: POST
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 200 OK
+     * Scenario: Add a new knowledge item with valid data.
+     * Verification: Confirms the knowledge count increases.
+     */
     @Test
-    public void testAddKnowledge() throws JsonProcessingException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addKnowledge_ValidData_ReturnsSuccess() throws JsonProcessingException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         long knowledgeCount = knowledgeRepository.count();
 
         AddKnowledgeRequest request = new AddKnowledgeRequest("knowledge title", "example knowledge content", softwareID);
@@ -245,16 +284,18 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
         assertEquals(knowledgeRepository.count(), knowledgeCount+1);
     }
 
-    //POST: /api/knowledge-bases
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the software ID is incorrect.
+    /**
+     * Controller method: KnowledgeBaseController.addKnowledge
+     * HTTP Method: POST
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempting to add knowledge with an invalid software ID.
+     */
     @Test
-    public void testAddKnowledgeWhenSoftwareIdIsWrong() throws JsonProcessingException {
-        Software software = initializeSoftware().get(0);
-        Knowledge knowledge = initializeKnowledge(software.getId()).get(0);
+    public void addKnowledge_InvalidSoftwareId_ReturnsNotFound() throws JsonProcessingException {
         long softwareID = 1000;
 
-        AddKnowledgeRequest request = new AddKnowledgeRequest(knowledge.getTitle(), "example knowledge content", softwareID);
+        AddKnowledgeRequest request = new AddKnowledgeRequest("knowledge title", "example knowledge content", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String newKnowledgeJson = objectMapper.writeValueAsString(request);
 
@@ -270,11 +311,16 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .log().all();
     }
 
-    //POST: /api/knowledge-bases
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if knowledge with the given title already exists.
+    /**
+     * Controller method: KnowledgeBaseController.addKnowledge
+     * HTTP Method: POST
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 200 OK
+     * Scenario: Add a knowledge item when the title already exists but under a different software.
+     * Verification: Confirms the knowledge count increases.
+     */
     @Test
-    public void testAddKnowledgeWhenTitleAlreadyExists() throws JsonProcessingException {
+    public void addKnowledge_TitleAlreadyExistsWithDifferentSoftware_ReturnsSuccess() throws JsonProcessingException {
         List<Software> softwareList = initializeSoftware();
         Long softwareID = softwareList.get(1).getId();
         List<Knowledge> knowledgeList = initializeKnowledge(softwareID);
@@ -298,17 +344,24 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
         assertEquals(knowledgeRepository.count(), knowledgeList.size()+1);
     }
 
-    //POST: /api/knowledge-bases
-    //Expected status: CONFLICT (409)
-    //Purpose: Verify the status returned if knowledge with the given name already exists.
+    /**
+     * Controller method: KnowledgeBaseController.addKnowledge
+     * HTTP Method: POST
+     * Endpoint: /api/knowledge-bases
+     * Expected Status: 409 CONFLICT
+     * Scenario: Attempt to add a knowledge item when the title already exists for the same software.
+     * Verification: Confirms the knowledge count remains unchanged.
+     */
     @Test
-    public void testAddKnowledgeWhenNameAlreadyExists() throws JsonProcessingException {
-        Long softwareID = initializeSoftware().get(0).getId();
+    public void addKnowledge_DuplicateTitleAndSoftware_ReturnsConflict() throws JsonProcessingException {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         Knowledge knowledge = initializeKnowledge(softwareID).get(0);
 
         AddKnowledgeRequest request = new AddKnowledgeRequest(knowledge.getTitle(), "example knowledge content", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String newKnowledgeJson = objectMapper.writeValueAsString(request);
+
+        long knowledgeNumber = knowledgeRepository.count();
 
         given()
                 .auth().oauth2(jwtToken)
@@ -320,15 +373,22 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("Knowledge with title '" + request.title() + "' and software ID '" + softwareID + "' already exists."))
                 .log().all();
+
+        assertEquals(knowledgeRepository.count(), knowledgeNumber);
     }
 
-    //DELETE: /api/knowledge-bases/<knowledgeID>
-    //Expected status: OK (200)
-    //Purpose: Verify the status returned if the request contains valid data.
+    /**
+     * Controller method: KnowledgeBaseController.deleteKnowledge
+     * HTTP Method: DELETE
+     * Endpoint: /api/knowledge-bases/{knowledgeID}
+     * Expected Status: 200 OK
+     * Scenario: Delete a knowledge item with a valid ID.
+     * Verification: Confirms the knowledge count decreases.
+     */
     @Test
-    public void testDeleteKnowledge() {
-        List<Software> softwareList = initializeSoftware();
-        List<Knowledge> knowledgeList = initializeKnowledge(softwareList.get(0).getId());
+    public void deleteKnowledge_ValidId_ReturnsSuccess() {
+        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
+        List<Knowledge> knowledgeList = initializeKnowledge(softwareID);
         Knowledge knowledge = knowledgeList.get(0);
 
         given()
@@ -344,11 +404,15 @@ public class KnowledgeBaseControllerAdminIT extends BaseIntegrationTest {
         assertEquals(knowledgeRepository.count(), knowledgeList.size()-1);
     }
 
-    //DELETE: /api/knowledge-bases/<knowledgeID>
-    //Expected status: NOT FOUND (404)
-    //Purpose: Verify the returned status when the knowledge ID is incorrect.
+    /**
+     * Controller method: KnowledgeBaseController.deleteKnowledge
+     * HTTP Method: DELETE
+     * Endpoint: /api/knowledge-bases/{knowledgeID}
+     * Expected Status: 404 NOT FOUND
+     * Scenario: Attempt to delete a knowledge item with an invalid ID.
+     */
     @Test
-    public void testDeleteKnowledgeWhenIdIsWrong() {
+    public void deleteKnowledge_InvalidId_ReturnsNotFound() {
         long knowledgeID = 1000;
 
         given()

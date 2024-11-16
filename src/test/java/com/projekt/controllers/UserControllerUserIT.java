@@ -7,11 +7,9 @@ import com.projekt.models.Role;
 import com.projekt.models.User;
 import com.projekt.payload.request.add.AddUserRequest;
 import com.projekt.payload.request.update.UpdateUserRequest;
-import com.projekt.repositories.UserRepository;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
@@ -21,9 +19,6 @@ import static org.hamcrest.Matchers.equalTo;
 
 public class UserControllerUserIT extends BaseIntegrationTest {
     String jwtToken;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @BeforeEach
     public void setUpTestData() throws JsonProcessingException {
@@ -36,10 +31,10 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/users/{userID}
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to access user account information as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to access user account information as a user without sufficient permissions.
      */
     @Test
-    public void getUser_WithUserRole_ReturnsUnauthorized() {
+    public void getUser_InsufficientPermissions_ReturnsUnauthorized() {
         User user = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
 
         given()
@@ -58,10 +53,10 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: POST
      * Endpoint: /api/users
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to add user account as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to add user account as a user without sufficient permissions.
      */
     @Test
-    public void addUser_WithUserRole_ReturnsUnauthorized() throws JsonProcessingException {
+    public void addUser_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         AddUserRequest request = new AddUserRequest("username", "password", "newaccount@mail.com", "Name", "Surname", List.of("ROLE_OPERATOR"));
         ObjectMapper objectMapper = new ObjectMapper();
         String newUserJson = objectMapper.writeValueAsString(request);
@@ -83,10 +78,10 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: PUT
      * Endpoint: /api/users
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to update user account as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to update user account as a user without sufficient permissions.
      */
     @Test
-    public void updateUser_WithUserRole_ReturnsUnauthorized() throws JsonProcessingException {
+    public void updateUser_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
 
         UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, List.of("ROLE.NOT_EXIST"));
@@ -110,10 +105,10 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/users
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to access users list as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to access users list as a user without sufficient permissions.
      */
     @Test
-    public void getAllUsers_WithUserRole_ReturnsUnauthorized() {
+    public void getAllUsers_InsufficientPermissions_ReturnsUnauthorized() {
         initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
 
         given()
@@ -131,12 +126,11 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      * HTTP Method: DELETE
      * Endpoint: /api/users/{userID}
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to delete user account as a user without sufficient permissions (as USER).
+     * Scenario: Attempting to delete user account as a user without sufficient permissions.
      */
     @Test
-    public void deleteUser_WithUserRole_ReturnsUnauthorized() {
-        initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
-        Long userID = userRepository.findAll().get(3).getId();
+    public void deleteUser_InsufficientPermissions_ReturnsUnauthorized() {
+        Long userID = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN).getId();
 
         given()
                 .auth().oauth2(jwtToken)

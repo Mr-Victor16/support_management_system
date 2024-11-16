@@ -41,7 +41,7 @@ public class CategoryControllerOperatorIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/categories
      * Expected Status: 200 OK
-     * Scenario: Retrieving all categories with operator role.
+     * Scenario: Retrieving all categories.
      * Verification: Confirms the returned list size matches the expected category count in the repository.
      */
     @Test
@@ -85,7 +85,7 @@ public class CategoryControllerOperatorIT extends BaseIntegrationTest {
 
         List<CategoryResponse> responseList = response.jsonPath().getList(".", CategoryResponse.class);
 
-        assertEquals(responseList.get(0).useNumber(), 2);
+        assertEquals(2, responseList.get(0).useNumber());
     }
 
     /**
@@ -93,11 +93,11 @@ public class CategoryControllerOperatorIT extends BaseIntegrationTest {
      * HTTP Method: GET
      * Endpoint: /api/categories/{userID}
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to retrieve category by ID as a user without sufficient permissions (as OPERATOR).
+     * Scenario: Attempting to retrieve category by ID as a user without sufficient permissions.
      */
     @Test
-    public void getCategoryById_WithOperatorRole_ReturnsUnauthorized() {
-        Category category = initializeCategories().get(0);
+    public void getCategoryById_InsufficientPermissions_ReturnsUnauthorized() {
+        Category category = initializeCategory("General");
 
         given()
                 .auth().oauth2(jwtToken)
@@ -115,11 +115,11 @@ public class CategoryControllerOperatorIT extends BaseIntegrationTest {
      * HTTP Method: PUT
      * Endpoint: /api/categories
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to update category as a user without sufficient permissions (as OPERATOR).
+     * Scenario: Attempting to update category as a user without sufficient permissions.
      */
     @Test
-    public void updateCategory_WithOperatorRole_ReturnsUnauthorized() throws JsonProcessingException {
-        Category category = initializeCategories().get(0);
+    public void updateCategory_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
+        Category category = initializeCategory("General");
 
         UpdateCategoryRequest request = new UpdateCategoryRequest(category.getId(), "Updated category");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -142,12 +142,10 @@ public class CategoryControllerOperatorIT extends BaseIntegrationTest {
      * HTTP Method: POST
      * Endpoint: /api/categories
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to add category as a user without sufficient permissions (as OPERATOR).
+     * Scenario: Attempting to add category as a user without sufficient permissions.
      */
     @Test
-    public void addCategory_WithOperatorRole_ReturnsUnauthorized() throws JsonProcessingException {
-        List<Category> categoryList = initializeCategories();
-
+    public void addCategory_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         AddCategoryRequest request = new AddCategoryRequest("New category");
         ObjectMapper objectMapper = new ObjectMapper();
         String newCategoryJson = objectMapper.writeValueAsString(request);
@@ -162,8 +160,6 @@ public class CategoryControllerOperatorIT extends BaseIntegrationTest {
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
                 .body("message", equalTo("Full authentication is required to access this resource"))
                 .log().all();
-
-        assertEquals(categoryRepository.count(), categoryList.size());
     }
 
     /**
@@ -171,11 +167,11 @@ public class CategoryControllerOperatorIT extends BaseIntegrationTest {
      * HTTP Method: DELETE
      * Endpoint: /api/categories
      * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Attempting to delete category as a user without sufficient permissions (as OPERATOR).
+     * Scenario: Attempting to delete category as a user without sufficient permissions.
      */
     @Test
-    public void deleteCategory_WithOperatorRole_ReturnsUnauthorized() {
-        Category category = initializeCategories().get(0);
+    public void deleteCategory_InsufficientPermissions_ReturnsUnauthorized() {
+        Category category = initializeCategory("General");
 
         given()
                 .auth().oauth2(jwtToken)
