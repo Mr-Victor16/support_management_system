@@ -40,10 +40,14 @@ public class TicketServiceTests {
         ticketService = new TicketServiceImpl(ticketRepository, mailService, userRepository, statusRepository, categoryRepository, priorityRepository, softwareRepository);
     }
 
-    //boolean isAuthorized(Long ticketID, String username);
-    //Verifies that the method returns ‘true’ when the user has the role 'Operator'.
+    /**
+     * Method: boolean isAuthorized(Long ticketID, String username)
+     * Description: Verifies that the method returns 'true' when the user has the role 'Operator'.
+     * Expected behavior:
+     *  - User is authorized if they have the 'Operator' role.
+     */
     @Test
-    void testIsAuthorized_shouldReturnTrue_userIsOperator() {
+    void isAuthorized_UserIsOperator_ShouldReturnTrue() {
         String username = "nickname";
 
         when(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)).thenReturn(true);
@@ -51,13 +55,17 @@ public class TicketServiceTests {
         assertTrue(ticketService.isAuthorized(1L, username));
     }
 
-    //boolean isAuthorized(Long ticketID, String username);
-    //Verifies that the method returns ‘true’ when the user owns the ticket.
+    /**
+     * Method: boolean isAuthorized(Long ticketID, String username)
+     * Description: Verifies that the method returns 'true' when the user owns the ticket.
+     * Expected behavior:
+     *  - User is authorized if they own the ticket.
+     */
     @Test
-    void testIsAuthorized_shouldReturnTrue_userIsTicketOwner() {
-        String username = "nickname";
-        Long userID = 1L;
-        Long ticketID = 2L;
+    void isAuthorized_UserIsTicketOwner_ShouldReturnTrue(){
+    String username = "nickname";
+        long userID = 1;
+        long ticketID = 2;
 
         User user = new User();
         user.setUsername(username);
@@ -74,41 +82,50 @@ public class TicketServiceTests {
         assertTrue(ticketService.isAuthorized(ticketID, username));
     }
 
-    //boolean isAuthorized(Long ticketID, String username);
-    //Ensures that the method returns ‘false’ when the user has neither the ‘Operator’ role nor the owner of the request.
+    /**
+     * Method: boolean isAuthorized(Long ticketID, String username)
+     * Description: Ensures that the method returns 'false' when the user has neither the 'Operator' role nor the ownership of the ticket.
+     * Expected behavior:
+     *  - User is not authorized if they don't have the 'Operator' role and are not the ticket owner.
+     */
     @Test
-    void testIsAuthorized_shouldReturnFalse_userIsNotAuthorized() {
+    void isAuthorized_UserIsNotAuthorized_ShouldReturnFalse() {
         String username = "nickname";
-        Long userID = 1L;
-        Long ticketID = 2L;
+        long userID = 1;
+        long ticketID = 2;
 
-        User user = new User();
-        user.setUsername(username);
-        user.setId(userID);
+        User firstUser = new User();
+        firstUser.setUsername(username);
+        firstUser.setId(userID);
 
-        User user2 = new User();
-        user2.setUsername("name");
-        user2.setId(2L);
+        User secondUser = new User();
+        secondUser.setUsername("name");
+        secondUser.setId(2L);
 
         Ticket ticket = new Ticket();
-        ticket.setUser(user2);
+        ticket.setUser(secondUser);
         ticket.setId(ticketID);
 
         when(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)).thenReturn(false);
-        when(userRepository.findByUsernameIgnoreCase(username)).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameIgnoreCase(username)).thenReturn(Optional.of(firstUser));
         when(ticketRepository.findById(ticketID)).thenReturn(Optional.of(ticket));
 
         assertFalse(ticketService.isAuthorized(ticketID, username));
     }
 
-    //void changeStatus(Long ticketID, Long statusID);
-    //Verifies the correctness of the change in the status of the ticket.
+    /**
+     * Method: void changeStatus(Long ticketID, Long statusID)
+     * Description: Verifies the correctness of changing the status of a ticket and sending an email notification.
+     * Expected behavior:
+     *  - The status of the ticket is updated.
+     *  - A notification email is sent to the user after the status change.
+     */
     @Test
-    void testChangeStatus() throws MessagingException {
-        Long ticketID = 1L;
-        Long statusID = 2L;
-        Long newStatusID = 3L;
-        Long userID = 3L;
+    void changeStatus_ShouldChangeTicketStatusAndSendEmail() throws MessagingException {
+        long ticketID = 1;
+        long statusID = 2;
+        long newStatusID = 3;
+        long userID = 3;
 
         Status status = new Status();
         status.setId(statusID);

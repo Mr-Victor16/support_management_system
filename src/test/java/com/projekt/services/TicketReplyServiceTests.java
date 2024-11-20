@@ -52,13 +52,19 @@ public class TicketReplyServiceTests {
         ticketReplyService = new TicketReplyServiceImpl(ticketReplyRepository, ticketRepository, ticketService, mailService, userRepository);
     }
 
-    //public void add(AddTicketReplyRequest request, Principal principal);
-    //Checks that the response to the ticket is added correctly.
+    /**
+     * Method: void add(AddTicketReplyRequest request, Principal principal)
+     * Description: Checks that a reply is successfully added to an open ticket and saved in the repository.
+     * Expected behavior:
+     *  - A new reply is added to the ticket.
+     *  - Ticket is updated and saved.
+     *  - Ticket reply is saved in the TicketReplyRepository.
+     */
     @Test
-    void testAddReply() {
-        Long ticketID = 1L;
-        Long userID = 2L;
-        Long statusID = 2L;
+    void addReplyToOpenTicket_ShouldAddReplySuccessfully() {
+        long ticketID = 1;
+        long userID = 2;
+        long statusID = 2;
         String username = "nickname";
 
         AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, "content");
@@ -88,16 +94,22 @@ public class TicketReplyServiceTests {
 
         verify(ticketReplyRepository, times(1)).save(any(TicketReply.class));
         verify(ticketRepository, times(1)).save(ticket);
-        assertEquals(ticket.getReplies().size(), 1);
+        assertEquals(1, ticket.getReplies().size());
     }
 
-    //public void add(AddTicketReplyRequest request, Principal principal);
-    //Check if a response to the ticket is blocked when it is closed.
+    /**
+     * Method: void add(AddTicketReplyRequest request, Principal principal)
+     * Description: Checks that adding a reply to a closed ticket is blocked and an exception is thrown.
+     * Expected behavior:
+     *  - No reply is added to the ticket.
+     *  - No changes are saved to the repository.
+     *  - UnauthorizedActionException is thrown with the appropriate message.
+     */
     @Test
-    void testAddReplyWhenTicketIsClosed() {
-        Long ticketID = 1L;
-        Long userID = 2L;
-        Long statusID = 2L;
+    void addReplyToClosedTicket_ShouldThrowUnauthorizedActionException() {
+        long ticketID = 1;
+        long userID = 2;
+        long statusID = 2;
         String username = "nickname";
 
         AddTicketReplyRequest request = new AddTicketReplyRequest(ticketID, "content");
@@ -129,7 +141,7 @@ public class TicketReplyServiceTests {
 
         verify(ticketReplyRepository, times(0)).save(any(TicketReply.class));
         verify(ticketRepository, times(0)).save(ticket);
-        assertEquals(ticket.getReplies().size(), 0);
+        assertEquals(0, ticket.getReplies().size());
         assertEquals("You do not have permission to add reply to closed ticket", exception.getMessage());
     }
 }

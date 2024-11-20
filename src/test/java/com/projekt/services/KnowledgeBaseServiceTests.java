@@ -26,12 +26,97 @@ public class KnowledgeBaseServiceTests {
         knowledgeBaseService = new KnowledgeBaseServiceImpl(knowledgeRepository, softwareRepository);
     }
 
-    //boolean findDuplicate(String title, Long softwareID);
-    //Tests that the method returns true when a knowledge entry with the same title and software ID exists
+    /**
+     * Method: boolean findDuplicate(Long knowledgeID, String knowledgeTitle, Long softwareID)
+     * Description: Knowledge has unique title. Test should return false.
+     * Expected return: FALSE
+     */
     @Test
-    void shouldReturnTrue_whenKnowledgeWithSameTitleAndSoftwareIdExists() {
+    void findDuplicateWithKnowledgeId_knowledgeTitleIsUnique_shouldReturnFalse(){
+        String knowledgeTitle = "Non-existing Knowledge";
+        long softwareID = 1;
+        long knowledgeID = 2;
+
+        when(knowledgeRepository.findByTitleIgnoreCase(knowledgeTitle)).thenReturn(null);
+
+        assertFalse(knowledgeBaseService.findDuplicate(knowledgeID, knowledgeTitle, softwareID));
+    }
+
+    /**
+     * Method: boolean findDuplicate(Long knowledgeID, String knowledgeTitle, Long softwareID)
+     * Description: Knowledge with the same title exists, but has a different software ID.
+     * Expected return: FALSE
+     */
+    @Test
+    void findDuplicateWithKnowledgeId_knowledgeTitleIsNonUniqueButInOtherSoftware_shouldReturnFalse(){
         String knowledgeTitle = "Existing Knowledge";
-        Long softwareID = 1L;
+        long softwareID = 1;
+        long differentSoftwareID = 2;
+        long knowledgeID = 2;
+
+        Knowledge knowledge = new Knowledge();
+        knowledge.setTitle(knowledgeTitle);
+        knowledge.setSoftware(new Software());
+        knowledge.getSoftware().setId(differentSoftwareID);
+
+        when(knowledgeRepository.findByTitleIgnoreCase(knowledgeTitle)).thenReturn(knowledge);
+
+        assertFalse(knowledgeBaseService.findDuplicate(knowledgeID, knowledgeTitle, softwareID));
+    }
+
+    /**
+     * Method: boolean findDuplicate(Long knowledgeID, String knowledgeTitle, Long softwareID)
+     * Description: Knowledge with the same title and software ID exists, but has a different knowledge ID.
+     * Expected return: TRUE
+     */
+    @Test
+    void findDuplicateWithKnowledgeId_knowledgeWithDifferentIdHasSameTitleAndSoftware_shouldReturnTrue() {
+        String knowledgeTitle = "Existing Knowledge";
+        long softwareID = 1;
+        long knowledgeID = 2;
+
+        Knowledge knowledge = new Knowledge();
+        knowledge.setId(1L);
+        knowledge.setTitle(knowledgeTitle);
+        knowledge.setSoftware(new Software());
+        knowledge.getSoftware().setId(softwareID);
+
+        when(knowledgeRepository.findByTitleIgnoreCase(knowledgeTitle)).thenReturn(knowledge);
+
+        assertTrue(knowledgeBaseService.findDuplicate(knowledgeID, knowledgeTitle, softwareID));
+    }
+
+    /**
+     * Method: boolean findDuplicate(Long knowledgeID, String knowledgeTitle, Long softwareID)
+     * Description: Knowledge with the same title and software ID exists, but has the same knowledge ID.
+     * Expected return: FALSE
+     */
+    @Test
+    void findDuplicateWithKnowledgeId_knowledgeWithSameIdHasSameTitleAndSoftware_ShouldReturnFalse() {
+        String knowledgeTitle = "Existing Knowledge";
+        long softwareID = 1;
+        long knowledgeID = 2;
+
+        Knowledge knowledge = new Knowledge();
+        knowledge.setId(knowledgeID);
+        knowledge.setTitle(knowledgeTitle);
+        knowledge.setSoftware(new Software());
+        knowledge.getSoftware().setId(softwareID);
+
+        when(knowledgeRepository.findByTitleIgnoreCase(knowledgeTitle)).thenReturn(knowledge);
+
+        assertFalse(knowledgeBaseService.findDuplicate(knowledgeID, knowledgeTitle, softwareID));
+    }
+
+    /**
+     * Method: boolean findDuplicate(String knowledgeTitle, Long softwareID)
+     * Description: Knowledge with the same title and software ID exists.
+     * Expected return: TRUE
+     */
+    @Test
+    void findDuplicate_knowledgeWithDifferentIdHasSameTitleAndSoftware_shouldReturnTrue() {
+        String knowledgeTitle = "Existing Knowledge";
+        long softwareID = 1;
 
         Knowledge knowledge = new Knowledge();
         knowledge.setTitle(knowledgeTitle);
@@ -43,25 +128,31 @@ public class KnowledgeBaseServiceTests {
         assertTrue(knowledgeBaseService.findDuplicate(knowledgeTitle, softwareID));
     }
 
-    //boolean findDuplicate(String title, Long softwareID);
-    //Tests that the method returns false when no knowledge entry with the given title exists
+    /**
+     * Method: boolean findDuplicate(String knowledgeTitle, Long softwareID)
+     * Description: Knowledge has unique title. Test should return false.
+     * Expected return: FALSE
+     */
     @Test
-    void shouldReturnFalse_whenKnowledgeWithTitleDoesNotExist() {
+    void findDuplicate_knowledgeTitleIsUnique_shouldReturnFalse(){
         String knowledgeTitle = "Non-existing Knowledge";
-        Long softwareID = 1L;
+        long softwareID = 1;
 
         when(knowledgeRepository.findByTitleIgnoreCase(knowledgeTitle)).thenReturn(null);
 
         assertFalse(knowledgeBaseService.findDuplicate(knowledgeTitle, softwareID));
     }
 
-    //boolean findDuplicate(String title, Long softwareID);
-    //Tests that the method returns false when a knowledge entry with the same title but different software ID exists
+    /**
+     * Method: boolean findDuplicate(String knowledgeTitle, Long softwareID)
+     * Description: Knowledge with the same title exists, but has a different software ID.
+     * Expected return: FALSE
+     */
     @Test
-    void shouldReturnFalse_whenKnowledgeWithSameTitleButDifferentSoftwareIdExists() {
+    void findDuplicate_knowledgeTitleIsNonUniqueButInOtherSoftware_shouldReturnFalse(){
         String knowledgeTitle = "Existing Knowledge";
-        Long softwareID = 1L;
-        Long differentSoftwareID = 2L;
+        long softwareID = 1;
+        long differentSoftwareID = 2;
 
         Knowledge knowledge = new Knowledge();
         knowledge.setTitle(knowledgeTitle);
@@ -73,12 +164,17 @@ public class KnowledgeBaseServiceTests {
         assertFalse(knowledgeBaseService.findDuplicate(knowledgeTitle, softwareID));
     }
 
-    //void update(UpdateKnowledgeRequest request);
-    //Tests the update method to ensure the knowledge is correctly updated based on the data from the UpdateKnowledgeRequest object.
+    /**
+     * Method: void update(UpdateKnowledgeRequest request)
+     * Description: Tests the update method to ensure the knowledge entity is correctly updated based on the data from the UpdateKnowledgeRequest object.
+     * Expected behavior:
+     *  - The knowledge entity's title, content and associated software are updated.
+     *  - The knowledge entity is saved in the repository.
+     */
     @Test
-    void testUpdateKnowledge() {
-        Long knowledgeID = 1L;
-        Long softwareID = 2L;
+    void update_ValidRequestIsProvided_ShouldUpdateKnowledgeSuccessfully() {
+        long knowledgeID = 1;
+        long softwareID = 2;
 
         UpdateKnowledgeRequest request = new UpdateKnowledgeRequest(knowledgeID, "Updated Title", "Updated Content", softwareID);
 
