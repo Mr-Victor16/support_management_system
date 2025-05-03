@@ -11,10 +11,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
 @Configuration
 @Profile("test")
 public class MainTestDataInitializer {
@@ -43,21 +39,21 @@ public class MainTestDataInitializer {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
         User user = new User("user", true);
-        user.setRoles(new HashSet<>(List.of(roleUser)));
+        user.setRole(roleUser);
         user.setEmail("example1@gmail.com");
         user.setName("Jan");
         user.setSurname("Kowalski");
         user.setPassword(passwordEncoder.encode("user"));
 
         User operator = new User("operator", true);
-        operator.setRoles(new HashSet<>(Arrays.asList(roleOperator,roleUser)));
+        operator.setRole(roleOperator);
         operator.setEmail("example2@gmail.com");
         operator.setName("Adam");
         operator.setSurname("Nowak");
         operator.setPassword(passwordEncoder.encode("operator"));
 
         User admin = new User("admin", true);
-        admin.setRoles(new HashSet<>(List.of(roleAdmin)));
+        admin.setRole(roleAdmin);
         admin.setEmail("example3@gmail.com");
         admin.setName("Piotr");
         admin.setSurname("Kowalski");

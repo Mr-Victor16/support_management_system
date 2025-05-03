@@ -12,10 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class UserConverter {
@@ -26,25 +23,18 @@ public class UserConverter {
     }
 
     public static UserDetailsResponse toUserDetailsResponse(User user){
-        List<String> roles = user.getRoles().stream()
-                .map(role -> role.getType().name())
-                .toList();
-
         return new UserDetailsResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getName(),
                 user.getSurname(),
                 user.getEmail(),
-                roles
+                user.getRole().getType().name()
         );
     }
 
     public static UserDetails toUserDetails(User user) {
-        Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-        for (Role role : user.getRoles()){
-            grantedAuthorities.add(new SimpleGrantedAuthority(role.getType().toString()));
-        }
+        Set<GrantedAuthority> grantedAuthorities = Set.of(new SimpleGrantedAuthority(user.getRole().getType().toString()));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
@@ -58,9 +48,7 @@ public class UserConverter {
     }
 
     public static LoginResponse toLoginResponse(UserDetailsImpl userDetails, String token) {
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
         return new LoginResponse(
                 userDetails.getId(),
@@ -69,14 +57,12 @@ public class UserConverter {
                 userDetails.getSurname(),
                 userDetails.getEmail(),
                 token,
-                roles
+                role
         );
     }
 
-    public Set<Role> fromRoleNames(List<String> roleNames) {
-        return roleNames.stream()
-                .map(roleName -> roleRepository.findRoleByType(Role.Types.valueOf(roleName))
-                        .orElseThrow(() -> new NotFoundException("Role", roleName)))
-                .collect(Collectors.toSet());
+    public Role fromRoleName(String roleName) {
+        return roleRepository.findRoleByType(Role.Types.valueOf(roleName))
+                .orElseThrow(() -> new NotFoundException("Role", roleName));
     }
 }

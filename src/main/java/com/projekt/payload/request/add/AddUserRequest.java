@@ -3,8 +3,6 @@ package com.projekt.payload.request.add;
 import com.projekt.validators.FirstCharacterConstraint;
 import jakarta.validation.constraints.*;
 
-import java.util.List;
-
 public record AddUserRequest(
         @Size(min = 2, max = 36)
         @NotBlank
@@ -27,6 +25,6 @@ public record AddUserRequest(
         @FirstCharacterConstraint
         String surname,
 
-        @NotEmpty
-        List<String> roles
+        @NotBlank
+        String role
 ) { }

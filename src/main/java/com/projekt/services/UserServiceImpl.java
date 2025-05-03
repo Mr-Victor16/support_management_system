@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.mail.MessagingException;
 
 import java.util.List;
-import java.util.Set;
 
 @Service("userDetailsService")
 public class UserServiceImpl implements UserService{
@@ -73,9 +73,7 @@ public class UserServiceImpl implements UserService{
         user.setEmail(request.email());
         user.setName(request.name());
         user.setSurname(request.surname());
-
-        Set<Role> roles = userConverter.fromRoleNames(request.roles());
-        user.setRoles(roles);
+        user.setRole(userConverter.fromRoleName(request.role()));
         user.setEnabled(request.enabled());
 
         userRepository.save(user);
@@ -86,7 +84,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User", id));
 
-        if (user.getRoles().stream().anyMatch(role -> role.getType() == Role.Types.ROLE_ADMIN)
+        if (user.getRole().getType() == Role.Types.ROLE_ADMIN
                 && userRepository.isExactlyOneUserWithRole(Role.Types.ROLE_ADMIN)) {
             throw DefaultEntityDeletionException.forDefaultAdmin();
         }
@@ -121,12 +119,12 @@ public class UserServiceImpl implements UserService{
                 request.surname()
         );
 
-        user.setRoles(Set.of(roleRepository.findByType(Role.Types.ROLE_USER)));
+        user.setRole(roleRepository.findByType(Role.Types.ROLE_USER));
 
         try {
             User savedUser = userRepository.save(user);
             mailService.sendRegisterMessage(savedUser.getId(), savedUser.isEnabled());
-        } catch (MessagingException ex) {
+        } catch (MessagingException | AuthenticationException ex) {
             throw new NotificationFailedException("Error occurred while sending registration notification", ex);
         }
     }
@@ -182,8 +180,7 @@ public class UserServiceImpl implements UserService{
                 request.surname()
         );
 
-        Set<Role> roles = userConverter.fromRoleNames(request.roles());
-        user.setRoles(roles);
+        user.setRole(userConverter.fromRoleName(request.role()));
         user.setEnabled(true);
 
         userRepository.save(user);

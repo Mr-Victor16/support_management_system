@@ -13,7 +13,7 @@ public class FirstCharacterValidator implements ConstraintValidator<FirstCharact
 
     @Override
     public boolean isValid(String name, ConstraintValidatorContext constraintValidatorContext) {
-        if(name != null){
+        if(name != null && !name.isBlank()){
             return Character.isUpperCase(name.charAt(0));
         }
 

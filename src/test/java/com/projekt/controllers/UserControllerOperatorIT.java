@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
-import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -105,7 +104,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void addUser_ValidData_ReturnsSuccess() throws JsonProcessingException {
-        AddUserRequest request = new AddUserRequest("username", "password", "newaccount@mail.com", "Name", "Surname", List.of("ROLE_OPERATOR"));
+        AddUserRequest request = new AddUserRequest("username", "password", "newaccount@mail.com", "Name", "Surname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String newUserJson = objectMapper.writeValueAsString(request);
 
@@ -137,7 +136,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
     public void addUser_DuplicateUsername_ReturnsConflict() throws JsonProcessingException {
         User user = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
 
-        AddUserRequest request = new AddUserRequest(user.getUsername(), "password", "newaccount@mail.com", "Name", "Surname", List.of("ROLE_OPERATOR"));
+        AddUserRequest request = new AddUserRequest(user.getUsername(), "password", "newaccount@mail.com", "Name", "Surname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String newUserJson = objectMapper.writeValueAsString(request);
 
@@ -169,7 +168,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
     public void addUser_DuplicateEmail_ReturnsConflict() throws JsonProcessingException {
         User user = initializeUser("newAccount", "password", true, Role.Types.ROLE_ADMIN);
 
-        AddUserRequest request = new AddUserRequest("username", "password", user.getEmail(), "Name", "Surname", List.of("ROLE_OPERATOR"));
+        AddUserRequest request = new AddUserRequest("username", "password", user.getEmail(), "Name", "Surname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String newUserJson = objectMapper.writeValueAsString(request);
 
@@ -200,7 +199,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
     public void updateUser_ValidData_ReturnsSuccess() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
 
-        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, List.of("ROLE_OPERATOR"));
+        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 
@@ -228,7 +227,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
         String usedUsername = userRepository.findAll().get(0).getUsername();
 
-        UpdateUserRequest request = new UpdateUserRequest(user.getId(), usedUsername, "testnew@mail.com", "NewName", "NewSurname", true, List.of("ROLE_OPERATOR"));
+        UpdateUserRequest request = new UpdateUserRequest(user.getId(), usedUsername, "testnew@mail.com", "NewName", "NewSurname", true, "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 
@@ -256,7 +255,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
         String usedEmail = userRepository.findAll().get(0).getEmail();
 
-        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", usedEmail, "NewName", "NewSurname", true, List.of("ROLE_OPERATOR"));
+        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", usedEmail, "NewName", "NewSurname", true, "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 
@@ -283,7 +282,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
     public void updateUser_InvalidUserId_ReturnsNotFound() throws JsonProcessingException {
         Long userID = 1000L;
 
-        UpdateUserRequest request = new UpdateUserRequest(userID, "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, List.of("ROLE_OPERATOR"));
+        UpdateUserRequest request = new UpdateUserRequest(userID, "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 

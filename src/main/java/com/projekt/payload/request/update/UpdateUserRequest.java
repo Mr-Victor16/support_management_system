@@ -3,8 +3,6 @@ package com.projekt.payload.request.update;
 import com.projekt.validators.FirstCharacterConstraint;
 import jakarta.validation.constraints.*;
 
-import java.util.List;
-
 public record UpdateUserRequest(
         @Positive
         Long userID,
@@ -29,6 +27,6 @@ public record UpdateUserRequest(
 
         Boolean enabled,
 
-        @NotEmpty
-        List<String> roles
+        @NotBlank
+        String role
 ) { }

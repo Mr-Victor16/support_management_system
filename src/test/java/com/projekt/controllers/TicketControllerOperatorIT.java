@@ -71,12 +71,11 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
      * Controller method: TicketController.getUserTickets
      * HTTP Method: GET
      * Endpoint: /api/tickets/user
-     * Expected Status: 200 OK
-     * Scenario: Retrieving tickets for the authenticated user.
-     * Verification: Confirms the returned list size matches the number of tickets initialized for the user.
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to retrieve user tickets as a user without sufficient permissions.
      */
     @Test
-    public void getUserTickets_ReturnsUserTicketsSuccessfully() throws IOException {
+    public void getUserTickets_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
         Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         initializeTicket(softwareID);
 
@@ -85,9 +84,8 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .when()
                 .get("/api/tickets/user")
                 .then()
-                .statusCode(HttpStatus.OK.value())
-                .contentType(ContentType.JSON)
-                .body("size()", equalTo(1))
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .body("message", equalTo("Full authentication is required to access this resource"))
                 .log().all();
     }
 
@@ -193,19 +191,15 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
      * Controller method: TicketController.addTicket
      * HTTP Method: POST
      * Endpoint: /api/tickets
-     * Expected Status: 200 OK
-     * Scenario: Adding a ticket with valid data.
-     * Verification: Confirms that the ticket count in the repository has increased.
+     * Expected Status: 401 UNAUTHORIZED
+     * Scenario: Attempting to add new ticket as a user without sufficient permissions.
      */
     @Test
-    public void addTicket_ValidData_ReturnsSuccess() throws IOException {
-        initializeStatus("Default", false, true);
+    public void addTicket_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
         Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         Long categoryID = initializeCategory("General").getId();
         Long priorityID = initializePriority("High", 1).getId();
 
-        long ticketCount = ticketRepository.count();
-
         AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
         String newTicketJson = objectMapper.writeValueAsString(request);
@@ -217,98 +211,8 @@ public class TicketControllerOperatorIT extends BaseIntegrationTest {
                 .when()
                 .post("/api/tickets")
                 .then()
-                .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Ticket added"))
-                .log().all();
-
-        assertEquals(ticketRepository.count(), ticketCount+1);
-    }
-
-    /**
-     * Controller method: TicketController.addTicket
-     * HTTP Method: POST
-     * Endpoint: /api/tickets
-     * Expected Status: 404 NOT FOUND
-     * Scenario: Adding a ticket with an invalid category ID.
-     */
-    @Test
-    public void addTicket_InvalidCategoryId_ReturnsNotFound() throws IOException {
-        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
-        Long priorityID = initializePriority("High", 1).getId();
-        long categoryID = 1000;
-
-        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String newTicketJson = objectMapper.writeValueAsString(request);
-
-        given()
-                .auth().oauth2(jwtToken)
-                .contentType(ContentType.JSON)
-                .body(newTicketJson)
-                .when()
-                .post("/api/tickets")
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Category with ID " + request.categoryID() + " not found."))
-                .log().all();
-    }
-
-    /**
-     * Controller method: TicketController.addTicket
-     * HTTP Method: POST
-     * Endpoint: /api/tickets
-     * Expected Status: 404 NOT FOUND
-     * Scenario: Adding a ticket with an invalid priority ID.
-     */
-    @Test
-    public void addTicket_InvalidPriorityId_ReturnsNotFound() throws IOException {
-        Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
-        Long categoryID = initializeCategory("General").getId();
-        long priorityID = 1000;
-
-        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String newTicketJson = objectMapper.writeValueAsString(request);
-
-        given()
-                .auth().oauth2(jwtToken)
-                .contentType(ContentType.JSON)
-                .body(newTicketJson)
-                .when()
-                .post("/api/tickets")
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Priority with ID " + request.priorityID() + " not found."))
-                .log().all();
-    }
-
-    /**
-     * Controller method: TicketController.addTicket
-     * HTTP Method: POST
-     * Endpoint: /api/tickets
-     * Expected Status: 404 NOT FOUND
-     * Scenario: Adding a ticket with an invalid software ID.
-     */
-    @Test
-    public void addTicket_InvalidSoftwareId_ReturnsNotFound() throws IOException {
-        initializeStatus("Default", false, true);
-        Long categoryID = initializeCategory("General").getId();
-        Long priorityID = initializePriority("High", 1).getId();
-        long softwareID = 1000;
-
-        AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String newTicketJson = objectMapper.writeValueAsString(request);
-
-        given()
-                .auth().oauth2(jwtToken)
-                .contentType(ContentType.JSON)
-                .body(newTicketJson)
-                .when()
-                .post("/api/tickets")
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("Software with ID " + request.softwareID() + " not found."))
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .body("message", equalTo("Full authentication is required to access this resource"))
                 .log().all();
     }
 

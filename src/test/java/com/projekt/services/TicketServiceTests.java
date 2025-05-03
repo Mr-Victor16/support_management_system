@@ -50,7 +50,7 @@ public class TicketServiceTests {
     void isAuthorized_UserIsOperator_ShouldReturnTrue() {
         String username = "nickname";
 
-        when(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)).thenReturn(true);
+        when(userRepository.existsByUsernameIgnoreCaseAndRoleType(username, Role.Types.ROLE_OPERATOR)).thenReturn(true);
 
         assertTrue(ticketService.isAuthorized(1L, username));
     }
@@ -75,7 +75,7 @@ public class TicketServiceTests {
         ticket.setUser(user);
         ticket.setId(ticketID);
 
-        when(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)).thenReturn(false);
+        when(userRepository.existsByUsernameIgnoreCaseAndRoleType(username, Role.Types.ROLE_OPERATOR)).thenReturn(false);
         when(userRepository.findByUsernameIgnoreCase(username)).thenReturn(Optional.of(user));
         when(ticketRepository.findById(ticketID)).thenReturn(Optional.of(ticket));
 
@@ -106,7 +106,7 @@ public class TicketServiceTests {
         ticket.setUser(secondUser);
         ticket.setId(ticketID);
 
-        when(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)).thenReturn(false);
+        when(userRepository.existsByUsernameIgnoreCaseAndRoleType(username, Role.Types.ROLE_OPERATOR)).thenReturn(false);
         when(userRepository.findByUsernameIgnoreCase(username)).thenReturn(Optional.of(firstUser));
         when(ticketRepository.findById(ticketID)).thenReturn(Optional.of(ticket));
 

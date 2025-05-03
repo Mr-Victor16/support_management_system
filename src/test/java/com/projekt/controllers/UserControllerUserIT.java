@@ -12,8 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-import java.util.List;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -57,7 +55,7 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      */
     @Test
     public void addUser_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
-        AddUserRequest request = new AddUserRequest("username", "password", "newaccount@mail.com", "Name", "Surname", List.of("ROLE_OPERATOR"));
+        AddUserRequest request = new AddUserRequest("username", "password", "newaccount@mail.com", "Name", "Surname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String newUserJson = objectMapper.writeValueAsString(request);
 
@@ -84,7 +82,7 @@ public class UserControllerUserIT extends BaseIntegrationTest {
     public void updateUser_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
 
-        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, List.of("ROLE.NOT_EXIST"));
+        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, "ROLE.NOT_EXIST");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 

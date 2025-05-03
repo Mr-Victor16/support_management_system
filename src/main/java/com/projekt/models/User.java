@@ -13,7 +13,6 @@ import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Table( name = "users",
         uniqueConstraints = {
@@ -59,11 +58,9 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = false;
 
-    @ManyToMany
-    @JoinTable(name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Role role;
 
     @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<Ticket> tickets = new ArrayList<>();
@@ -81,13 +78,13 @@ public class User {
         this.surname = surname;
     }
 
-    public User(String username, String password, String email, String name, String surname, boolean enabled, Set<Role> roles) {
+    public User(String username, String password, String email, String name, String surname, boolean enabled, Role role) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.name = name;
         this.surname = surname;
         this.enabled = enabled;
-        this.roles = roles;
+        this.role = role;
     }
 }

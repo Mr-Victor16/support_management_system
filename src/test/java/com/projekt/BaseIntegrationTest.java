@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -191,7 +190,7 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
                 "Name",
                 "Surname",
                 activated,
-                Set.of(roleRepository.findByType(role))
+                roleRepository.findByType(role)
         );
         return userRepository.save(user);
     }

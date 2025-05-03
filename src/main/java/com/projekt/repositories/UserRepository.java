@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsernameIgnoreCase(String username);
 
-    boolean existsByUsernameIgnoreCaseAndRolesType(String username, Role.Types type);
+    boolean existsByUsernameIgnoreCaseAndRoleType(String username, Role.Types type);
 
     boolean existsByUsernameIgnoreCase(String username);
 
@@ -21,6 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByUsernameIgnoreCase(String username);
 
-    @Query("SELECT COUNT(u) = 1 FROM User u JOIN u.roles r WHERE r.type = :type")
+    @Query("SELECT COUNT(u) = 1 FROM User u JOIN u.role r WHERE r.type = :type")
     boolean isExactlyOneUserWithRole(@Param("type") Role.Types type);
 }

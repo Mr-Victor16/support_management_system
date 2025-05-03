@@ -60,7 +60,8 @@ public class TicketServiceImpl implements TicketService{
 
     @Override
     public boolean isAuthorized(Long ticketID, String username){
-        if(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)) return true;
+//        if(userRepository.existsByUsernameIgnoreCaseAndRolesType(username, Role.Types.ROLE_OPERATOR)) return true;
+        if(userRepository.existsByUsernameIgnoreCaseAndRoleType(username, Role.Types.ROLE_OPERATOR)) return true;
 
         User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new NotFoundException("User", username));
