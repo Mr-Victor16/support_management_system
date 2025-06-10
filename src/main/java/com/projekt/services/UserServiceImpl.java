@@ -156,12 +156,14 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void updateProfile(String username, UpdateProfileDetailsRequest request) {
+        if (request == null) return;
+
         User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new NotFoundException("User", username));
 
-        user.setName(request.name());
-        user.setSurname(request.surname());
-        user.setPassword(encoder.encode(request.password()));
+        if (!request.name().isBlank()) user.setName(request.name());
+        if (!request.surname().isBlank()) user.setSurname(request.surname());
+        if (!request.password().isBlank()) user.setPassword(encoder.encode(request.password()));
 
         userRepository.save(user);
     }
