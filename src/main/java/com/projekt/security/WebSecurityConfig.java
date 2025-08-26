@@ -7,6 +7,7 @@ import com.projekt.security.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -69,16 +70,20 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/categories/**").permitAll()
-                                .requestMatchers("/api/knowledge-bases/**").permitAll()
-                                .requestMatchers("/api/priorities/**").permitAll()
-                                .requestMatchers("/api/roles").permitAll()
-                                .requestMatchers("/api/software/**").permitAll()
-                                .requestMatchers("/api/statuses/**").permitAll()
-                                .requestMatchers("/api/tickets/**").permitAll()
-                                .requestMatchers("/api/users/**").permitAll()
-                                .requestMatchers("/api/profiles/**").permitAll()
+                        auth
+                                .requestMatchers("/api/auth/**").permitAll()
+
+                                .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/priorities/**", "/api/statuses/**", "/api/software/**", "/api/knowledge-bases/**").permitAll()
+
+                                .requestMatchers("/api/tickets/**").authenticated()
+                                .requestMatchers("/api/users/**").authenticated()
+                                .requestMatchers("/api/profiles/**").authenticated()
+                                .requestMatchers("/api/roles").authenticated()
+
+                                .requestMatchers(HttpMethod.POST, "/api/categories/**", "/api/priorities/**", "/api/statuses/**", "/api/software/**", "/api/knowledge-bases/**").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/categories/**", "/api/priorities/**", "/api/statuses/**", "/api/software/**", "/api/knowledge-bases/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/categories/**", "/api/priorities/**", "/api/statuses/**", "/api/software/**", "/api/knowledge-bases/**").authenticated()
+
                                 .anyRequest().authenticated()
                 );
 
