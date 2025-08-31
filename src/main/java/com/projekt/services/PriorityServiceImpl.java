@@ -11,6 +11,7 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service("priorityDetailsService")
 public class PriorityServiceImpl implements PriorityService{
@@ -40,16 +41,11 @@ public class PriorityServiceImpl implements PriorityService{
         Priority priority = priorityRepository.findById(request.priorityID())
                 .orElseThrow(() -> new NotFoundException("Priority", request.priorityID()));
 
-        if(priority.getName().equals(request.name())) {
-            throw new NameUnchangedException("Priority", request.name());
-        }
-
-        if(priorityRepository.existsByNameIgnoreCase(request.name())) {
+        if(!Objects.equals(priority.getName(), request.name()) && priorityRepository.existsByNameIgnoreCase(request.name())) {
             throw new NameConflictException("Priority", request.name());
         }
 
         priority.setName(request.name());
-        priority.setMaxTime(request.maxTime());
         priorityRepository.save(priority);
     }
 
@@ -59,7 +55,7 @@ public class PriorityServiceImpl implements PriorityService{
             throw new NameConflictException("Priority", request.name());
         }
 
-        priorityRepository.save(new Priority(request.name(), request.maxTime()));
+        priorityRepository.save(new Priority(request.name()));
     }
 
     @Override

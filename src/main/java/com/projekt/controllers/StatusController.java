@@ -22,7 +22,6 @@ public class StatusController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('OPERATOR', 'ADMIN')")
     public List<Status> getAllStatuses(){
         return statusService.getAll();
     }

@@ -8,8 +8,5 @@ public record UpdatePriorityRequest(
 
         @Size(min = 3, max = 20)
         @NotBlank
-        String name,
-
-        @Min(1)
-        Integer maxTime
+        String name
 ) { }

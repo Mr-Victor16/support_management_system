@@ -12,6 +12,7 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service("softwareDetailsService")
 public class SoftwareServiceImpl implements SoftwareService {
@@ -60,11 +61,7 @@ public class SoftwareServiceImpl implements SoftwareService {
         Software software = softwareRepository.findById(request.softwareID())
                 .orElseThrow(() -> new NotFoundException("Software", request.softwareID()));
 
-        if(software.getName().equals(request.name())) {
-            throw new NameUnchangedException("Software", request.name());
-        }
-
-        if(softwareRepository.existsByNameIgnoreCase(request.name())) {
+        if(!Objects.equals(software.getName(), request.name()) && softwareRepository.existsByNameIgnoreCase(request.name())) {
             throw new NameConflictException("Software", request.name());
         }
 

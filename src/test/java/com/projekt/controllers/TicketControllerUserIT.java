@@ -211,7 +211,7 @@ public class TicketControllerUserIT extends BaseIntegrationTest {
         Long ticketID = initializeTicketForUser(1L).getId();
         Long softwareID = initializeSingleSoftware("Other software name", "Software description").getId();
         Long categoryID = initializeCategory("Question").getId();
-        Long priorityID = initializePriority("High", 1).getId();
+        Long priorityID = initializePriority("High").getId();
 
         UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", categoryID, priorityID, "2.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();

@@ -220,7 +220,7 @@ public class SoftwareControllerAdminIT extends BaseIntegrationTest {
                 .put("/api/software")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Software name is the same as the current name '" + request.name() + "'"))
+                .body(equalTo("Software details updated"))
                 .log().all();
     }
 

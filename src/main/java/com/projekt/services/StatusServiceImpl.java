@@ -11,6 +11,7 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service("statusDetailsService")
 public class StatusServiceImpl implements StatusService{
@@ -66,11 +67,7 @@ public class StatusServiceImpl implements StatusService{
         Status status = statusRepository.findById(request.statusID())
                 .orElseThrow(() -> new NotFoundException("Status", request.statusID()));
 
-        if(status.getName().equals(request.name())) {
-            throw new NameUnchangedException("Status", request.name());
-        }
-
-        if(statusRepository.existsByNameIgnoreCase(request.name())) {
+        if(!Objects.equals(status.getName(), request.name()) && statusRepository.existsByNameIgnoreCase(request.name())) {
             throw new NameConflictException("Status", request.name());
         }
 

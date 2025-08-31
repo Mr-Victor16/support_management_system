@@ -214,7 +214,7 @@ public class StatusControllerAdminIT extends BaseIntegrationTest {
                 .put("/api/statuses")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Status name is the same as the current name '" + request.name() + "'"))
+                .body(equalTo("Status details updated"))
                 .log().all();
     }
 

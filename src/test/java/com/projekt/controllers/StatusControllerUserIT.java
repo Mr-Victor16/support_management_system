@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -29,20 +30,22 @@ public class StatusControllerUserIT extends BaseIntegrationTest {
      * Controller method: StatusController.getAllStatuses
      * HTTP Method: GET
      * Endpoint: /api/statuses
-     * Expected Status: 401 UNAUTHORIZED
-     * Scenario: Verifying that the user role cannot access the statuses list.
+     * Expected Status: 200 OK
+     * Scenario: Retrieving all categories.
+     * Verification: Confirms the returned list size matches the expected status count in the repository.
      */
     @Test
-    public void getAllStatuses_InsufficientPermissions_ReturnsUnauthorized() {
-        initializeStatuses();
+    public void getAllStatuses_ReturnsStatusListSuccessfully() {
+        List<Status> statusList = initializeStatuses();
 
         given()
                 .auth().oauth2(jwtToken)
                 .when()
                 .get("/api/statuses")
                 .then()
-                .statusCode(HttpStatus.UNAUTHORIZED.value())
-                .body("message", equalTo("Full authentication is required to access this resource"))
+                .statusCode(HttpStatus.OK.value())
+                .contentType(ContentType.JSON)
+                .body("size()", equalTo(statusList.size()))
                 .log().all();
     }
 

@@ -85,7 +85,7 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
      */
     @Test
     public void getPriorityById_InsufficientPermissions_ReturnsUnauthorized() {
-        Priority priority = initializePriority("High", 1);
+        Priority priority = initializePriority("High");
 
         given()
                 .auth().oauth2(jwtToken)
@@ -107,9 +107,9 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
      */
     @Test
     public void updatePriority_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
-        Priority priority = initializePriority("High", 1);
+        Priority priority = initializePriority("High");
 
-        UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), "Updated priority", 2);
+        UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), "Updated priority");
         ObjectMapper objectMapper = new ObjectMapper();
         String updatePriorityJson = objectMapper.writeValueAsString(request);
 
@@ -136,7 +136,7 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
     public void addPriority_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
         List<Priority> priorityList = initializePriorities();
 
-        AddPriorityRequest request = new AddPriorityRequest("New priority", 5);
+        AddPriorityRequest request = new AddPriorityRequest("New priority");
         ObjectMapper objectMapper = new ObjectMapper();
         String newPriorityJson = objectMapper.writeValueAsString(request);
 
@@ -163,7 +163,7 @@ public class PriorityControllerUserIT extends BaseIntegrationTest {
      */
     @Test
     public void deletePriority_InsufficientPermissions_ReturnsUnauthorized() {
-        Priority priority = initializePriority("High", 1);
+        Priority priority = initializePriority("High");
 
         given()
                 .auth().oauth2(jwtToken)

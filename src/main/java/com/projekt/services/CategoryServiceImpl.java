@@ -11,6 +11,7 @@ import com.projekt.repositories.TicketRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service("categoryDetailsService")
 public class CategoryServiceImpl implements CategoryService{
@@ -66,11 +67,7 @@ public class CategoryServiceImpl implements CategoryService{
         Category category = categoryRepository.findById(request.categoryID())
                 .orElseThrow(() -> new NotFoundException("Category", request.categoryID()));
 
-        if(category.getName().equals(request.name())) {
-            throw new NameUnchangedException("Category", request.name());
-        }
-
-        if (categoryRepository.existsByNameIgnoreCase(request.name())) {
+        if (!Objects.equals(category.getName(), request.name()) && categoryRepository.existsByNameIgnoreCase(request.name())) {
             throw new NameConflictException("Category", request.name());
         }
 

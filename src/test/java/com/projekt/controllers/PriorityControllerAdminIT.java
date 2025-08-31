@@ -94,11 +94,11 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
      * Endpoint: /api/priorities/{priorityID}
      * Expected Status: 200 OK
      * Scenario: Retrieving a priority by ID.
-     * Verification: Confirms the returned priority matches the expected ID, name and maxTime.
+     * Verification: Confirms the returned priority matches the expected ID and name.
      */
     @Test
     public void getPriorityById_ReturnsPrioritySuccessfully() {
-        Priority priority = initializePriority("High", 1);
+        Priority priority = initializePriority("High");
 
         given()
                 .auth().oauth2(jwtToken)
@@ -110,7 +110,6 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .contentType(ContentType.JSON)
                 .body("id", equalTo(priority.getId().intValue()))
                 .body("name", equalTo(priority.getName()))
-                .body("maxTime", equalTo(priority.getMaxTime()))
                 .log().all();
     }
 
@@ -145,9 +144,9 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
      */
     @Test
     public void updatePriority_ValidData_ReturnsSuccess() throws JsonProcessingException {
-        Priority priority = initializePriority("High", 1);
+        Priority priority = initializePriority("High");
 
-        UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), "Updated priority", 2);
+        UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), "Updated priority");
         ObjectMapper objectMapper = new ObjectMapper();
         String updatePriorityJson = objectMapper.writeValueAsString(request);
 
@@ -177,7 +176,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
         Long priorityID = priorityList.get(0).getId();
         String priorityName = priorityList.get(1).getName();
 
-        UpdatePriorityRequest request = new UpdatePriorityRequest(priorityID, priorityName, 2);
+        UpdatePriorityRequest request = new UpdatePriorityRequest(priorityID, priorityName);
         ObjectMapper objectMapper = new ObjectMapper();
         String updatePriorityJson = objectMapper.writeValueAsString(request);
 
@@ -202,9 +201,9 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
      */
     @Test
     public void updatePriority_NewNameIsSameAsCurrent_ReturnsSuccess() throws JsonProcessingException {
-        Priority priority = initializePriority("High", 1);
+        Priority priority = initializePriority("High");
 
-        UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), priority.getName(), priority.getMaxTime());
+        UpdatePriorityRequest request = new UpdatePriorityRequest(priority.getId(), priority.getName());
         ObjectMapper objectMapper = new ObjectMapper();
         String updatePriorityJson = objectMapper.writeValueAsString(request);
 
@@ -216,7 +215,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
                 .put("/api/priorities")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Priority name is the same as the current name '" + request.name() + "'"))
+                .body(equalTo("Priority updated"))
                 .log().all();
     }
 
@@ -231,7 +230,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     public void updatePriority_InvalidId_ReturnsNotFound() throws JsonProcessingException {
         long priorityID = 1000;
 
-        UpdatePriorityRequest request = new UpdatePriorityRequest(priorityID, "Updated priority", 3);
+        UpdatePriorityRequest request = new UpdatePriorityRequest(priorityID, "Updated priority");
         ObjectMapper objectMapper = new ObjectMapper();
         String updatePriorityJson = objectMapper.writeValueAsString(request);
 
@@ -259,7 +258,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
     public void addPriority_UniqueName_ReturnsSuccess() throws JsonProcessingException {
         List<Priority> priorityList = initializePriorities();
 
-        AddPriorityRequest request = new AddPriorityRequest("New priority", 5);
+        AddPriorityRequest request = new AddPriorityRequest("New priority");
         ObjectMapper objectMapper = new ObjectMapper();
         String newPriorityJson = objectMapper.writeValueAsString(request);
 
@@ -287,9 +286,9 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
      */
     @Test
     public void addPriority_ExistingName_ReturnsConflict() throws JsonProcessingException {
-        Priority priority = initializePriority("High",1);
+        Priority priority = initializePriority("High");
 
-        AddPriorityRequest request = new AddPriorityRequest(priority.getName(), priority.getMaxTime());
+        AddPriorityRequest request = new AddPriorityRequest(priority.getName());
         ObjectMapper objectMapper = new ObjectMapper();
         String newPriorityJson = objectMapper.writeValueAsString(request);
 
@@ -319,7 +318,7 @@ public class PriorityControllerAdminIT extends BaseIntegrationTest {
      */
     @Test
     public void deletePriority_NoAssignedTickets_ReturnsSuccess() {
-        Priority priority = initializePriority("High",1);
+        Priority priority = initializePriority("High");
         long priorityNumber = priorityRepository.count();
 
         given()

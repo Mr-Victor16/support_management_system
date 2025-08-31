@@ -158,14 +158,14 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         return categoryRepository.findAll();
     }
 
-    public Priority initializePriority(String name, Integer maxTime){
-        return priorityRepository.save(new Priority(name, maxTime));
+    public Priority initializePriority(String name){
+        return priorityRepository.save(new Priority(name));
     }
 
     public List<Priority> initializePriorities(){
-        initializePriority("High", 1);
-        initializePriority("Normal", 2);
-        initializePriority("Low", 5);
+        initializePriority("High");
+        initializePriority("Normal");
+        initializePriority("Low");
 
         return priorityRepository.findAll();
     }
@@ -197,7 +197,7 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
 
     public Ticket initializeTicketForUser(Long userID) throws IOException {
         Status status = initializeStatus("New",false, true);
-        Priority priority = initializePriority("Normal", 2);
+        Priority priority = initializePriority("Normal");
         Category category = initializeCategory("General");
         Software software = initializeSingleSoftware("Software name", "Software description");
 

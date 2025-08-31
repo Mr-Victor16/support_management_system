@@ -132,7 +132,7 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
     public void addTicket_InsufficientPermissions_ReturnsUnauthorized() throws IOException {
         Long softwareID = initializeSingleSoftware("Software name", "Software description").getId();
         Long categoryID = initializeCategory("General").getId();
-        Long priorityID = initializePriority("High", 1).getId();
+        Long priorityID = initializePriority("High").getId();
 
         AddTicketRequest request = new AddTicketRequest("New ticket", "Ticket description", categoryID, priorityID, "1.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -162,7 +162,7 @@ public class TicketControllerAdminIT extends BaseIntegrationTest {
         Long ticketID = initializeTicketForUser(1L).getId();
         Long softwareID = initializeSingleSoftware("Other software name", "Software description").getId();
         Long categoryID = initializeCategory("Question").getId();
-        Long priorityID = initializePriority("High", 1).getId();
+        Long priorityID = initializePriority("High").getId();
 
         UpdateTicketRequest request = new UpdateTicketRequest(ticketID, "Updated title", "Updated description", categoryID, priorityID, "2.1", softwareID);
         ObjectMapper objectMapper = new ObjectMapper();

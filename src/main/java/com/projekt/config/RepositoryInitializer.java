@@ -132,9 +132,9 @@ public class RepositoryInitializer {
             }
 
             if(priorityRepository.findAll().isEmpty()){
-                priorityRepository.save(new Priority(1L,"High",1));
-                priorityRepository.save(new Priority(2L, "Normal",2));
-                priorityRepository.save(new Priority(3L,"Low", 5));
+                priorityRepository.save(new Priority(1L,"High"));
+                priorityRepository.save(new Priority(2L, "Normal"));
+                priorityRepository.save(new Priority(3L,"Low"));
             }
 
             if(statusRepository.findAll().isEmpty()){

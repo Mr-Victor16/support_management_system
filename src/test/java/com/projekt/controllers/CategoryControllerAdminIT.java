@@ -220,7 +220,7 @@ public class CategoryControllerAdminIT extends BaseIntegrationTest {
                 .put("/api/categories")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body(equalTo("Category name is the same as the current name '" + request.name() + "'"))
+                .body(equalTo("Category updated"))
                 .log().all();
     }
 

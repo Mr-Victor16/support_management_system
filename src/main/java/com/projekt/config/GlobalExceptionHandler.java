@@ -72,13 +72,6 @@ public class GlobalExceptionHandler {
         return ex.getMessage();
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @ExceptionHandler(NameUnchangedException.class)
-    @ResponseBody
-    public String handleNameUnchangedException(NameUnchangedException ex) {
-        return ex.getMessage();
-    }
-
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
     @ResponseBody
