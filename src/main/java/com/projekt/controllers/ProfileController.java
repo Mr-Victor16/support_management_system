@@ -30,10 +30,4 @@ public class ProfileController {
         userService.updateProfile(principal.getName(), request);
         return "Profile updated";
     }
-
-    @GetMapping("/activate/{userID}")
-    public String activateProfile(@PathVariable Long userID) {
-        userService.activate(userID);
-        return "User activated";
-    }
 }

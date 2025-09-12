@@ -37,7 +37,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void authenticate_ValidCredentials_ReturnsUserDetailsSuccessfully() throws JsonProcessingException {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
 
         LoginRequest request = new LoginRequest(user.getUsername(), "password");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -92,7 +92,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void authenticate_IncorrectPassword_ReturnsUnauthorized() throws JsonProcessingException {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
 
         LoginRequest request = new LoginRequest(user.getUsername(), "wrongPassword");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -148,7 +148,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void registerUser_DuplicateUsername_ReturnsConflict() throws JsonProcessingException {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
 
         RegisterRequest request = new RegisterRequest(user.getUsername(), "password", "newUserEmail@email.com", "Name", "Surname");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -179,7 +179,7 @@ public class AuthControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void registerUser_DuplicateEmail_ReturnsConflict() throws JsonProcessingException {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
 
         RegisterRequest request = new RegisterRequest("newUser", "password", user.getEmail(), "Name", "Surname");
         ObjectMapper objectMapper = new ObjectMapper();

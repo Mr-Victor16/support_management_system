@@ -54,7 +54,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void getUserById_ReturnsUserDetailsSuccessfully() {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -134,7 +134,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void addUser_DuplicateUsername_ReturnsConflict() throws JsonProcessingException {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
+        User user = initializeUser("username", "password", Role.Types.ROLE_ADMIN);
 
         AddUserRequest request = new AddUserRequest(user.getUsername(), "password", "newaccount@mail.com", "Name", "Surname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -166,7 +166,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void addUser_DuplicateEmail_ReturnsConflict() throws JsonProcessingException {
-        User user = initializeUser("newAccount", "password", true, Role.Types.ROLE_ADMIN);
+        User user = initializeUser("newAccount", "password", Role.Types.ROLE_ADMIN);
 
         AddUserRequest request = new AddUserRequest("username", "password", user.getEmail(), "Name", "Surname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
@@ -197,9 +197,9 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void updateUser_ValidData_ReturnsSuccess() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
 
-        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, "ROLE_OPERATOR");
+        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 
@@ -224,10 +224,10 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void updateUser_UsernameAlreadyUsed_ReturnsConflict() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
         String usedUsername = userRepository.findAll().get(0).getUsername();
 
-        UpdateUserRequest request = new UpdateUserRequest(user.getId(), usedUsername, "testnew@mail.com", "NewName", "NewSurname", true, "ROLE_OPERATOR");
+        UpdateUserRequest request = new UpdateUserRequest(user.getId(), usedUsername, "testnew@mail.com", "NewName", "NewSurname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 
@@ -252,10 +252,10 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void updateUser_EmailAlreadyUsed_ReturnsConflict() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
         String usedEmail = userRepository.findAll().get(0).getEmail();
 
-        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", usedEmail, "NewName", "NewSurname", true, "ROLE_OPERATOR");
+        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", usedEmail, "NewName", "NewSurname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 
@@ -282,7 +282,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
     public void updateUser_InvalidUserId_ReturnsNotFound() throws JsonProcessingException {
         Long userID = 1000L;
 
-        UpdateUserRequest request = new UpdateUserRequest(userID, "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, "ROLE_OPERATOR");
+        UpdateUserRequest request = new UpdateUserRequest(userID, "NewUsername", "testnew@mail.com", "NewName", "NewSurname", "ROLE_OPERATOR");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 
@@ -308,7 +308,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void getAllUsers_ReturnsUserListSuccessfully() {
-        initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
+        initializeUser("username", "password", Role.Types.ROLE_ADMIN);
         int userNumbers = userRepository.findAll().size();
 
         given()
@@ -332,7 +332,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void deleteUser_ValidUserId_ReturnsSuccess() {
-        Long userID = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN).getId();
+        Long userID = initializeUser("username", "password", Role.Types.ROLE_ADMIN).getId();
         long userNumbers = userRepository.findAll().size();
 
         given()
@@ -380,7 +380,7 @@ public class UserControllerOperatorIT extends BaseIntegrationTest {
      */
     @Test
     public void deleteUser_UserWithTickets_ReturnsSuccess() throws IOException {
-        Long userID = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN).getId();
+        Long userID = initializeUser("username", "password", Role.Types.ROLE_ADMIN).getId();
         initializeTicketForUser(userID);
 
         long userNumbers = userRepository.findAll().size();

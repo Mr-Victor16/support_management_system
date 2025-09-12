@@ -57,7 +57,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getPassword(),
                 user.getName(),
                 user.getSurname(),
-                user.isEnabled(),
+                true,
                 authorities);
     }
 

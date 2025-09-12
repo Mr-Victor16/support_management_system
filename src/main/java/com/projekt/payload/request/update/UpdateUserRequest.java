@@ -25,8 +25,6 @@ public record UpdateUserRequest(
         @FirstCharacterConstraint
         String surname,
 
-        Boolean enabled,
-
         @NotBlank
         String role
 ) { }

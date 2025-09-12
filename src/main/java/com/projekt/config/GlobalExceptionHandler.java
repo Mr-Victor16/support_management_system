@@ -17,13 +17,6 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(UserAlreadyActivatedException.class)
-    @ResponseBody
-    public String handleUserAlreadyActivatedException(UserAlreadyActivatedException ex) {
-        return ex.getMessage();
-    }
-
-    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UsernameOrEmailAlreadyExistsException.class)
     @ResponseBody
     public String handleUsernameOrEmailAlreadyExistsException(UsernameOrEmailAlreadyExistsException ex) {

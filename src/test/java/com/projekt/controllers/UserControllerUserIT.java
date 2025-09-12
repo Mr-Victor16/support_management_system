@@ -33,7 +33,7 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      */
     @Test
     public void getUser_InsufficientPermissions_ReturnsUnauthorized() {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
+        User user = initializeUser("username", "password", Role.Types.ROLE_ADMIN);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -80,9 +80,9 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      */
     @Test
     public void updateUser_InsufficientPermissions_ReturnsUnauthorized() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
 
-        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", true, "ROLE.NOT_EXIST");
+        UpdateUserRequest request = new UpdateUserRequest(user.getId(), "NewUsername", "testnew@mail.com", "NewName", "NewSurname", "ROLE.NOT_EXIST");
         ObjectMapper objectMapper = new ObjectMapper();
         String updateUserJson = objectMapper.writeValueAsString(request);
 
@@ -107,7 +107,7 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      */
     @Test
     public void getAllUsers_InsufficientPermissions_ReturnsUnauthorized() {
-        initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
+        initializeUser("username", "password", Role.Types.ROLE_ADMIN);
 
         given()
                 .auth().oauth2(jwtToken)
@@ -128,7 +128,7 @@ public class UserControllerUserIT extends BaseIntegrationTest {
      */
     @Test
     public void deleteUser_InsufficientPermissions_ReturnsUnauthorized() {
-        Long userID = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN).getId();
+        Long userID = initializeUser("username", "password", Role.Types.ROLE_ADMIN).getId();
 
         given()
                 .auth().oauth2(jwtToken)

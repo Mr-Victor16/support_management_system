@@ -23,8 +23,6 @@ public interface UserService extends UserDetailsService {
 
     void delete(Long id);
 
-    void activate(Long id);
-
     void register(RegisterRequest request);
 
     LoginResponse authenticate(LoginRequest request);

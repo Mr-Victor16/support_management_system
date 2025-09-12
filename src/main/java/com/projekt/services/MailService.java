@@ -4,7 +4,6 @@ import com.projekt.exceptions.NotFoundException;
 import com.projekt.models.User;
 import com.projekt.repositories.UserRepository;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -18,16 +17,13 @@ public class MailService {
     private final TemplateEngine templateEngine;
     private final UserRepository userRepository;
 
-    @Value("${app.activation-link-base-url}")
-    private String activationLinkBaseUrl;
-
     public MailService(JavaMailSender javaMailSender, TemplateEngine templateEngine, UserRepository userRepository) {
         this.javaMailSender = javaMailSender;
         this.templateEngine = templateEngine;
         this.userRepository = userRepository;
     }
 
-    public void sendRegisterMessage(Long userID, boolean enabled) throws MessagingException {
+    public void sendRegisterMessage(Long userID) throws MessagingException {
         User user = userRepository.findById(userID)
                 .orElseThrow(() -> new NotFoundException("User", userID));
 
@@ -35,13 +31,10 @@ public class MailService {
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
         helper.setTo(user.getEmail());
-        helper.setSubject("Support System - Confirm your registration");
+        helper.setSubject("Support System - Registration");
 
         Context context = new Context();
         context.setVariable("username", user.getUsername());
-        String link = activationLinkBaseUrl+user.getId();
-        context.setVariable("link", link);
-        context.setVariable("enabled", enabled);
         String html = templateEngine.process("email/register", context);
 
         helper.setText(html, true);

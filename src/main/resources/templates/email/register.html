@@ -27,13 +27,6 @@
             <div>
                 <span th:text="${username + ' '}"></span>thank you for registration.
             </div>
-            <div th:if="${!enabled}">
-                <div>Activate your account:</div>
-                <a th:href="${link}" th:text="${link}"></a>
-            </div>
-            <div th:if="${enabled}">
-                <div>Your account is now active.</div>
-            </div>
         </div>
     </body>
 </html>

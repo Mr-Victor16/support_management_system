@@ -29,7 +29,7 @@ public class UserConverter {
                 user.getName(),
                 user.getSurname(),
                 user.getEmail(),
-                user.getRole().getType().name()
+                user.getRole()
         );
     }
 
@@ -39,7 +39,7 @@ public class UserConverter {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                user.isEnabled(),
+                true,
                 true,
                 true,
                 true,

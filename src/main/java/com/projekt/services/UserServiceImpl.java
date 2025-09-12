@@ -65,8 +65,16 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(request.userID())
                 .orElseThrow(() -> new NotFoundException("User", request.userID()));
 
-        if (userRepository.existsByUsernameIgnoreCase(request.username()) || userRepository.existsByEmail(request.email())) {
-            throw new UsernameOrEmailAlreadyExistsException(request.username(), request.email());
+        if (!user.getUsername().equalsIgnoreCase(request.username())) {
+            if (userRepository.existsByUsernameIgnoreCase(request.username())) {
+                throw new UsernameOrEmailAlreadyExistsException(request.username(), request.email());
+            }
+        }
+
+        if (!user.getEmail().equalsIgnoreCase(request.email())) {
+            if (userRepository.existsByEmail(request.email())) {
+                throw new UsernameOrEmailAlreadyExistsException(request.username(), request.email());
+            }
         }
 
         user.setUsername(request.username());
@@ -74,7 +82,6 @@ public class UserServiceImpl implements UserService{
         user.setName(request.name());
         user.setSurname(request.surname());
         user.setRole(userConverter.fromRoleName(request.role()));
-        user.setEnabled(request.enabled());
 
         userRepository.save(user);
     }
@@ -90,19 +97,6 @@ public class UserServiceImpl implements UserService{
         }
 
         userRepository.deleteById(user.getId());
-    }
-
-    @Override
-    public void activate(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User", id));
-
-        if(user.isEnabled()){
-            throw new UserAlreadyActivatedException(user.getId());
-        }
-
-        user.setEnabled(true);
-        userRepository.save(user);
     }
 
     @Override
@@ -123,7 +117,7 @@ public class UserServiceImpl implements UserService{
 
         try {
             User savedUser = userRepository.save(user);
-            mailService.sendRegisterMessage(savedUser.getId(), savedUser.isEnabled());
+            mailService.sendRegisterMessage(savedUser.getId());
         } catch (MessagingException | AuthenticationException ex) {
             throw new NotificationFailedException("Error occurred while sending registration notification", ex);
         }
@@ -183,7 +177,6 @@ public class UserServiceImpl implements UserService{
         );
 
         user.setRole(userConverter.fromRoleName(request.role()));
-        user.setEnabled(true);
 
         userRepository.save(user);
     }

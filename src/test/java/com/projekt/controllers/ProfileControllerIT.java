@@ -30,7 +30,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void getProfile_AdminRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
-        User user = initializeUser("username", "password", true, Role.Types.ROLE_ADMIN);
+        User user = initializeUser("username", "password", Role.Types.ROLE_ADMIN);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
         given()
@@ -58,7 +58,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void getProfile_OperatorRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_OPERATOR);
+        User user = initializeUser("username", "password", Role.Types.ROLE_OPERATOR);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
         given()
@@ -86,7 +86,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void getProfile_UserRoleAndValidToken_ReturnsUserProfileDataSuccessfully() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
         given()
@@ -113,7 +113,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void updateProfile_AdminRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_ADMIN);
+        User user = initializeUser("username", "password", Role.Types.ROLE_ADMIN);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
         UpdateProfileDetailsRequest request = new UpdateProfileDetailsRequest("NewName", "NewSurname", "NewPassword");
@@ -141,7 +141,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void updateProfile_OperatorRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_OPERATOR);
+        User user = initializeUser("username", "password", Role.Types.ROLE_OPERATOR);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
         UpdateProfileDetailsRequest request = new UpdateProfileDetailsRequest("NewName", "NewSurname", "NewPassword");
@@ -169,7 +169,7 @@ public class ProfileControllerIT extends BaseIntegrationTest {
      */
     @Test
     public void updateProfile_UserRoleAndValidData_ReturnsSuccess() throws JsonProcessingException {
-        User user = initializeUser("username", "password",true, Role.Types.ROLE_USER);
+        User user = initializeUser("username", "password", Role.Types.ROLE_USER);
         String jwtToken = getJwtToken(user.getUsername(), "password");
 
         UpdateProfileDetailsRequest request = new UpdateProfileDetailsRequest("NewName", "NewSurname", "NewPassword");
@@ -185,69 +185,6 @@ public class ProfileControllerIT extends BaseIntegrationTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body(equalTo("Profile updated"))
-                .log().all();
-    }
-
-    /**
-     * Controller method: ProfileController.activateProfile
-     * HTTP Method: GET
-     * Endpoint: /api/profiles/activate/{userID}
-     * Expected Status: 200 OK
-     * Scenario: Activating a user profile with a valid ID.
-     */
-    @Test
-    public void activateProfile_ValidInactiveUserId_ReturnsSuccess() {
-        Long userID = initializeUser("username", "password",false, Role.Types.ROLE_USER).getId();
-
-        given()
-                .pathParam("userID", userID)
-                .when()
-                .get("/api/profiles/activate/{userID}")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .body(equalTo("User activated"))
-                .log().all();
-    }
-
-    /**
-     * Controller method: ProfileController.activateProfile
-     * HTTP Method: GET
-     * Endpoint: /api/profiles/activate/{userID}
-     * Expected Status: 404 NOT FOUND
-     * Scenario: Attempting to activate a user profile with a non-existent user ID.
-     */
-    @Test
-    public void activateProfile_NonExistentUserId_ReturnsNotFound() {
-        Long userID = 1000L;
-
-        given()
-                .pathParam("userID", userID)
-                .when()
-                .get("/api/profiles/activate/{userID}")
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .body(equalTo("User with ID " + userID + " not found."))
-                .log().all();
-    }
-
-    /**
-     * Controller method: ProfileController.activateProfile
-     * HTTP Method: GET
-     * Endpoint: /api/profiles/activate/{userID}
-     * Expected Status: 409 CONFLICT
-     * Scenario: Attempting to activate a user profile that is already active.
-     */
-    @Test
-    public void activateProfile_AlreadyActiveUserId_ReturnsConflict() {
-        Long userID = initializeUser("username", "password",true, Role.Types.ROLE_USER).getId();
-
-        given()
-                .pathParam("userID", userID)
-                .when()
-                .get("/api/profiles/activate/{userID}")
-                .then()
-                .statusCode(HttpStatus.CONFLICT.value())
-                .body(equalTo("User with ID '" + userID + "' is already activated."))
                 .log().all();
     }
 }

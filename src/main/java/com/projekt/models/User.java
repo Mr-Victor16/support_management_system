@@ -55,20 +55,12 @@ public class User {
     @Column(nullable = false)
     private String surname;
 
-    @Column(nullable = false)
-    private boolean enabled = false;
-
     @ManyToOne
     @JoinColumn(nullable = false)
     private Role role;
 
     @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<Ticket> tickets = new ArrayList<>();
-
-    public User(String username, boolean enabled){
-        this.username = username;
-        this.enabled = enabled;
-    }
 
     public User(String username, String password, String email, String name, String surname) {
         this.username = username;
@@ -78,13 +70,12 @@ public class User {
         this.surname = surname;
     }
 
-    public User(String username, String password, String email, String name, String surname, boolean enabled, Role role) {
+    public User(String username, String password, String email, String name, String surname, Role role) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.name = name;
         this.surname = surname;
-        this.enabled = enabled;
         this.role = role;
     }
 }

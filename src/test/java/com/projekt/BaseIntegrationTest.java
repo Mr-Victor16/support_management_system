@@ -182,14 +182,13 @@ public abstract class BaseIntegrationTest extends SingletonMySQLContainer {
         return statusRepository.findAll();
     }
 
-    public User initializeUser(String username, String password, boolean activated, Role.Types role){
+    public User initializeUser(String username, String password, Role.Types role){
         User user = new User(
                 username,
                 passwordEncoder.encode(password),
                 "username@email.com",
                 "Name",
                 "Surname",
-                activated,
                 roleRepository.findByType(role)
         );
         return userRepository.save(user);

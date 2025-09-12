@@ -38,21 +38,24 @@ public class MainTestDataInitializer {
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        User user = new User("user", true);
+        User user = new User();
+        user.setUsername("user");
         user.setRole(roleUser);
         user.setEmail("example1@gmail.com");
         user.setName("Jan");
         user.setSurname("Kowalski");
         user.setPassword(passwordEncoder.encode("user"));
 
-        User operator = new User("operator", true);
+        User operator = new User();
+        operator.setUsername("operator");
         operator.setRole(roleOperator);
         operator.setEmail("example2@gmail.com");
         operator.setName("Adam");
         operator.setSurname("Nowak");
         operator.setPassword(passwordEncoder.encode("operator"));
 
-        User admin = new User("admin", true);
+        User admin = new User();
+        admin.setUsername("admin");
         admin.setRole(roleAdmin);
         admin.setEmail("example3@gmail.com");
         admin.setName("Piotr");
