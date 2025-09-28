@@ -5,6 +5,11 @@ This system was originally created as an individual project for a university cou
 
 The project was later refactored to a REST API backend to provide a more modern and streamlined solution. During this process, redundant features were removed, and technologies such as Docker, JWT and JUnit were integrated to enhance the system’s functionality and scalability.
 
+## Mobile application
+A mobile client has been implemented for this backend, providing comprehensive access to the system's features on the go. It enables users to conveniently manage their support tickets, while offering full system administration for operators and administrators.
+
+* **[View the Mobile App Repository](https://github.com/Mr-Victor16/support-management-system-mobile)**
+
 ## Technologies used
 + Spring Framework, Spring Boot, Spring Security, Spring Data JPA
 + JUnit, Mockito
@@ -23,8 +28,8 @@ The project was later refactored to a REST API backend to provide a more modern 
   - view knowledge base,
   - view a list of supported software,
   - login and registration in the system,
-  - send e-mail with activation link after registration,
-  - send emails with notification about status change and new response for ticket
+  - send e-mail after registration,
+  - send emails with notification about status change and new response for ticket,
   - three system roles: user, support operator, system administrator.
 
 
@@ -50,7 +55,7 @@ The project was later refactored to a REST API backend to provide a more modern 
   - manage knowledge base.
 
 ##  Database schema
-<img width="730" height="806" alt="db_schema" src="https://github.com/user-attachments/assets/9532aee7-1d8b-4431-9ee6-f23f795a7752" />  
+![db_schema](https://github.com/user-attachments/assets/9532aee7-1d8b-4431-9ee6-f23f795a7752)  
 _Entity-relationship diagram (ERD) generated using Apache Workbench._
 
 ## Running the project with Docker Compose
@@ -75,7 +80,6 @@ spring.mail.password=<your_email_password>
 ```
 - JWT Configuration::
 ```
-app.activation-link-base-url=<server_host_and_port>/activate/ (e.g. http://localhost:8080/activate/)
 sms.app.jwtSecret=<JWT_secret_key>
 sms.app.jwtExpirationMs=<token_expiration_time> (e.g. 86400000)
 ```
