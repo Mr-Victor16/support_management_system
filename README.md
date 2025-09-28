@@ -50,7 +50,7 @@ The project was later refactored to a REST API backend to provide a more modern 
   - manage knowledge base.
 
 ##  Database schema
-![db_schema](https://github.com/user-attachments/assets/c075a487-595d-49e0-a915-09c12feee1e7)  
+<img width="730" height="806" alt="db_schema" src="https://github.com/user-attachments/assets/9532aee7-1d8b-4431-9ee6-f23f795a7752" />  
 _Entity-relationship diagram (ERD) generated using Apache Workbench._
 
 ## Running the project with Docker Compose
